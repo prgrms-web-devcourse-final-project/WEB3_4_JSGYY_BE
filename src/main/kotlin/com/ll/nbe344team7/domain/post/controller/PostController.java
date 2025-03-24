@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
+import com.ll.nbe344team7.domain.post.dto.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -75,8 +76,61 @@ public class PostController {
         return ResponseEntity.ok(postService.modifyPost(postId, request));
     }
 
-    @GetMapping
-    public ResponseEntity<?> getPosts() {
-        return ResponseEntity.ok(postService.getPosts());
+    /**
+     *
+     * 게시글 좋아요
+     *
+     * @param postId
+     * @param loggedInMemberId
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 24.
+     */
+    @GetMapping("/{postId}/like")
+    public ResponseEntity<?> likePost(@PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
+        if(postId == 10000){
+            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
+        }
+        return ResponseEntity.ok(Map.of("message", "좋아요 성공"));
+    }
+
+    /**
+     *
+     * 게시글 좋아요 취소
+     *
+     * @param postId
+     * @param loggedInMemberId
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 24.
+     */
+    @GetMapping("/{postId}/unlike")
+    public ResponseEntity<?> unlikePost(@PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
+        if(postId == 10000){
+            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
+        }
+        return ResponseEntity.ok(Map.of("message", "좋아요 취소 성공"));
+    }
+
+    /**
+     *
+     * 게시글 신고
+     *
+     * @param reportDTO
+     * @param postId
+     * @param loggedInMemberId
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 24.
+     */
+    @PostMapping("/{postId}/reports")
+    public ResponseEntity<?> reportPost(@RequestBody ReportDTO reportDTO, @PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
+        if(postId == 10000){
+            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
+        }
+        return ResponseEntity.ok(Map.of("message", "게시글 신고가 완료되었습니다."));
     }
 }
