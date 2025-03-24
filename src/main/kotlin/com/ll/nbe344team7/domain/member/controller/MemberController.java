@@ -18,7 +18,7 @@ public class MemberController {
     public ResponseEntity<Map<String,String>> register(@RequestBody() MemberDTO memberDTO){
         Map<String,String> mockResponseMap = new HashMap<>();
 
-        if(memberDTO.getEmail().isBlank() || memberDTO.getName().isBlank() || memberDTO.getNickName() .isBlank()||
+        if(memberDTO.getEmail().isBlank() || memberDTO.getName().isBlank() || memberDTO.getNickName().isBlank()||
         memberDTO.getUsername().isBlank() || memberDTO.getPassword().isBlank()||memberDTO.getPassword2().isBlank()){
 
             mockResponseMap.put("message", "회원가입 실패: 필수 항목 누락");
@@ -35,9 +35,11 @@ public class MemberController {
         Map<String,String> mockResponseMap = new HashMap<>();
 
         if(memberDTO.getPassword().isBlank() || memberDTO.getUsername().isBlank()){
-            mockResponseMap.put("message","로그인 실패");
+            mockResponseMap.put("Message","이메일 혹은 비밀번호를 잘못 입력했습니다");
+            return ResponseEntity.ok(mockResponseMap);
+
         }
-        mockResponseMap.put("Message","”이메일 혹은 비밀번호를 잘못 입력했습니다");
+        mockResponseMap.put("Message","로그인 성공");
         return ResponseEntity.ok(mockResponseMap);
     }
 
