@@ -47,6 +47,6 @@ public class ChatController {
                     .status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", "채팅방을 찾을 수 없습니다."));
 
-        return ResponseEntity.ok(chatService.items(roomId, message));
+        return ResponseEntity.ok(chatService.items(roomId, message, page, size));
     }
 }

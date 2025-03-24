@@ -22,7 +22,7 @@ public class ChatService {
         return Map.of("message", "전송성공");
     }
 
-    public Map<Object, Object> items(long roomId, String message) {
+    public Map<Object, Object> items(long roomId, String message, int page, int size) {
 
         List<ChatMessageDTO> list = new ArrayList<>();
 
@@ -36,6 +36,8 @@ public class ChatService {
             list.add(new ChatMessageDTO(4, 1, 1, "궁금합니다.", LocalDateTime.now()));
         }
 
-        return Map.of("messages", list);
+        return Map.of("messages", list,
+                "page", page,
+                "size", size);
     }
 }
