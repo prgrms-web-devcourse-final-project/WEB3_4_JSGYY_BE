@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.domain.post.service;
 
+import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +67,10 @@ public class PostService {
                 "likes", 3,
                 "reports", 0
         );
+    }
+
+    public Map<String, Object> changeToAuction(Long postId, AuctionRequest request) {
+        return Map.of("message", "경매 전환이 완료되었습니다.");
     }
 
 }
