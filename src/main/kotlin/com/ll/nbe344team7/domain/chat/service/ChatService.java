@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.chat.service;
 
 import com.ll.nbe344team7.domain.chat.dto.ChatMessageDTO;
+import com.ll.nbe344team7.domain.chat.dto.MessageDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -9,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author shjung
+ * @author jyson
  * @since 25. 3. 24.
  */
 @Service
 public class ChatService {
 
-    public Map<Object, Object> send(ChatMessageDTO dto) {
+    public Map<Object, Object> send(MessageDTO dto) {
 
 
         return Map.of("message", "전송성공");
