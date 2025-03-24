@@ -58,7 +58,7 @@ public class AccountController {
         }
         String exchangeType;
         try {
-            exchangeType = String.valueOf(ExchangeType.valueOf(type));
+            exchangeType = String.valueOf(ExchangeType.valueOf(type.toUpperCase()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(Map.of("message", "조회 타입이 올바르지 않습니다."));
         }
