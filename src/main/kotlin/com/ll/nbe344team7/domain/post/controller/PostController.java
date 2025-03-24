@@ -133,4 +133,9 @@ public class PostController {
         }
         return ResponseEntity.ok(Map.of("message", "게시글 신고가 완료되었습니다."));
     }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPost(@PathVariable Long postId) {
+        return ResponseEntity.ok(postService.getPost(postId));
+    }
 }
