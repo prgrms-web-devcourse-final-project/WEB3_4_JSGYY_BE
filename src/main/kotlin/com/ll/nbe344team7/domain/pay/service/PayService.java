@@ -1,6 +1,6 @@
-package com.ll.nbe344team7.pay.service;
+package com.ll.nbe344team7.domain.pay.service;
 
-import com.ll.nbe344team7.pay.dto.DepositDTO;
+import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

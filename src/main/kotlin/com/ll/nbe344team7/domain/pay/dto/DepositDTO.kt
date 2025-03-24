@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.pay.dto
+package com.ll.nbe344team7.domain.pay.dto
 
 /**
  *

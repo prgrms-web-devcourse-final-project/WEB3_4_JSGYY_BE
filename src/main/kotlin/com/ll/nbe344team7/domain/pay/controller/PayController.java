@@ -1,7 +1,7 @@
-package com.ll.nbe344team7.pay.controller;
+package com.ll.nbe344team7.domain.pay.controller;
 
-import com.ll.nbe344team7.pay.dto.DepositDTO;
-import com.ll.nbe344team7.pay.service.PayService;
+import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
+import com.ll.nbe344team7.domain.pay.service.PayService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
