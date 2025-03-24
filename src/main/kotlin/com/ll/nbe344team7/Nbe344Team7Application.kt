@@ -9,3 +9,4 @@ class Nbe344Team7Application
 fun main(args: Array<String>) {
 	runApplication<Nbe344Team7Application>(*args)
 }
+
