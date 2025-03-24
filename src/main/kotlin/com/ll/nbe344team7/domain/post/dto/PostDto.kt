@@ -6,5 +6,9 @@ data class PostDto (
     val title: String,
     val content: String,
     val place: String,
-    val price: Int
+    val price: Int,
+    val status: Boolean,
+    val auctionStatus: Boolean,
+    val likes: Int,
+    val reports: Int
 )

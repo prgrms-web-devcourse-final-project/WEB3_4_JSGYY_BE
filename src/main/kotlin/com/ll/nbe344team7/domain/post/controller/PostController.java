@@ -18,7 +18,17 @@ public class PostController {
         this.postService = postService;
     }
 
-
+    /**
+     *
+     * 게시글 작성
+     *
+     * @param request
+     * @param loggedInMemberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-24
+     */
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody PostRequest request,
@@ -39,6 +49,17 @@ public class PostController {
         return ResponseEntity.ok(postService.createPost(request));
     }
 
+    /**
+     *
+     * 게시글 삭제
+     *
+     * @param postId
+     * @param loggedInMemberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-24
+     */
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long postId,
@@ -57,6 +78,18 @@ public class PostController {
         return ResponseEntity.ok(postService.deletePost(postId));
     }
 
+    /**
+     *
+     * 게시글 수정
+     *
+     * @param postId
+     * @param request
+     * @param loggedInMemberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-24
+     */
     @PutMapping("/{postId}")
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
@@ -74,6 +107,40 @@ public class PostController {
         }
 
         return ResponseEntity.ok(postService.modifyPost(postId, request));
+    }
+
+    /**
+     *
+     * 게시글 목록 조회
+     *
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-24
+     */
+    @GetMapping
+    public ResponseEntity<?> getPosts() {
+        return ResponseEntity.ok(postService.getPosts());
+    }
+
+    /**
+     *
+     * 게시글 상세 조회
+     *
+     * @param postId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-24
+     */
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPost(@PathVariable Long postId) {
+
+        if (postId == 10000) {
+            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
+        }
+
+        return ResponseEntity.ok(postService.getPost(postId));
     }
 
     /**
@@ -132,10 +199,5 @@ public class PostController {
             return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
         }
         return ResponseEntity.ok(Map.of("message", "게시글 신고가 완료되었습니다."));
-    }
-
-    @GetMapping("/{postId}")
-    public ResponseEntity<?> getPost(@PathVariable Long postId) {
-        return ResponseEntity.ok(postService.getPost(postId));
     }
 }
