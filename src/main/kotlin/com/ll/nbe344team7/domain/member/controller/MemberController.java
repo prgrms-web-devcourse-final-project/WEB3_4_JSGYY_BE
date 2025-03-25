@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.member.controller;
 
 
+import com.ll.nbe344team7.domain.member.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,20 +15,18 @@ import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 @RequestMapping("api")
 public class MemberController {
 
+    final private MemberService memberService;
+
+    public MemberController(MemberService memberService){
+        this.memberService = memberService;
+    }
+
     @PostMapping("/auth/register")
-    public ResponseEntity<Map<String,String>> register(@RequestBody() MemberDTO memberDTO){
-        Map<String,String> mockResponseMap = new HashMap<>();
-
-        if(memberDTO.getEmail().isBlank() || memberDTO.getName().isBlank() || memberDTO.getNickName().isBlank()||
-        memberDTO.getUsername().isBlank() || memberDTO.getPassword().isBlank()||memberDTO.getPassword2().isBlank()){
-
-            mockResponseMap.put("message", "회원가입 실패: 필수 항목 누락");
-            return ResponseEntity.badRequest().body(mockResponseMap);
-        }
+    public ResponseEntity<String> register(@RequestBody() MemberDTO memberDTO){
+        memberService.register(memberDTO);
 
 
-        mockResponseMap.put("Message","회원가입 성공");
-        return ResponseEntity.ok(mockResponseMap);
+        return ResponseEntity.ok("회원가입 성공");
     }
 
     @PostMapping("/auth/login")
