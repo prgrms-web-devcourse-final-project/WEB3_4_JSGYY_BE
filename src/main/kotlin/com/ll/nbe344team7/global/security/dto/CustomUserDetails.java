@@ -20,10 +20,18 @@ public class CustomUserDetails implements UserDetails {
         collection.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return memberEntity.getRole()+"";
+                return memberEntity.getRole();
             }
         });
         return collection;
+    }
+
+    public Long getMemberId(){
+        return memberEntity.getId();
+    }
+
+    public String getRole(){
+        return memberEntity.getRole();
     }
 
     @Override
@@ -35,6 +43,7 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return memberEntity.getUserName();
     }
+
 
     @Override
     public boolean isAccountNonExpired() {

@@ -42,7 +42,7 @@ class MemberEntity(
     val blocked: Boolean =false,
 
     @Column(nullable = false)
-    val role: Int = 2
+    val role: String = "ROLE_ADMIN"
 ):BaseEntity(){
    constructor(dto: MemberDTO):this(
        id=null,
@@ -53,7 +53,7 @@ class MemberEntity(
        email=dto.email,
        phoneNum=dto.phone_num,
        blocked=false,
-       role=2
+       role=dto.role
    )
 
     constructor() : this(
@@ -65,6 +65,6 @@ class MemberEntity(
         email = "",
         phoneNum = "",
         blocked = false,
-        role = 2
+        role = "ROLE_ADMIN"
     )
 }

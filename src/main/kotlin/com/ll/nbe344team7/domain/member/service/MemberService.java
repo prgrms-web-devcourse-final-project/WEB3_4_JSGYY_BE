@@ -38,7 +38,7 @@ public class MemberService {
                 memberDTO.getEmail(),
                 memberDTO.getPhone_num(),
                 false,
-                2
+                "ROLE_ADMIN"
         );
 
         try {

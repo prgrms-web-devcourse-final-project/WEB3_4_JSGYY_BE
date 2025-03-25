@@ -15,17 +15,7 @@ data class MemberDTO(
     val password2: String="",
     val nickName:String="",
     val email:String="",
-    val phone_num: String=""
+    val phone_num: String="",
+    val role:String="ROLE_ADMIN"
 )
-fun MemberDTO.toEntity(): MemberEntity {
-    return MemberEntity(
-        userName = this.username,
-        name = this.name,
-        password = this.password,
-        nickName = this.nickName,
-        email = this.email,
-        phoneNum = this.phone_num,
-        blocked = false,
-        role = 2
-    )
-}
+
