@@ -49,6 +49,17 @@ public class PostService {
         return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
     }
 
+    /**
+     *
+     * 게시글 삭제
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-25
+     */
     public Map<String, String> deletePost(Long postId, Long memberId) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
