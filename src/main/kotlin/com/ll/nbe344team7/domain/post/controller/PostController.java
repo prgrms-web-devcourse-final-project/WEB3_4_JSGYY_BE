@@ -4,6 +4,7 @@ import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class PostController {
      * 게시글 작성
      *
      * @param request
-     * @param loggedInMemberId
+     * @param memberId
      * @return
      *
      * @author GAEUN220
@@ -32,7 +33,7 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<?> createPost(
-            @RequestBody PostRequest request,
+            @Valid @RequestBody PostRequest request,
             @RequestHeader(value = "memberId") Long memberId)
     {
         return ResponseEntity.ok(postService.createPost(request, memberId));
