@@ -3,15 +3,11 @@ package com.ll.nbe344team7.domain.chat.controller;
 import com.ll.nbe344team7.domain.chat.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.service.ChatService;
-import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
-import com.ll.nbe344team7.domain.chatroom.service.ChatroomService;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author jyson
@@ -22,11 +18,9 @@ import java.util.Optional;
 public class ChatController {
 
     private final ChatService chatService;
-    private final ChatroomService chatroomService;
 
-    public ChatController(ChatService chatService, ChatroomService chatroomService) {
+    public ChatController(ChatService chatService) {
         this.chatService = chatService;
-        this.chatroomService = chatroomService;
     }
 
     /**
@@ -45,14 +39,7 @@ public class ChatController {
             @RequestBody MessageDTO messageDTO,
             @PathVariable long roomId
     ) {
-        Optional<ChatRoom> chatRoom = chatroomService.getItem(roomId);
-
-        if (chatRoom.isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "message", "채팅방을 찾을 수 없습니다."
-            ));
-
-        chatService.send(messageDTO, chatRoom.get());
+        chatService.send(messageDTO, roomId);
 
         return ResponseEntity.ok(Map.of(
                 "message", "메세지 전송완료"
@@ -79,14 +66,7 @@ public class ChatController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String message
     ) {
-        Optional<ChatRoom> chatRoom = chatroomService.getItem(roomId);
-
-        if (chatRoom.isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "message", "채팅방을 찾을 수 없습니다."
-            ));
-
-        Page<ChatMessageDTO> items = chatService.items(chatRoom.get(), message, page, size);
+        Page<ChatMessageDTO> items = chatService.items(roomId, message, page, size);
 
         return ResponseEntity.ok(items);
     }
