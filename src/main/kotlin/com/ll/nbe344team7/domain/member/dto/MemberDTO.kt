@@ -2,6 +2,12 @@ package com.ll.nbe344team7.domain.member.dto
 
 import com.ll.nbe344team7.domain.member.entity.MemberEntity
 
+/**
+ * 멤버 DTO
+ *
+ * @author 이광석
+ * @since 25.03.25
+ */
 data class MemberDTO(
     val name: String="",
     val username: String="",

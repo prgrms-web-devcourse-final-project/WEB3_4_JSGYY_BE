@@ -5,7 +5,12 @@ import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
-
+/**
+ * 멤버 entity
+ *
+ * @author 이광석
+ * @since 25.03.25
+ */
 @Entity
 @Table(name="member")
 class MemberEntity(
@@ -50,4 +55,16 @@ class MemberEntity(
        blocked=false,
        role=2
    )
+
+    constructor() : this(
+        id = null,
+        userName = "",
+        name = "",
+        password = "",
+        nickName = "",
+        email = "",
+        phoneNum = "",
+        blocked = false,
+        role = 2
+    )
 }
