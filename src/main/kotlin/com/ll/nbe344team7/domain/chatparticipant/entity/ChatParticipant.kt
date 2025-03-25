@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.domain.chatparticipants.entity
+package com.ll.nbe344team7.domain.chatparticipant.entity
 
 import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom
 import com.ll.nbe344team7.domain.member.Member
@@ -6,10 +6,10 @@ import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
 
 @Entity
-class ChatParticipants(
+class ChatParticipant(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chatroom_id", nullable = false)
-    val chatRoom: ChatRoom,
+    val chatroom: ChatRoom,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -20,8 +20,8 @@ class ChatParticipants(
     var id : Long? = 0
 
     companion object {
-        fun create(chatRoom: ChatRoom, member: Member): ChatParticipants {
-            return ChatParticipants(chatRoom = chatRoom, member = member)
+        fun create(chatroom: ChatRoom, member: Member): ChatParticipant {
+            return ChatParticipant(chatroom = chatroom, member = member)
         }
     }
 }
