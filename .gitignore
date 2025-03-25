@@ -39,10 +39,7 @@ out/
 ### Kotlin ###
 .kotlin
 
-<<<<<<< HEAD
-### 추가적인것 ###
-db_dev2.mv.db
-=======
+
 ### Custom ###
 db_dev2.mv.db
->>>>>>> main
+
