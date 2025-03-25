@@ -2,12 +2,15 @@ package com.ll.nbe344team7.domain.chat.service;
 
 import com.ll.nbe344team7.domain.chat.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.dto.MessageDTO;
+import com.ll.nbe344team7.domain.chat.entity.ChatMessage;
+import com.ll.nbe344team7.domain.chat.repository.ChatRepository;
+import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author jyson
@@ -16,28 +19,48 @@ import java.util.Map;
 @Service
 public class ChatService {
 
-    public Map<Object, Object> send(MessageDTO dto) {
+    private final ChatRepository chatRepository;
 
-
-        return Map.of("message", "전송성공");
+    public ChatService(ChatRepository chatRepository) {
+        this.chatRepository = chatRepository;
     }
 
-    public Map<Object, Object> items(long roomId, String message, int page, int size) {
+    /**
+     * 채팅 보내기
+     *
+     * 1. 채팅방 있는지 확인
+     * 2. 채팅방에 자신이 포함되어 있는지 확인해야 될까?????
+     *
+     * @param dto
+     * @param chatRoom
 
-        List<ChatMessageDTO> list = new ArrayList<>();
+     *
+     * @author jyson
+     * @since 25. 3. 25.
+     */
+    public void send(MessageDTO dto, ChatRoom chatRoom) {
+        ChatMessage chatMessage = new ChatMessage(new Member(), dto.getContent(), chatRoom);
 
-        if (!message.isEmpty()) {
-            list.add(new ChatMessageDTO(1, 1, 1, "안녕하세요", LocalDateTime.now()));
-            list.add(new ChatMessageDTO(2, 2, 1, "안녕하세요", LocalDateTime.now()));
-        } else {
-            list.add(new ChatMessageDTO(1, 1, 1, "안녕하세요", LocalDateTime.now()));
-            list.add(new ChatMessageDTO(2, 2, 1, "안녕하세요", LocalDateTime.now()));
-            list.add(new ChatMessageDTO(3, 2, 1, "무슨일이세요?", LocalDateTime.now()));
-            list.add(new ChatMessageDTO(4, 1, 1, "궁금합니다.", LocalDateTime.now()));
-        }
+        chatRepository.save(chatMessage);
+    }
 
-        return Map.of("messages", list,
-                "page", page,
-                "size", size);
+    /**
+     * 채팅방 메세지 조회
+     *
+     * @param chatRoom
+     * @param message
+     * @param page
+     * @param size
+     * @return
+
+     *
+     * @author jyson
+     * @since 25. 3. 25.
+     * */
+    public Page<ChatMessageDTO> items(ChatRoom chatRoom, String message, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        if (!message.isEmpty()) return chatRepository.findByChatRoomIdAndContentContaining(pageable, chatRoom.getId(), message).map(ChatMessageDTO::new);
+        return chatRepository.findByChatRoomId(pageable, chatRoom.getId()).map(ChatMessageDTO::new);
     }
 }
