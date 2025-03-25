@@ -7,10 +7,11 @@ import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.exception.AuctionError;
 import com.ll.nbe344team7.domain.auction.exception.AuctionException;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author shjung
@@ -40,25 +41,25 @@ public class AuctionService {
      */
     public Map<Object, Object> bidPrice(BidDTO dto, Long postId){
         // 1. 게시글이 존재하는지 요청
-        Optional<Auction> opAuction = auctionRepository.findByPostId(postId);
-        Auction auction = opAuction.orElse(null);
-        // 2. 없는 경우 에러 발생
+        Auction auction = this.auctionRepository.findByPostId(postId);;
         if(auction == null){
-            throw new AuctionException(AuctionError.NOT_FOUND_POST);
-        }
-        // 3. 멤버가 존재 하는지 확인
-        try{
-            Account account = accountRepository.findByMemberId(dto.getMemberId());
-        } catch (NullPointerException e){
-            throw new AuctionException(AuctionError.NOT_FOUND_MEMBER);
+            throw new GlobalException(GlobalExceptionCode.NOT_FOUND_POST);
         }
 
-        // 4. 보유금이 입찰한 가격보다 높은지 확인
-        if(auction.getMaxPrice() < dto.getPrice()){
-            auction.setMaxPrice(dto.getPrice());
-            auction.setMemberId(dto.getMemberId());
-            auction = auctionRepository.save(auction);
-        } else if(auction.getMaxPrice() > dto.getPrice()){
+        // 2. 멤버가 존재 하는지 확인
+        Account account = accountRepository.findByMemberId(dto.getMemberId());
+        if(account == null){
+            throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
+        }
+
+        // 3. 보유금이 입찰한 가격보다 높은지 확인
+        if(account.getMoney() >= dto.getPrice()){
+            if(auction.getMaxPrice() < dto.getPrice()){
+                auction.setMaxPrice(dto.getPrice());
+                auction.setMemberId(dto.getMemberId());
+                auction = auctionRepository.save(auction);
+            }
+        } else if(account.getMoney() < dto.getPrice()){
             throw new AuctionException(AuctionError.NOT_OVER_ACCOUNT);
         }
 
