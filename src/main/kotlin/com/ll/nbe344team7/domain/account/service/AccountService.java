@@ -1,11 +1,14 @@
 package com.ll.nbe344team7.domain.account.service;
 
+
+import com.ll.nbe344team7.domain.pay.entity.Payment;
+import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
 import com.ll.nbe344team7.domain.account.dto.ExchangeDTO;
 import com.ll.nbe344team7.domain.account.entity.Account;
 import com.ll.nbe344team7.domain.account.repository.AccountRepository;
+
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,18 +19,18 @@ import java.util.Map;
 @Service
 public class AccountService {
 
+    private final PaymentRepository paymentRepository;
     private final AccountRepository accountRepository;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, PaymentRepository paymentRepository) {
         this.accountRepository = accountRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     /**
-     *
      * 보유금 조회 기능
      *
      * @return
-     *
      * @author shjung
      * @since 25. 3. 24.
      */
@@ -41,25 +44,31 @@ public class AccountService {
     }
 
     /**
-     *
      * 거래 내역 조회 기능
      *
      * @param exchangeType
      * @return
-     *
      * @author shjung
      * @since 25. 3. 24.
      */
-    public Map<Object, Object> getExchangeAccount(String exchangeType) {
-        List<ExchangeDTO> list = new ArrayList<>();
+    public Map<Object, Object> getExchangeAccount(Long memberId, String exchangeType) {
+        try {
+            List<Payment> list;
+            if (exchangeType.equals("sender")) {
+                list = this.paymentRepository.findByMyIdAndExchangeType(memberId, 0);
+            } else if (exchangeType.equals("receiver")) {
+                list = this.paymentRepository.findByMyIdAndExchangeType(memberId, 1);
+            } else {
+                list = this.paymentRepository.findByMyId(memberId);
+            }
 
-        list.add(new ExchangeDTO("출금", "2025.03.25.", 15000,35000,"이광석"));
-        list.add(new ExchangeDTO("입금", "2025.03.26.", 50000,85000,"충전"));
-        list.add(new ExchangeDTO("출금", "2025.03.26.", 50000,35000,"김재민"));
-        list.add(new ExchangeDTO("출금", "2025.03.26.", 15000,20000,"박가은"));
-        list.add(new ExchangeDTO("입금", "2025.03.27.", 15000,35000,"손진영"));
-        list.add(new ExchangeDTO("출금", "2025.03.27.", 35000,0,"출금"));
+            if(list.isEmpty()) {
+                throw new NullPointerException();
+            }
 
-        return Map.of("exchanges", list);
+            return Map.of("exchanges", list);
+        } catch (NullPointerException e) {
+            throw new NullPointerException();
+        }
     }
 }
