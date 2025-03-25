@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.domain.pay.entity
+package com.ll.nbe344team7.domain.account.entity
 
 /**
  *
