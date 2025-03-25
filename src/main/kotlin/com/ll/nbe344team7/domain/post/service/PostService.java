@@ -2,6 +2,11 @@ package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
+import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
+import com.ll.nbe344team7.domain.post.exception.PostException;
+import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,11 +15,61 @@ import java.util.Map;
 @Service
 public class PostService {
 
-    public Map<String, Object> createPost(PostRequest request) {
-        return Map.of("message", "1번 게시글이 작성되었습니다.");
+    private final PostRepository postRepository;
+
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
     }
 
-    public Map<String, Object> deletePost(Long postId) {
+    /**
+     *
+     * 게시글 작성
+     *
+     * @param request
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-25
+     */
+    @Transactional
+    public Map<String, String> createPost(PostRequest request, Long memberId) {
+
+        Post post = new Post(
+                memberId,
+                request.getTitle(),
+                request.getContent(),
+                request.getPrice(),
+                request.getPlace(),
+                request.getAuctionStatus()
+                );
+
+        post = postRepository.save(post);
+
+        return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
+    }
+
+    /**
+     *
+     * 게시글 삭제
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-25
+     */
+    public Map<String, String> deletePost(Long postId, Long memberId) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        if (post.getMemberId() != memberId) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        postRepository.delete(post);
+
         return Map.of("message", postId + "번 게시글이 삭제되었습니다.");
     }
 
@@ -72,5 +127,4 @@ public class PostService {
     public Map<String, Object> changeToAuction(Long postId, AuctionRequest request) {
         return Map.of("message", "경매 전환이 완료되었습니다.");
     }
-
 }

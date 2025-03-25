@@ -33,11 +33,11 @@ public class AccountController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getAccount(@PathVariable Long id) {
-        if(id == 10000){
+        try {
+            return ResponseEntity.ok(this.accountService.getAccount(id));
+        } catch (NullPointerException e) {
             return ResponseEntity.status(404).body(Map.of("message", "멤버가 조회되지 않습니다."));
         }
-
-        return ResponseEntity.ok(this.accountService.getAccount());
     }
 
     /**

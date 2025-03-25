@@ -5,9 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- *
- *
- *
  * @author shjung
  * @since 25. 3. 25.
  */
