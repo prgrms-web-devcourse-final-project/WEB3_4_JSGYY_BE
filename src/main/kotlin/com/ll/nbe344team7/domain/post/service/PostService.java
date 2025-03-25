@@ -3,6 +3,8 @@ package com.ll.nbe344team7.domain.post.service;
 import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
+import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -49,10 +51,10 @@ public class PostService {
 
     public Map<String, String> deletePost(Long postId, Long memberId) {
 
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ("해당 게시글이 존재하지 않습니다."));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (!post.getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("해당 게시글을 삭제할 권한이 없습니다.");
+        if (post.getMemberId() != memberId) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         postRepository.delete(post);
