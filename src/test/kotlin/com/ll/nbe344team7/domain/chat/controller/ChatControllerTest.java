@@ -72,8 +72,8 @@ public class ChatControllerTest {
                 .andDo(print())
                 .andExpect(handler().handlerType(ChatController.class))
                 .andExpect(handler().methodName("sendMessage"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("채팅방을 찾을 수 없습니다."));    }
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("채팅방이 조회되지 않습니다."));    }
 
     @Test
     @DisplayName("메세지 조회")
@@ -102,7 +102,7 @@ public class ChatControllerTest {
                 .andDo(print())
                 .andExpect(handler().handlerType(ChatController.class))
                 .andExpect(handler().methodName("enterRoom"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("채팅방을 찾을 수 없습니다."));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("채팅방이 조회되지 않습니다."));
     }
 }
