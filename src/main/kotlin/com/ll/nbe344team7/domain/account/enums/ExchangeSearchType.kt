@@ -8,5 +8,5 @@ package com.ll.nbe344team7.domain.account.enums
  * @since 25. 3. 24.
  */
 enum class ExchangeSearchType (val type: String) {
-    ALL("all"), SENDER("sender"), RECEIVER("receiver");
+    ALL("전체"), SENDER("출금"), RECEIVER("입금");
 }
