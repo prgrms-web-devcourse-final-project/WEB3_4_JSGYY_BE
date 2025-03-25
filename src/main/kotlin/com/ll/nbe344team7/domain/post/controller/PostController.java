@@ -33,21 +33,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long loggedInMemberId)
+            @RequestHeader(value = "memberId") Long memberId)
     {
-        if (request.getTitle().trim().isEmpty()){
-            return ResponseEntity.status(400).body(Map.of("message", "제목을 입력해주세요."));
-        }
-
-        if (request.getContent().trim().isEmpty()){
-            return ResponseEntity.status(400).body(Map.of("message", "내용을 입력해주세요."));
-        }
-
-        if (request.getPrice() <= 0) {
-            return ResponseEntity.status(400).body(Map.of("message", "가격을 0원 이상 입력해주세요."));
-        }
-
-        return ResponseEntity.ok(postService.createPost(request));
+        return ResponseEntity.ok(postService.createPost(request, memberId));
     }
 
     /**

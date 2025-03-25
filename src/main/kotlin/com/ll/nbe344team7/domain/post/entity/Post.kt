@@ -5,6 +5,7 @@ import jakarta.persistence.*
 
 @Entity
 class Post (
+    memberId: Long,
     title: String,
     content: String,
     price: Long,
@@ -15,6 +16,10 @@ class Post (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
+
+    @Column(nullable = false)
+    var memberId: Long = memberId
+        protected set
 
     @Column(nullable = false)
     var title: String = title
