@@ -44,7 +44,7 @@ public class PostController {
      * 게시글 삭제
      *
      * @param postId
-     * @param loggedInMemberId
+     * @param memberId
      * @return
      *
      * @author GAEUN220
@@ -53,19 +53,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long postId,
-            @RequestHeader(value = "memberId") Long loggedInMemberId)
+            @RequestHeader(value = "memberId") Long memberId)
     {
-        Long authorId = 1L;
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 삭제 권한이 없습니다."));
-        }
-
-        return ResponseEntity.ok(postService.deletePost(postId));
+        return ResponseEntity.ok(postService.deletePost(postId, memberId));
     }
 
     /**

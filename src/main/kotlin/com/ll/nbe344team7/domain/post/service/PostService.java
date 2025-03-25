@@ -47,7 +47,16 @@ public class PostService {
         return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
     }
 
-    public Map<String, Object> deletePost(Long postId) {
+    public Map<String, String> deletePost(Long postId, Long memberId) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ("해당 게시글이 존재하지 않습니다."));
+
+        if (!post.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("해당 게시글을 삭제할 권한이 없습니다.");
+        }
+
+        postRepository.delete(post);
+
         return Map.of("message", postId + "번 게시글이 삭제되었습니다.");
     }
 
