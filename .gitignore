@@ -38,3 +38,6 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### db 파일 ###
+db_dev2.mv.db
