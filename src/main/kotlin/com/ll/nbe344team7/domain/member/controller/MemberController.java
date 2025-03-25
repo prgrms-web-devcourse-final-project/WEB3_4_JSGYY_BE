@@ -1,18 +1,29 @@
 package com.ll.nbe344team7.domain.member.controller;
 
 
+import com.ll.nbe344team7.domain.member.MemberService;
+import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 
 
 @RestController
 @RequestMapping("api")
 public class MemberController {
+
+    private final MemberService memberService;
+
+    public MemberController(MemberService memberService) {
+        this.memberService = memberService;
+    }
+
+    @PostMapping("/test")
+    public void createTest(){
+        memberService.create();
+    }
 
     @PostMapping("/auth/register")
     public ResponseEntity<Map<String,String>> register(@RequestBody() MemberDTO memberDTO){

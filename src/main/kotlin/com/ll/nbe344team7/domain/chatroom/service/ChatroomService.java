@@ -2,8 +2,8 @@ package com.ll.nbe344team7.domain.chatroom.service;
 
 import com.ll.nbe344team7.domain.chatparticipant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chatparticipant.repository.ChatParticipantRepository;
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomCreateResponseDto;
 import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomRequestDto;
+import com.ll.nbe344team7.domain.chatroom.dto.CreateResponseDto;
 import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chatroom.repository.ChatRoomRepository;
 import com.ll.nbe344team7.domain.member.Member;
@@ -13,7 +13,6 @@ import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,17 +36,20 @@ public class ChatroomService {
     }
 
     @Transactional
-    public ChatRoomCreateResponseDto createRoom(ChatRoomRequestDto requestDto) {
-        Member seller = memberRepository.findById(requestDto.getSellerId()).orElseThrow(()-> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-        Member user = memberRepository.findById(requestDto.getUserId()).orElseThrow(()-> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+    public CreateResponseDto createRoom(ChatRoomRequestDto requestDto) {
+        Member seller = memberRepository.findById(requestDto.getSellerId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member user = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        ChatRoom chatRoom = ChatRoom.Companion.create();
-        chatParticipantRepository.saveAll(List.of(
-                ChatParticipant.Companion.create(chatRoom, seller),
-                ChatParticipant.Companion.create(chatRoom, user)
-        ));
+        ChatRoom chatroom = new ChatRoom();
+        ChatParticipant userChatParticipant = new ChatParticipant(chatroom, user);
+        ChatParticipant sellerChatParticipant = new ChatParticipant(chatroom, seller);
+        chatroom.addParticipant(userChatParticipant);
+        chatroom.addParticipant(sellerChatParticipant);
 
-        return ChatRoomCreateResponseDto.Companion.success();
+        chatroom.setTitle(user.getId());
+        chatRoomRepository.save(chatroom);
+
+        return new CreateResponseDto("채팅방 생성 성공");
     }
 
 
