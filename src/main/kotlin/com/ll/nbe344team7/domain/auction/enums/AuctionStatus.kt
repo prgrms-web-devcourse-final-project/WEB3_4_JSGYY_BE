@@ -7,6 +7,8 @@ package com.ll.nbe344team7.domain.auction.enums
  * @author shjung
  * @since 25. 3. 25.
  */
-enum class AuctionStatus (val code: String){
-    READY("ready"), PROGRESS("progress"), COMPLETED("completed")
+enum class AuctionStatus (val code: Int){
+    READY(0), PROGRESS(1), COMPLETED(2);
+
+    fun getValue(): Int {return code}
 }
