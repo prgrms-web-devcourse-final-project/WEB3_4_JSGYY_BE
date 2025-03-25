@@ -1,6 +1,6 @@
 package com.ll.nbe344team7.domain.account.controller;
 
-import com.ll.nbe344team7.domain.account.enums.ExchangeType;
+import com.ll.nbe344team7.domain.account.enums.ExchangeSearchType;
 import com.ll.nbe344team7.domain.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,11 +33,11 @@ public class AccountController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getAccount(@PathVariable Long id) {
-        if(id == 10000){
+        try {
+            return ResponseEntity.ok(this.accountService.getAccount(id));
+        } catch (NullPointerException e) {
             return ResponseEntity.status(404).body(Map.of("message", "멤버가 조회되지 않습니다."));
         }
-
-        return ResponseEntity.ok(this.accountService.getAccount());
     }
 
     /**
@@ -58,7 +58,7 @@ public class AccountController {
         }
         String exchangeType;
         try {
-            exchangeType = String.valueOf(ExchangeType.valueOf(type.toUpperCase()));
+            exchangeType = String.valueOf(ExchangeSearchType.valueOf(type.toUpperCase()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(Map.of("message", "조회 타입이 올바르지 않습니다."));
         }
