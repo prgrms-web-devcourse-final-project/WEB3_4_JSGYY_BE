@@ -13,6 +13,7 @@ import java.util.Map;
 public class AuctionService {
 
     public Map<Object, Object> bidPrice(BidDTO dto, Long postId){
+
         return Map.of("message", postId + "번 게시글 책 물품에 15000원 입찰이 완료되었습니다.");
     }
 }
