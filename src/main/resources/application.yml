@@ -1,13 +1,8 @@
 spring:
   application:
     name: NBE3-4-4-team7
-  datasource:
-    url: jdbc:h2:./db_dev2;MODE=MySQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    hikari:
-      auto-commit: false
+  profiles:
+    active: dev
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,6 +12,7 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+
 
 logging:
   level:
