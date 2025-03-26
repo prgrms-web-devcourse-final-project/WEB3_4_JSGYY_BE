@@ -50,4 +50,12 @@ class Post (
 
     var reports: Long = 0L
         protected set
+
+    fun update(title: String, content: String, price: Long, place: String, auctionStatus: Boolean) {
+        this.title = title
+        this.content = content
+        this.price = price
+        this.place = place
+        this.auctionStatus = auctionStatus
+    }
 }

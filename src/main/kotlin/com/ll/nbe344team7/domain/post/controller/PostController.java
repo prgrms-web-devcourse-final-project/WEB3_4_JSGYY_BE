@@ -64,7 +64,7 @@ public class PostController {
      *
      * @param postId
      * @param request
-     * @param loggedInMemberId
+     * @param memberId
      * @return
      *
      * @author GAEUN220
@@ -74,19 +74,9 @@ public class PostController {
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
             @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long loggedInMemberId)
+            @RequestHeader(value = "memberId") Long memberId)
     {
-        Long authorId = 1L;
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 수정 권한이 없습니다."));
-        }
-
-        return ResponseEntity.ok(postService.modifyPost(postId, request));
+        return ResponseEntity.ok(postService.modifyPost(postId, request, memberId));
     }
 
     /**

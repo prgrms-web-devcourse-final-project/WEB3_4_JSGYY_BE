@@ -42,4 +42,5 @@ out/
 
 ### Custom ###
 db_dev2.mv.db
+db_dev2.trace.db
 

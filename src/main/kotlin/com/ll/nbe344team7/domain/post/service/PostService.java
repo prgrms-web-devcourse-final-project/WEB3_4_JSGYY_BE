@@ -74,7 +74,24 @@ public class PostService {
         return Map.of("message", postId + "번 게시글이 삭제되었습니다.");
     }
 
-    public Map<String, Object> modifyPost(Long postId, PostRequest request) {
+    public Map<String, String> modifyPost(Long postId, PostRequest request, Long memberId) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        if (post.getMemberId() != memberId) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        post.update(
+                request.getTitle(),
+                request.getContent(),
+                request.getPrice(),
+                request.getPlace(),
+                request.getAuctionStatus()
+        );
+
+        postRepository.save(post);
+
         return Map.of("message", postId + "번 게시글이 수정되었습니다.");
     }
 
