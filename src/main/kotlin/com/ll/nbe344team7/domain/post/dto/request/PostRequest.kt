@@ -6,5 +6,6 @@ data class PostRequest (
     val price: Long,
     val place: String,
     val saleStatus: Boolean = true,
-    val auctionStatus: Boolean
+    val auctionStatus: Boolean,
+    val auctionRequest: AuctionRequest?
 )
