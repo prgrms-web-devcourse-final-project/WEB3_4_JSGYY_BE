@@ -82,6 +82,9 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil);
+        loginFilter.setFilterProcessesUrl("/api/auth/login");
+
 
         // CORS 설정 활성화
         http
@@ -121,7 +124,7 @@ public class SecurityConfig {
 
                 .addFilterBefore(new JWTFilter(jwtUtil),LoginFilter.class)  // jwt 유효성 검사
 
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
 
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));  //세션 stateless 상태 설정
