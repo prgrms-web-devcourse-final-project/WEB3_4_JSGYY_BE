@@ -1,10 +1,16 @@
 package com.ll.nbe344team7.domain.post.controller;
 
-import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
-import com.ll.nbe344team7.domain.post.dto.PostRequest;
-import com.ll.nbe344team7.domain.post.dto.ReportDTO;
+import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
+import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
+import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
+import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,7 +70,7 @@ public class PostController {
      *
      * @param postId
      * @param request
-     * @param loggedInMemberId
+     * @param memberId
      * @return
      *
      * @author GAEUN220
@@ -74,19 +80,9 @@ public class PostController {
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
             @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long loggedInMemberId)
+            @RequestHeader(value = "memberId") Long memberId)
     {
-        Long authorId = 1L;
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 수정 권한이 없습니다."));
-        }
-
-        return ResponseEntity.ok(postService.modifyPost(postId, request));
+        return ResponseEntity.ok(postService.modifyPost(postId, request, memberId));
     }
 
     /**
@@ -99,8 +95,22 @@ public class PostController {
      * @since 2025-03-24
      */
     @GetMapping
-    public ResponseEntity<?> getPosts() {
-        return ResponseEntity.ok(postService.getPosts());
+    public ResponseEntity<?> getPosts(
+            @PageableDefault(size = 10,
+                    page = 0,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false) Boolean saleStatus,
+            @RequestParam(required = false) String keyword)
+    {
+        PostSearchRequest searchRequest = new PostSearchRequest(minPrice, maxPrice, saleStatus, keyword);
+
+        Page<PostListDto> postList = postService.getPostsBySearch(pageable, searchRequest);
+
+        return ResponseEntity.ok(postList);
     }
 
     /**
@@ -108,50 +118,39 @@ public class PostController {
      * 게시글 상세 조회
      *
      * @param postId
+     * @param memberId
      * @return
      *
      * @author GAEUN220
      * @since 2025-03-24
      */
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPost(@PathVariable Long postId) {
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        return ResponseEntity.ok(postService.getPost(postId));
+    public ResponseEntity<?> getPost(
+            @PathVariable Long postId,
+            @RequestHeader(value = "memberId") Long memberId)
+    {
+        return ResponseEntity.ok(postService.getPost(postId, memberId));
     }
 
+    /**
+     *
+     * 게시글 경매 전환
+     *
+     * @param auctionRequest
+     * @param memberId
+     * @param postId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
     @PostMapping("/{postId}/auction")
     public ResponseEntity<?> changeToAuction(
-            @RequestBody AuctionRequest request,
-            @RequestHeader(value = "memberId") Long loggedInMemberId,
+            @RequestBody AuctionRequest auctionRequest,
+            @RequestHeader(value = "memberId") Long memberId,
             @PathVariable Long postId)
     {
-        Long authorId = 1L;
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 경매 전환 권한이 없습니다."));
-        }
-
-        if (request.getStartedAt() == null) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 시작일을 입력해주세요."));
-        }
-
-        if (request.getClosedAt() == null) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 종료일을 입력해주세요."));
-        }
-
-        if (request.getStartPrice() <= 0) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 시작가를 0원 이상 입력해주세요."));
-        }
-
-        return ResponseEntity.ok(postService.changeToAuction(postId, request));
+        return ResponseEntity.ok(postService.changeToAuction(postId, auctionRequest, memberId));
     }
 
     /**
