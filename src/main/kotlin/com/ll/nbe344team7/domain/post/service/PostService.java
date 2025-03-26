@@ -153,6 +153,17 @@ public class PostService {
         return posts.map(post -> PostListDto.Companion.from(post));
     }
 
+    /**
+     *
+     * 게시글 검색
+     *
+     * @param pageable
+     * @param searchRequest
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
     public Page<PostListDto> getPostsBySearch(Pageable pageable, PostSearchRequest searchRequest) {
 
         if (searchRequest.getMinPrice() == null && searchRequest.getMaxPrice() == null
