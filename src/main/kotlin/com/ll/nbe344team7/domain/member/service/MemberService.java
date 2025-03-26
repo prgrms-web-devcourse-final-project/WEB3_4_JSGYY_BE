@@ -25,7 +25,14 @@ public class MemberService {
     }
 
 
-
+    /**
+     * 회원가입 메소드
+     * password 인코딩
+     * 기존에 가입한 회원인지 확인
+     * @param memberDTO
+     * @author 이광석
+     * @since 2025-03-25
+     */
     public void register(MemberDTO memberDTO) {
         String encodingPassword = bCryptPasswordEncoder.encode(memberDTO.getPassword());
 

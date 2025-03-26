@@ -10,6 +10,13 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+/**
+ * jwt 유틸 틀래스
+ * jwt를 생성하거나 정보를 추출
+ *
+ * @since 2025-03-26
+ * @author 이광석
+ */
 @Component
 public class JWTUtil {
     private SecretKey secretKey;
@@ -36,6 +43,16 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    /**
+     * jwt 생성 메소드
+     * @param username
+     * @param memberId
+     * @param role
+     * @param expiredMs
+     * @return String(jwt token)
+     * @author 이광석
+     * @since 2025-03-26
+     */
     public String createJwt(String username, Long memberId,String role,Long expiredMs){
         return Jwts.builder()
                 .claim("username",username)

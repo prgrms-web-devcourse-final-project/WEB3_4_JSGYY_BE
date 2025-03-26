@@ -9,6 +9,7 @@ import com.ll.nbe344team7.domain.member.entity.MemberEntity
  * @since 25.03.25
  */
 data class MemberDTO(
+    val id : Long? ,
     val name: String="",
     val username: String="",
     val password:String="",

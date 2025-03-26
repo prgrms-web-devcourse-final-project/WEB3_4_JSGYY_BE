@@ -2,8 +2,10 @@ package com.ll.nbe344team7.domain.member.controller;
 
 
 import com.ll.nbe344team7.domain.member.service.MemberService;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -110,5 +112,24 @@ public class MemberController {
         Map<String,Object> mockResponseMap = new HashMap<>();
         mockResponseMap.put("Message","회원 탈퇴 성공");
         return ResponseEntity.ok(mockResponseMap);
+    }
+
+    /**
+     * 로그인후 CustomUserDetails 를 테스트하기위한 메소드
+     * @param customUserDetails
+     * @return ResponseEntity<Map<String,Object>>
+     * @author 이광석
+     * @since 2025-03-26
+     */
+    @GetMapping("/")
+    public ResponseEntity<Map<String,Object>> userDetailTest(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails){
+        Map<String,Object> test = new HashMap<>();
+        test.put("이름",customUserDetails.getUsername());
+        test.put("권한",customUserDetails.getRole());
+        test.put("아이디", customUserDetails.getMemberId());
+
+        return ResponseEntity.ok(test);
+
     }
 }
