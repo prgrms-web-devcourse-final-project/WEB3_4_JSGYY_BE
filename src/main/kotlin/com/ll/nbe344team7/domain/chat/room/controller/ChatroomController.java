@@ -1,10 +1,12 @@
 package com.ll.nbe344team7.domain.chat.room.controller;
 
+
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ public class ChatroomController {
     public ResponseEntity<?> createChatroom(@RequestBody ChatRoomRequestDto requestDto) {
         return ResponseEntity.ok(chatroomService.createRoom(requestDto));
     }
+
 
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getChatRooms(@PathVariable Long id) {

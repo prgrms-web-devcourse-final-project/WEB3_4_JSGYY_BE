@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.chat.participant.entity
 
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom
+
 import com.ll.nbe344team7.domain.member.Member
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
@@ -21,6 +22,7 @@ class ChatParticipant(
     @JoinColumn(name = "member_id", nullable = false)
     val member: Member
 ) : BaseEntity() {
+  
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null

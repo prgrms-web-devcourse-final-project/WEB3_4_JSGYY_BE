@@ -11,6 +11,7 @@ import com.ll.nbe344team7.domain.member.Member;
 import com.ll.nbe344team7.domain.member.MemberRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
+
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
