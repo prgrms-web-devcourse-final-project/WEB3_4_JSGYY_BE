@@ -24,6 +24,28 @@ public class PostService {
 
     /**
      *
+     * 입력값 검증
+     *
+     * @param request
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
+    private void validatePostRequest(PostRequest request) {
+        if (request.getTitle().trim().isEmpty() || request.getTitle().length() > 50) {
+            throw new PostException(PostErrorCode.INVALID_TITLE);
+        }
+        if (request.getContent().trim().isEmpty() || request.getContent().length() > 500) {
+            throw new PostException(PostErrorCode.INVALID_CONTENT);
+        }
+        if (request.getPrice() < 0) {
+            throw new PostException(PostErrorCode.INVALID_PRICE);
+        }
+    }
+
+
+    /**
+     *
      * 게시글 작성
      *
      * @param request
@@ -35,6 +57,8 @@ public class PostService {
      */
     @Transactional
     public Map<String, String> createPost(PostRequest request, Long memberId) {
+
+        validatePostRequest(request);
 
         Post post = new Post(
                 memberId,
@@ -74,7 +98,21 @@ public class PostService {
         return Map.of("message", postId + "번 게시글이 삭제되었습니다.");
     }
 
+    /**
+     *
+     * 게시글 수정
+     *
+     * @param postId
+     * @param request
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-25
+     */
     public Map<String, String> modifyPost(Long postId, PostRequest request, Long memberId) {
+
+        validatePostRequest(request);
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
