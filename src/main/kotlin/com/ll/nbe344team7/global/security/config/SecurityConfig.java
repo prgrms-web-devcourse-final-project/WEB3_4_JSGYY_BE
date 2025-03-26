@@ -55,8 +55,13 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable())
 
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/api/auth/register").permitAll()
+                        .requestMatchers("/login", "/", "/api/auth/register","/h2-console/**").permitAll()
                         .anyRequest().authenticated())
+
+                .headers(headers -> headers
+                        .defaultsDisabled()
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
 
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class)
 

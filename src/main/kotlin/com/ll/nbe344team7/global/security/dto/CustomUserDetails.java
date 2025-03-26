@@ -10,8 +10,10 @@ import java.util.Collection;
 public class CustomUserDetails implements UserDetails {
 
     final private MemberEntity memberEntity;
+//    final private CustomUserData customUserData;
 
-    public CustomUserDetails(MemberEntity memberEntity){
+    public CustomUserDetails(
+            MemberEntity memberEntity){
         this.memberEntity = memberEntity;
     }
     @Override
