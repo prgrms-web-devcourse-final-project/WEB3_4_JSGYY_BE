@@ -6,8 +6,8 @@ import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomCreateResponseDto;
 import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomRequestDto;
 import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chatroom.repository.ChatRoomRepository;
-import com.ll.nbe344team7.domain.member.Member;
-import com.ll.nbe344team7.domain.member.MemberRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  *
@@ -54,5 +55,9 @@ public class ChatroomService {
 
     public Map<Object,Object> deleteChatroom(Long roomId) {
         return Map.of("message","채팅방 삭제 성공");
+    }
+
+    public Optional<ChatRoom> getChatRoom(long roomId) {
+        return chatRoomRepository.findById(roomId);
     }
 }

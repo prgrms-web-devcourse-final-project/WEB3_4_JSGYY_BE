@@ -66,8 +66,8 @@ public class ChatController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String message
     ) {
-        Page<ChatMessageDTO> items = chatService.items(roomId, message, page, size);
+        Page<ChatMessageDTO> chats = chatService.getChatMessages(roomId, message, page, size);
 
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(chats);
     }
 }

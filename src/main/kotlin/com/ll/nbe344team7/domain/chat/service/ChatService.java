@@ -44,7 +44,7 @@ public class ChatService {
      * @since 25. 3. 25.
      */
     public void send(MessageDTO dto, long roomId) {
-        ChatRoom chatRoom = chatroomService.getItem(roomId).orElseThrow(
+        ChatRoom chatRoom = chatroomService.getChatRoom(roomId).orElseThrow(
                 () -> new ChatException(ChatExceptionCode.NOT_FOUND_ROOM)
         );
 
@@ -66,13 +66,13 @@ public class ChatService {
      * @author jyson
      * @since 25. 3. 25.
      * */
-    public Page<ChatMessageDTO> items(long roomId, String message, int page, int size) {
-        ChatRoom chatRoom = chatroomService.getItem(roomId).orElseThrow(
+    public Page<ChatMessageDTO> getChatMessages(long roomId, String message, int page, int size) {
+        chatroomService.getChatRoom(roomId).orElseThrow(
                 () -> new ChatException(ChatExceptionCode.NOT_FOUND_ROOM)
         );
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        if (!message.isEmpty()) return chatRepository.findByChatRoomIdAndContentContaining(pageable, chatRoom.getId(), message).map(ChatMessageDTO::new);
-        return chatRepository.findByChatRoomId(pageable, chatRoom.getId()).map(ChatMessageDTO::new);
+        if (!message.isEmpty()) return chatRepository.findByChatRoomIdAndContentContaining(pageable, roomId, message).map(ChatMessageDTO::new);
+        return chatRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
     }
 }
