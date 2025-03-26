@@ -1,10 +1,13 @@
 package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
+import com.ll.nbe344team7.domain.post.dto.PostListDto;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,8 +92,11 @@ public class PostController {
      * @since 2025-03-24
      */
     @GetMapping
-    public ResponseEntity<?> getPosts() {
-        return ResponseEntity.ok(postService.getPosts());
+    public ResponseEntity<?> getPosts(Pageable pageable) {
+
+        Page<PostListDto> postList = postService.getPosts(pageable);
+
+        return ResponseEntity.ok(postList);
     }
 
     /**

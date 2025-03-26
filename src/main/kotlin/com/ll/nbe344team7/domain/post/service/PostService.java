@@ -2,15 +2,17 @@ package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.PostDto;
+import com.ll.nbe344team7.domain.post.dto.PostListDto;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -135,39 +137,32 @@ public class PostService {
         return Map.of("message", postId + "번 게시글이 수정되었습니다.");
     }
 
-    public Map<String, Object> getPosts() {
-        return Map.of(
-                "currentPage", 1,
-                "totalPages", 1,
-                "totalItems", 2,
-                "pageSize", 10,
-                "posts", List.of(
-                        Map.of(
-                                "id", 1,
-                                "title", "제목1",
-                                "content", "내용1",
-                                "place", "부산광역시 금정구 장전동",
-                                "price", 10000,
-                                "status", true,
-                                "auctionStatus", false,
-                                "likes", 3,
-                                "reports", 0
-                        ),
-                        Map.of(
-                                "id", 2,
-                                "title", "제목2",
-                                "content", "내용2",
-                                "place", "서울특별시 강남구 역삼동",
-                                "price", 15000,
-                                "status", true,
-                                "auctionStatus", false,
-                                "likes", 5,
-                                "reports", 1
-                        )
-                )
-        );
+    /**
+     *
+     * 게시글 목록 조회
+     *
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
+    public Page<PostListDto> getPosts(Pageable pageable) {
+        Page<Post> posts = postRepository.findAll(pageable);
+
+        return posts.map(post -> PostListDto.Companion.from(post));
     }
 
+    /**
+     *
+     * 게시글 상세 조회
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
     public PostDto getPost(Long postId, Long memberId) {
 
         Post post = postRepository.findById(postId)
