@@ -1,10 +1,16 @@
-package com.ll.nbe344team7.domain.chatparticipant.entity
+package com.ll.nbe344team7.domain.chat.participant.entity
 
-import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom
+import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom
 import com.ll.nbe344team7.domain.member.Member
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
 
+/**
+ *
+ *
+ * @author kjm72
+ * @since 2025-03-25
+ */
 @Entity
 class ChatParticipant(
     @ManyToOne(fetch = FetchType.LAZY)
@@ -17,11 +23,5 @@ class ChatParticipant(
 ) : BaseEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id : Long? = 0
-
-    companion object {
-        fun create(chatroom: ChatRoom, member: Member): ChatParticipant {
-            return ChatParticipant(chatroom = chatroom, member = member)
-        }
-    }
+    var id: Long? = null
 }
