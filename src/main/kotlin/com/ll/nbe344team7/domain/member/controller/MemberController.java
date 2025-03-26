@@ -50,18 +50,7 @@ public class MemberController {
 
     }
 
-//    @PostMapping("/auth/login")
-//    public ResponseEntity<Map<String,String>> login(@RequestBody() MemberDTO memberDTO){
-//        Map<String,String> mockResponseMap = new HashMap<>();
-//
-//        if(memberDTO.getPassword().isBlank() || memberDTO.getUsername().isBlank()){
-//            mockResponseMap.put("Message","이메일 혹은 비밀번호를 잘못 입력했습니다");
-//            return ResponseEntity.ok(mockResponseMap);
-//
-//        }
-//        mockResponseMap.put("Message","로그인 성공");
-//        return ResponseEntity.ok(mockResponseMap);
-//    }
+
 
     /**
      * 로그아웃
