@@ -56,7 +56,7 @@ public class AuctionService {
         if(account.getMoney() >= dto.getPrice()){
             if(auction.getMaxPrice() < dto.getPrice()){
                 auction.setMaxPrice(dto.getPrice());
-                auction.setMemberId(dto.getMemberId());
+                auction.setWinnerId(dto.getMemberId());
                 auction = auctionRepository.save(auction);
             }
         } else if(account.getMoney() < dto.getPrice()){
