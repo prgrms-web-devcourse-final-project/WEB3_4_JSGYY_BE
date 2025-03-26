@@ -125,6 +125,7 @@ public class PostService {
                 request.getContent(),
                 request.getPrice(),
                 request.getPlace(),
+                request.getSaleStatus(),
                 request.getAuctionStatus()
         );
 

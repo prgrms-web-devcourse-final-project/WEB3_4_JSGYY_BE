@@ -5,5 +5,6 @@ data class PostRequest (
     val content: String,
     val price: Long,
     val place: String,
+    val saleStatus: Boolean = true,
     val auctionStatus: Boolean
 )
