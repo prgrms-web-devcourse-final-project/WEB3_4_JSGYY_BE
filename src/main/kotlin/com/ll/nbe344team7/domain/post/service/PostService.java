@@ -1,9 +1,10 @@
 package com.ll.nbe344team7.domain.post.service;
 
-import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
-import com.ll.nbe344team7.domain.post.dto.PostDto;
-import com.ll.nbe344team7.domain.post.dto.PostListDto;
-import com.ll.nbe344team7.domain.post.dto.PostRequest;
+import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
+import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
+import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.response.PostDto;
+import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
@@ -150,6 +151,22 @@ public class PostService {
         Page<Post> posts = postRepository.findAll(pageable);
 
         return posts.map(post -> PostListDto.Companion.from(post));
+    }
+
+    public Page<PostListDto> getPostsBySearch(Pageable pageable, PostSearchRequest searchRequest) {
+
+        if (searchRequest.getMinPrice() == null && searchRequest.getMaxPrice() == null
+                && searchRequest.getSaleStatus() == null && searchRequest.getKeyword() == null) {
+            return postRepository.findAll(pageable).map(post -> PostListDto.Companion.from(post));
+        }
+
+        return postRepository.findBySearchCriteria(
+                searchRequest.getMinPrice(),
+                searchRequest.getMaxPrice(),
+                searchRequest.getSaleStatus(),
+                searchRequest.getKeyword(),
+                pageable
+        ).map(post -> PostListDto.Companion.from(post));  // 코틀린의 from() 메서드 호출
     }
 
     /**

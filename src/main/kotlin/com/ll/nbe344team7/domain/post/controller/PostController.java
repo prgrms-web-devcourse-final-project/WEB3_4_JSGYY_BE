@@ -1,13 +1,16 @@
 package com.ll.nbe344team7.domain.post.controller;
 
-import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
-import com.ll.nbe344team7.domain.post.dto.PostListDto;
-import com.ll.nbe344team7.domain.post.dto.PostRequest;
-import com.ll.nbe344team7.domain.post.dto.ReportDTO;
+import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
+import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
+import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
+import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,9 +95,20 @@ public class PostController {
      * @since 2025-03-24
      */
     @GetMapping
-    public ResponseEntity<?> getPosts(Pageable pageable) {
+    public ResponseEntity<?> getPosts(
+            @PageableDefault(size = 10,
+                    page = 0,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false) Boolean saleStatus,
+            @RequestParam(required = false) String keyword)
+    {
+        PostSearchRequest searchRequest = new PostSearchRequest(minPrice, maxPrice, saleStatus, keyword);
 
-        Page<PostListDto> postList = postService.getPosts(pageable);
+        Page<PostListDto> postList = postService.getPostsBySearch(pageable, searchRequest);
 
         return ResponseEntity.ok(postList);
     }

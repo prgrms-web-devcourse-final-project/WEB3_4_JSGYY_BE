@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.domain.post.dto
+package com.ll.nbe344team7.domain.post.dto.response
 
 import com.ll.nbe344team7.domain.post.entity.Post
 import java.time.LocalDateTime
