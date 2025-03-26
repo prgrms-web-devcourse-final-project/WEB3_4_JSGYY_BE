@@ -66,6 +66,10 @@ class Post (
     var auctionDetails: Auction? = null
         protected set
 
+    fun updateAuctionStatus(status: Boolean) {
+        this.auctionStatus = status
+    }
+
     fun createAuction(startedAt: LocalDateTime, closedAt: LocalDateTime): Auction {
         return Auction(
             startedAt = startedAt,

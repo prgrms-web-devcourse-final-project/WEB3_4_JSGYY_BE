@@ -132,31 +132,25 @@ public class PostController {
         return ResponseEntity.ok(postService.getPost(postId, memberId));
     }
 
+    /**
+     *
+     * 게시글 경매 전환
+     *
+     * @param auctionRequest
+     * @param memberId
+     * @param postId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
     @PostMapping("/{postId}/auction")
     public ResponseEntity<?> changeToAuction(
-            @RequestBody AuctionRequest request,
-            @RequestHeader(value = "memberId") Long loggedInMemberId,
+            @RequestBody AuctionRequest auctionRequest,
+            @RequestHeader(value = "memberId") Long memberId,
             @PathVariable Long postId)
     {
-        Long authorId = 1L;
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 경매 전환 권한이 없습니다."));
-        }
-
-        if (request.getStartedAt() == null) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 시작일을 입력해주세요."));
-        }
-
-        if (request.getClosedAt() == null) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 종료일을 입력해주세요."));
-        }
-
-        return ResponseEntity.ok(postService.changeToAuction(postId, request));
+        return ResponseEntity.ok(postService.changeToAuction(postId, auctionRequest, memberId));
     }
 
     /**

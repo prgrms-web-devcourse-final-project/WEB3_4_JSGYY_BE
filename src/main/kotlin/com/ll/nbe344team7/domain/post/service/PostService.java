@@ -217,7 +217,40 @@ public class PostService {
         return PostDto.Companion.from(post, memberId);
     }
 
-    public Map<String, Object> changeToAuction(Long postId, AuctionRequest request) {
+
+    /**
+     *
+     * 게시글 경매 전환
+     *
+     * @param postId
+     * @param auctionRequest
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-26
+     */
+    public Map<String, String> changeToAuction(Long postId, AuctionRequest auctionRequest, Long memberId) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        if (post.getMemberId() != memberId) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (post.getAuctionDetails() != null) {
+            throw new PostException(PostErrorCode.ALREADY_IN_AUCTION);
+        }
+
+        post.updateAuctionStatus(true);
+
+        Auction auction = post.createAuction(
+                auctionRequest.getStartedAt(),
+                auctionRequest.getClosedAt()
+        );
+
+        auctionRepository.save(auction);
+        postRepository.save(post);
+
         return Map.of("message", "경매 전환이 완료되었습니다.");
     }
 }
