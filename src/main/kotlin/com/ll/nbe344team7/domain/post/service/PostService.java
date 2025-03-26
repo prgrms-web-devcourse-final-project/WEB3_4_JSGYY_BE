@@ -1,11 +1,11 @@
 package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
+import com.ll.nbe344team7.domain.post.dto.PostDto;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
-
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -110,6 +110,7 @@ public class PostService {
      * @author GAEUN220
      * @since 2025-03-25
      */
+    @Transactional
     public Map<String, String> modifyPost(Long postId, PostRequest request, Long memberId) {
 
         validatePostRequest(request);
@@ -167,18 +168,12 @@ public class PostService {
         );
     }
 
-    public Map<String, Object> getPost(Long postId) {
-        return Map.of(
-                "id", 1,
-                "title", "제목",
-                "content", "내용",
-                "place", "부산광역시 금정구 장전동",
-                "price", 10000,
-                "status", true,
-                "actionStatus", false,
-                "likes", 3,
-                "reports", 0
-        );
+    public PostDto getPost(Long postId, Long memberId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        return PostDto.Companion.from(post, memberId);
     }
 
     public Map<String, Object> changeToAuction(Long postId, AuctionRequest request) {

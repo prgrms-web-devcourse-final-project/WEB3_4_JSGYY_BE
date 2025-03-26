@@ -98,19 +98,18 @@ public class PostController {
      * 게시글 상세 조회
      *
      * @param postId
+     * @param memberId
      * @return
      *
      * @author GAEUN220
      * @since 2025-03-24
      */
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPost(@PathVariable Long postId) {
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        return ResponseEntity.ok(postService.getPost(postId));
+    public ResponseEntity<?> getPost(
+            @PathVariable Long postId,
+            @RequestHeader(value = "memberId") Long memberId)
+    {
+        return ResponseEntity.ok(postService.getPost(postId, memberId));
     }
 
     @PostMapping("/{postId}/auction")
