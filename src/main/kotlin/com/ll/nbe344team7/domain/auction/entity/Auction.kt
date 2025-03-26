@@ -1,9 +1,7 @@
 package com.ll.nbe344team7.domain.auction.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import com.ll.nbe344team7.domain.post.entity.Post
+import jakarta.persistence.*
 import java.time.LocalDateTime
 
 /**
@@ -15,10 +13,15 @@ import java.time.LocalDateTime
  */
 @Entity
 data class Auction (
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Long,
-    val postId: Long,
-    var maxPrice: Long,
+    @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Long? = null,
+    var maxPrice: Long? = null,
     val startedAt: LocalDateTime,
     val closedAt: LocalDateTime,
-    var status: Int,
-    var memberId: Long)
+    var startPrice: Long,
+    var status: Int, // 0: 진행중, 1: 종료
+    var winnerId: Long? = null // 낙찰자 ID
+) {
+    @OneToOne
+    @JoinColumn(name = "post_id", nullable = false, unique = true)
+    var post: Post? = null
+}

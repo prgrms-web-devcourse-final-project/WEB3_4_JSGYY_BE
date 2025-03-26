@@ -1,5 +1,9 @@
 package com.ll.nbe344team7.domain.post.service;
 
+import com.ll.nbe344team7.domain.auction.entity.Auction;
+import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
+import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
+import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
@@ -8,21 +12,25 @@ import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
+
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
+    private final AuctionRepository auctionRepository;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, AuctionRepository auctionRepository) {
         this.postRepository = postRepository;
+        this.auctionRepository = auctionRepository;
     }
 
     /**
@@ -70,10 +78,23 @@ public class PostService {
                 request.getPrice(),
                 request.getPlace(),
                 request.getAuctionStatus()
-                );
+        );
 
         post = postRepository.save(post);
 
+        // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
+        if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
+            AuctionRequest auctionRequest = request.getAuctionRequest();
+
+            Auction auction = post.createAuction(
+                    auctionRequest.getStartedAt(),
+                    auctionRequest.getClosedAt()
+            );
+
+            auctionRepository.save(auction);
+        }
+
+        // 반환 메시지
         return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
     }
 

@@ -156,10 +156,6 @@ public class PostController {
             return ResponseEntity.status(400).body(Map.of("message", "경매 종료일을 입력해주세요."));
         }
 
-        if (request.getStartPrice() <= 0) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 시작가를 0원 이상 입력해주세요."));
-        }
-
         return ResponseEntity.ok(postService.changeToAuction(postId, request));
     }
 
