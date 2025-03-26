@@ -19,4 +19,3 @@ data class MemberDTO(
     val phone_num: String="",
     val role:String="ROLE_ADMIN"
 )
-

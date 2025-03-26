@@ -4,9 +4,13 @@ package com.ll.nbe344team7.domain.member.service;
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.entity.MemberEntity;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 /**
@@ -55,4 +59,25 @@ public class MemberService {
         }
     }
 
+    /**
+     * 사용자 상세 정보 반환 메서드
+     * 비밀번호는 반환하지 않도록 했다.
+     * @param memberId
+     * @return
+     * @author 이광석
+     * @since 2025-03-26
+     */
+    public MemberDTO myDetails(Long memberId) {
+        MemberEntity memberEntity = memberRepository.findById(memberId)
+                .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        return new MemberDTO(memberEntity.getId(),
+                memberEntity.getName(),
+                memberEntity.getUserName(),
+                "","",
+                memberEntity.getNickName(),
+                memberEntity.getEmail(),
+                memberEntity.getPhoneNum(),
+                memberEntity.getRole());
+    }
 }

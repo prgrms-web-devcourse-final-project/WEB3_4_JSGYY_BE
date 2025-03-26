@@ -14,6 +14,7 @@ import java.util.Objects;
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 
 
+
 /**
  * member 컨트롤러
  *
@@ -73,20 +74,16 @@ public class MemberController {
      * @since 25.03.25
      */
     @GetMapping("/member/mydetails")
-    public ResponseEntity<Map<String, Object>> myDetails(){
-        Map<String,Object> mockDataMap = new HashMap<>();
-        mockDataMap.put("id" , 1);
-        mockDataMap.put("name" , "홍길동");
-        mockDataMap.put("nickname","임꺽정");
-        mockDataMap.put("email","tmp@gmail.com");
-        mockDataMap.put("phone_num","010-8080-8080");
-        mockDataMap.put("create_at","2024-03-21T12:00:00");
+    public ResponseEntity<Map<String, Object>> myDetails(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        MemberDTO memberDTOS= memberService.myDetails(customUserDetails.getMemberId());
 
-        Map<String,Object> mockResponseMap= new HashMap<>();
-        mockResponseMap.put("message","데이터 전달 성공");
-        mockResponseMap.put("data",mockDataMap);
+        Map<String,Object> map = new HashMap<>();
+        map.put("message","데이터 전달 성공");
+        map.put("data",memberDTOS);
 
-        return ResponseEntity.ok(mockResponseMap);
+        return ResponseEntity.ok(map);
     }
 
 
