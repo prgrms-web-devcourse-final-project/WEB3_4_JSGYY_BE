@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.global.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
@@ -12,8 +13,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 
 /**
@@ -38,7 +41,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     /**
-     * Requse에서 username, password 를 추출
+     * Request에서 username, password 를 추출
      * username,password를 authenticationManager에 전달
      *
      * @param request
@@ -51,13 +54,20 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> requestMap = objectMapper.readValue(request.getInputStream(), Map.class);
+
+            String username = requestMap.get("username");
+            String password = requestMap.get("password");
 
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
-        return authenticationManager.authenticate(authToken);
+            return authenticationManager.authenticate(authToken);
+        }catch (IOException e){
+            throw new RuntimeException("회원 정보를 다시 확인해주세요");
+        }
     }
 
 
