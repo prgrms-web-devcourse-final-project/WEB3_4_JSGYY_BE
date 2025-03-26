@@ -1,12 +1,12 @@
-package com.ll.nbe344team7.domain.chatroom.service;
+package com.ll.nbe344team7.domain.chat.room.service;
 
-import com.ll.nbe344team7.domain.chatparticipant.entity.ChatParticipant;
-import com.ll.nbe344team7.domain.chatparticipant.repository.ChatParticipantRepository;
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomListResponseDto;
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomRequestDto;
-import com.ll.nbe344team7.domain.chatroom.dto.CreateResponseDto;
-import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
-import com.ll.nbe344team7.domain.chatroom.repository.ChatRoomRepository;
+import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
+import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
+import com.ll.nbe344team7.domain.chat.room.dto.CreateResponseDto;
+import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
+import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRepository;
 import com.ll.nbe344team7.domain.member.Member;
 import com.ll.nbe344team7.domain.member.MemberRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  *

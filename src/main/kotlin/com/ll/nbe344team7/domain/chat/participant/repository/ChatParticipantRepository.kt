@@ -1,6 +1,6 @@
-package com.ll.nbe344team7.domain.chatparticipant.repository;
+package com.ll.nbe344team7.domain.chat.participant.repository;
 
-import com.ll.nbe344team7.domain.chatparticipant.entity.ChatParticipant;
+import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

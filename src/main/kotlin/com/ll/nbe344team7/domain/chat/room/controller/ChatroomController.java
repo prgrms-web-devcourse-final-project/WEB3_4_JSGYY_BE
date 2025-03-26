@@ -1,8 +1,8 @@
-package com.ll.nbe344team7.domain.chatroom.controller;
+package com.ll.nbe344team7.domain.chat.room.controller;
 
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomListResponseDto;
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomRequestDto;
-import com.ll.nbe344team7.domain.chatroom.service.ChatroomService;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
+import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
