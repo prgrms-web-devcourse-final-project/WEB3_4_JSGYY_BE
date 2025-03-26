@@ -29,7 +29,7 @@ class ChatRoom(
         this.title = participants
             .map { it.member }
             .filter { it.id != userId }
-            .map { it.nickname }
+            .map { it.nickName}
             .firstOrNull() ?: "알 수 없음"
     }
 

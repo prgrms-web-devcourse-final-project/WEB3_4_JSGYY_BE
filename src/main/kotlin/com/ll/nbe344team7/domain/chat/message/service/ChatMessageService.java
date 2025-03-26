@@ -3,12 +3,10 @@ package com.ll.nbe344team7.domain.chat.message.service;
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
-import com.ll.nbe344team7.domain.chat.exception.ChatException;
-import com.ll.nbe344team7.domain.chat.exception.ChatExceptionCode;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
-import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.entity.MemberEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,11 +42,9 @@ public class ChatMessageService {
      * @since 25. 3. 25.
      */
     public void send(MessageDTO dto, long roomId) {
-        ChatRoom chatRoom = chatroomService.getChatRoom(roomId).orElseThrow(
-                () -> new ChatException(ChatExceptionCode.NOT_FOUND_ROOM)
-        );
+        ChatRoom chatRoom = chatroomService.getChatRoom(roomId);
 
-        ChatMessage chatMessage = new ChatMessage(new Member(), dto.getContent(), chatRoom);
+        ChatMessage chatMessage = new ChatMessage(new MemberEntity(), dto.getContent(), chatRoom);
 
         chatMessageRepository.save(chatMessage);
     }
@@ -67,9 +63,7 @@ public class ChatMessageService {
      * @since 25. 3. 25.
      * */
     public Page<ChatMessageDTO> getChatMessages(long roomId, String message, int page, int size) {
-        chatroomService.getChatRoom(roomId).orElseThrow(
-                () -> new ChatException(ChatExceptionCode.NOT_FOUND_ROOM)
-        );
+        chatroomService.getChatRoom(roomId);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         if (!message.isEmpty()) return chatMessageRepository.findByChatRoomIdAndContentContaining(pageable, roomId, message).map(ChatMessageDTO::new);

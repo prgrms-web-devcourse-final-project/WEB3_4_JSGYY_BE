@@ -7,11 +7,10 @@ import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
 import com.ll.nbe344team7.domain.chat.room.dto.CreateResponseDto;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRepository;
-import com.ll.nbe344team7.domain.member.Member;
-import com.ll.nbe344team7.domain.member.MemberRepository;
+import com.ll.nbe344team7.domain.member.entity.MemberEntity;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
-
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
@@ -50,8 +49,8 @@ public class ChatroomService {
      */
     @Transactional
     public CreateResponseDto createRoom(ChatRoomRequestDto requestDto) {
-        Member seller = memberRepository.findById(requestDto.getSellerId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-        Member user = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        MemberEntity seller = memberRepository.findById(requestDto.getSellerId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        MemberEntity user = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         ChatRoom chatroom = new ChatRoom();
         ChatParticipant userChatParticipant = new ChatParticipant(chatroom, user);
@@ -76,7 +75,7 @@ public class ChatroomService {
      */
     @Transactional(readOnly = true)
     public List<ChatRoomListResponseDto> listChatRoom(Long id) {
-        Member member = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        MemberEntity member = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         List<ChatRoomListResponseDto> list = chatParticipantRepository.findByMemberId(member.getId()).stream()
                 .map(cp ->{
                     ChatRoom chatroom = cp.getChatroom();
@@ -105,5 +104,11 @@ public class ChatroomService {
     public void deleteChatroom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
         chatRoomRepository.delete(chatRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public ChatRoom getChatRoom(long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
+        return chatRoom;
     }
 }

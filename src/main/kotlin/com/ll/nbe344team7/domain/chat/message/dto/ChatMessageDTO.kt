@@ -19,7 +19,7 @@ data class ChatMessageDTO(
 ) {
     constructor(chatMessage: ChatMessage) : this(
         chatMessage.id,
-        chatMessage.member.id,
+        chatMessage.member.id!!,
         chatMessage.chatRoom.id!!,
         chatMessage.content,
         chatMessage.createdAt!!
