@@ -1,14 +1,14 @@
-package com.ll.nbe344team7.domain.chat.service;
+package com.ll.nbe344team7.domain.chat.message.service;
 
-import com.ll.nbe344team7.domain.chat.dto.ChatMessageDTO;
-import com.ll.nbe344team7.domain.chat.dto.MessageDTO;
-import com.ll.nbe344team7.domain.chat.entity.ChatMessage;
+import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
+import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
+import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.exception.ChatException;
-import com.ll.nbe344team7.domain.chat.repository.ChatRepository;
-import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
-import com.ll.nbe344team7.domain.chatroom.service.ChatroomService;
-import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.chat.exception.ChatExceptionCode;
+import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
+import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
+import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
  * @since 25. 3. 24.
  */
 @Service
-public class ChatService {
+public class ChatMessageService {
 
-    private final ChatRepository chatRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ChatroomService chatroomService;
 
-    public ChatService(ChatRepository chatRepository, ChatroomService chatroomService) {
-        this.chatRepository = chatRepository;
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService) {
+        this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
     }
 
@@ -50,7 +50,7 @@ public class ChatService {
 
         ChatMessage chatMessage = new ChatMessage(new Member(), dto.getContent(), chatRoom);
 
-        chatRepository.save(chatMessage);
+        chatMessageRepository.save(chatMessage);
     }
 
     /**
@@ -72,7 +72,7 @@ public class ChatService {
         );
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        if (!message.isEmpty()) return chatRepository.findByChatRoomIdAndContentContaining(pageable, roomId, message).map(ChatMessageDTO::new);
-        return chatRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
+        if (!message.isEmpty()) return chatMessageRepository.findByChatRoomIdAndContentContaining(pageable, roomId, message).map(ChatMessageDTO::new);
+        return chatMessageRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
     }
 }

@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.chat.controller;
 
-import com.ll.nbe344team7.domain.chat.service.ChatService;
+import com.ll.nbe344team7.domain.chat.message.controller.ChatMessageController;
+import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class ChatControllerTest {
+public class ChatMessageControllerTest {
 
     @Autowired
-    private ChatService chatService;
+    private ChatMessageService chatMessageService;
 
     @Autowired
     private MockMvc mvc;
@@ -49,7 +50,7 @@ public class ChatControllerTest {
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 )
                 .andDo(print())
-                .andExpect(handler().handlerType(ChatController.class))
+                .andExpect(handler().handlerType(ChatMessageController.class))
                 .andExpect(handler().methodName("sendMessage"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("메세지 전송완료"));
@@ -70,7 +71,7 @@ public class ChatControllerTest {
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 )
                 .andDo(print())
-                .andExpect(handler().handlerType(ChatController.class))
+                .andExpect(handler().handlerType(ChatMessageController.class))
                 .andExpect(handler().methodName("sendMessage"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("채팅방이 조회되지 않습니다."));    }
@@ -82,7 +83,7 @@ public class ChatControllerTest {
                         get("/api/chat/rooms/1")
                 )
                 .andDo(print())
-                .andExpect(handler().handlerType(ChatController.class))
+                .andExpect(handler().handlerType(ChatMessageController.class))
                 .andExpect(handler().methodName("enterRoom"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -100,7 +101,7 @@ public class ChatControllerTest {
                         get("/api/chat/rooms/2")
                 )
                 .andDo(print())
-                .andExpect(handler().handlerType(ChatController.class))
+                .andExpect(handler().handlerType(ChatMessageController.class))
                 .andExpect(handler().methodName("enterRoom"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("채팅방이 조회되지 않습니다."));

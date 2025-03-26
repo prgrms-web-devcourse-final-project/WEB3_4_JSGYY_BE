@@ -1,6 +1,6 @@
-package com.ll.nbe344team7.domain.chat.dto
+package com.ll.nbe344team7.domain.chat.message.dto
 
-import com.ll.nbe344team7.domain.chat.entity.ChatMessage
+import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage
 import java.time.LocalDateTime
 
 /**

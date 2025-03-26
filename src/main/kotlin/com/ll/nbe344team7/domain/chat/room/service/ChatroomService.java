@@ -1,11 +1,11 @@
-package com.ll.nbe344team7.domain.chatroom.service;
+package com.ll.nbe344team7.domain.chat.room.service;
 
-import com.ll.nbe344team7.domain.chatparticipant.entity.ChatParticipant;
-import com.ll.nbe344team7.domain.chatparticipant.repository.ChatParticipantRepository;
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomCreateResponseDto;
-import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomRequestDto;
-import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom;
-import com.ll.nbe344team7.domain.chatroom.repository.ChatRoomRepository;
+import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
+import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomCreateResponseDto;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
+import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
+import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;

@@ -1,7 +1,7 @@
-package com.ll.nbe344team7.domain.chatparticipant.entity
+package com.ll.nbe344team7.domain.chat.participant.entity
 
-import com.ll.nbe344team7.domain.chatroom.entity.ChatRoom
-import com.ll.nbe344team7.domain.member.Member
+import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom
+import com.ll.nbe344team7.domain.member.entity.Member
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
 

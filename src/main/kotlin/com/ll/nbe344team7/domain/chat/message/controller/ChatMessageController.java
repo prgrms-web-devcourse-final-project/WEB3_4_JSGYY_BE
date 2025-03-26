@@ -1,8 +1,8 @@
-package com.ll.nbe344team7.domain.chat.controller;
+package com.ll.nbe344team7.domain.chat.message.controller;
 
-import com.ll.nbe344team7.domain.chat.dto.ChatMessageDTO;
-import com.ll.nbe344team7.domain.chat.dto.MessageDTO;
-import com.ll.nbe344team7.domain.chat.service.ChatService;
+import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
+import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
+import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +15,12 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/chat/rooms")
-public class ChatController {
+public class ChatMessageController {
 
-    private final ChatService chatService;
+    private final ChatMessageService chatMessageService;
 
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
+    public ChatMessageController(ChatMessageService chatMessageService) {
+        this.chatMessageService = chatMessageService;
     }
 
     /**
@@ -39,7 +39,7 @@ public class ChatController {
             @RequestBody MessageDTO messageDTO,
             @PathVariable long roomId
     ) {
-        chatService.send(messageDTO, roomId);
+        chatMessageService.send(messageDTO, roomId);
 
         return ResponseEntity.ok(Map.of(
                 "message", "메세지 전송완료"
@@ -66,7 +66,7 @@ public class ChatController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String message
     ) {
-        Page<ChatMessageDTO> chats = chatService.getChatMessages(roomId, message, page, size);
+        Page<ChatMessageDTO> chats = chatMessageService.getChatMessages(roomId, message, page, size);
 
         return ResponseEntity.ok(chats);
     }
