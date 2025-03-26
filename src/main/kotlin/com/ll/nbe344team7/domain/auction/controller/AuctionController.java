@@ -1,7 +1,9 @@
 package com.ll.nbe344team7.domain.auction.controller;
 
 import com.ll.nbe344team7.domain.auction.dto.BidDTO;
+import com.ll.nbe344team7.domain.auction.exception.AuctionException;
 import com.ll.nbe344team7.domain.auction.service.AuctionService;
+import com.ll.nbe344team7.global.exception.GlobalException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,18 +23,25 @@ public class AuctionController {
         this.auctionService = auctionService;
     }
 
+    /**
+     *
+     * 입찰 기능
+     *
+     * @param bidDTO
+     * @param postId
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 25.
+     */
     @PostMapping("/{postId}/bid")
     public ResponseEntity<?> bidPrice(@RequestBody BidDTO bidDTO, @PathVariable Long postId) {
-        if(bidDTO.getMemberId() == null || bidDTO.getMemberId() == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "멤버가 조회되지 않습니다."));
+        try{
+            return ResponseEntity.ok(this.auctionService.bidPrice(bidDTO, postId));
+        } catch (GlobalException e) {
+            return ResponseEntity.status(e.getStatus()).body(Map.of("message", e.getMessage()));
+        } catch (AuctionException e) {
+            return ResponseEntity.status(e.getStatus()).body(Map.of("message", e.getMessage()));
         }
-        else if(postId == null || postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "게시글이 조회되지 않습니다."));
-        }
-        else if(bidDTO.getPrice() == null || bidDTO.getPrice() > 50000) {
-            return ResponseEntity.status(404).body(Map.of("message", "보유금보다 많은 금액을 입찰할 수는 없습니다."));
-        }
-
-        return ResponseEntity.ok(this.auctionService.bidPrice(bidDTO, postId));
     }
 }
