@@ -67,6 +67,7 @@ public class ChatroomService {
 
     /**
      * 채팅방 목록 조회
+     *
      * @param id
      * @return
      *
@@ -92,9 +93,17 @@ public class ChatroomService {
         return list;
     }
 
-
-
-    public Map<Object,Object> deleteChatroom(Long roomId) {
-        return Map.of("message","채팅방 삭제 성공");
+    /**
+     * 채팅방 삭제
+     *
+     * @param roomId
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-03-26
+     */
+    public void deleteChatroom(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
+        chatRoomRepository.delete(chatRoom);
     }
 }

@@ -31,9 +31,7 @@ public class ChatroomController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteChatroom(@PathVariable("id") Long roomId) {
-        if(roomId == 10000L){
-            return ResponseEntity.status(404).body(Map.of("message","해당 채팅방이 존재하지 않습니다."));
-        }
-        return ResponseEntity.ok(this.chatroomService.deleteChatroom(roomId));
+        chatroomService.deleteChatroom(roomId);
+        return ResponseEntity.ok(Map.of("message","채팅방 삭제 성공"));
     }
 }
