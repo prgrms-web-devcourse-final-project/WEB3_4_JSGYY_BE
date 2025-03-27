@@ -1,6 +1,6 @@
 package com.ll.nbe344team7.global.security.service;
 
-import com.ll.nbe344team7.domain.member.entity.MemberEntity;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
@@ -37,10 +37,10 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MemberEntity memberEntity = memberRepository.findByUserName(username);
+        Member member = memberRepository.findByUserName(username);
 
-        if(memberEntity != null){
-            CustomUserData customUserData = new CustomUserData(memberEntity.getId(),memberEntity.getUserName(),memberEntity.getRole(),memberEntity.getPassword());
+        if(member != null){
+            CustomUserData customUserData = new CustomUserData(member.getId(), member.getUserName(), member.getRole(), member.getPassword());
             return new CustomUserDetails(customUserData);
         }
         return null;
