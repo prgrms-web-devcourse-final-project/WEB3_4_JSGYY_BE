@@ -78,4 +78,18 @@ public class MemberService {
                 member.getPhoneNum(),
                 member.getRole());
     }
+
+    /**
+     * 회원 탈퇴 메소드
+     *
+     * @param memberId
+     * @author 이광석
+     * @since 2025-03-27
+     */
+    public void withdrawal(Long memberId) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+            memberRepository.delete(member);
+    }
 }
