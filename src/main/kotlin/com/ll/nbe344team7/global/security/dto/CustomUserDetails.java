@@ -1,7 +1,5 @@
 package com.ll.nbe344team7.global.security.dto;
 
-import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.entity.MemberEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

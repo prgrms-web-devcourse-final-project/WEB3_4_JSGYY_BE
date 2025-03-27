@@ -20,7 +20,7 @@ class Member(
 
 
     @Column(nullable = false,unique=true)
-    val userName: String,
+    val username: String,
 
     @Column(nullable = false)
     val name: String,
@@ -35,7 +35,7 @@ class Member(
     val email: String,
 
     @Column(nullable = false, name = "phone_num")
-    val phoneNum: String,
+    val phone_num: String,
 
     @Column(nullable = false)
     val blocked: Boolean =false,
@@ -46,23 +46,23 @@ class Member(
    constructor(dto: MemberDTO):this(
        id=null,
        name= dto.name,
-       userName=dto.username,
+       username=dto.username,
        password=dto.password,
-       nickname=dto.nickName,
+       nickname=dto.nickname,
        email=dto.email,
-       phoneNum=dto.phone_num,
+       phone_num=dto.phone_num,
        blocked=false,
        role=dto.role
    )
 
     constructor() : this(
         id = null,
-        userName = "",
+        username = "",
         name = "",
         password = "",
         nickname = "",
         email = "",
-        phoneNum = "",
+        phone_num = "",
         blocked = false,
         role = "ROLE_ADMIN"
     )

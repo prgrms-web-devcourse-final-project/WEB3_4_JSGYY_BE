@@ -2,15 +2,13 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.entity.MemberEntity;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 
 /**
@@ -40,12 +38,12 @@ public class MemberService {
     public void register(MemberDTO memberDTO) {
         String encodingPassword = bCryptPasswordEncoder.encode(memberDTO.getPassword());
 
-        MemberEntity memberEntity = new MemberEntity(
+        Member memberEntity = new Member(
                 null,
                 memberDTO.getUsername(),
                 memberDTO.getName(),
                 encodingPassword,
-                memberDTO.getNickName(),
+                memberDTO.getNickname(),
                 memberDTO.getEmail(),
                 memberDTO.getPhone_num(),
                 false,
@@ -68,16 +66,16 @@ public class MemberService {
      * @since 2025-03-26
      */
     public MemberDTO myDetails(Long memberId) {
-        MemberEntity memberEntity = memberRepository.findById(memberId)
+        Member memberEntity = memberRepository.findById(memberId)
                 .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         return new MemberDTO(memberEntity.getId(),
                 memberEntity.getName(),
-                memberEntity.getUserName(),
+                memberEntity.getUsername(),
                 "","",
-                memberEntity.getNickName(),
+                memberEntity.getNickname(),
                 memberEntity.getEmail(),
-                memberEntity.getPhoneNum(),
+                memberEntity.getPhone_num(),
                 memberEntity.getRole());
     }
 }

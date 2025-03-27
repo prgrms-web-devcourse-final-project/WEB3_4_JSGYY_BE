@@ -1,7 +1,5 @@
 package com.ll.nbe344team7.domain.member.dto
 
-import com.ll.nbe344team7.domain.member.entity.MemberEntity
-
 /**
  * 멤버 DTO
  *
@@ -14,7 +12,7 @@ data class MemberDTO(
     val username: String="",
     val password:String="",
     val password2: String="",
-    val nickName:String="",
+    val nickname:String="",
     val email:String="",
     val phone_num: String="",
     val role:String="ROLE_ADMIN"
