@@ -1,7 +1,10 @@
 package com.ll.nbe344team7.global.security.jwt;
 
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -49,23 +52,29 @@ public class JWTFilter extends OncePerRequestFilter {
            return;
        }
 
-       String authorization = request.getHeader("Authorization");
+       String accessToken = request.getHeader("access");
 
-       if(authorization == null || !authorization.startsWith("Bearer")){
+       //토큰 존재 확인
+       if(accessToken==null){
            filterChain.doFilter(request,response);
            return;
        }
 
-       String token = authorization.split(" ")[1];
-
-       if(jwtUtil.isExpired(token)){
-           filterChain.doFilter(request,response);
-           return;
+       // 토큰 만료 확인
+       try{
+           jwtUtil.isExpired(accessToken);
+       }catch (ExpiredJwtException e){
+           throw new GlobalException(GlobalExceptionCode.ACCESSTOKEN_IS_EXPIRED);
        }
 
-        String username = jwtUtil.getUsername(token);
-        Long memberId= jwtUtil.getMemberId(token);
-        String role = jwtUtil.getRole(token);
+       // 토큰 종류 확인
+       if(!jwtUtil.getCategory(accessToken).equals("access")){
+           throw new GlobalException(GlobalExceptionCode.NOT_ACCESSTOKEN);
+       }
+
+        String username = jwtUtil.getUsername(accessToken);
+        Long memberId= jwtUtil.getMemberId(accessToken);
+        String role = jwtUtil.getRole(accessToken);
 
 
         CustomUserData customUserData = new CustomUserData(memberId,username,role,"tmp");

@@ -104,7 +104,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refreshToken = jwtUil.createJwt("refresh",username,memberId,role,86400000L);
 
 
-       Cookie cookie = new Cookie("refreshToken",refreshToken);
+       Cookie cookie = new Cookie("refresh",refreshToken);
        cookie.setHttpOnly(true);
        cookie.setPath("/");
 
