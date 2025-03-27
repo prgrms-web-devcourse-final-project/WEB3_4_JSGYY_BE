@@ -9,7 +9,7 @@ import com.ll.nbe344team7.domain.account.exception.AccountExceptionCode;
 import com.ll.nbe344team7.domain.account.repository.AccountRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
-import com.ll.nbe344team7.domain.pay.entity.Payment;
+import com.ll.nbe344team7.domain.pay.entity.Exchange;
 import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
@@ -63,7 +63,7 @@ public class AccountService {
         try{
             String exchangeType = String.valueOf(ExchangeSearchType.valueOf(type.toUpperCase()));
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-            List<Payment> list;
+            List<Exchange> list;
             if (exchangeType.equals("sender")) {
                 list = this.paymentRepository.findByMyIdAndExchangeType(memberId, 0);
             } else if (exchangeType.equals("receiver")) {
