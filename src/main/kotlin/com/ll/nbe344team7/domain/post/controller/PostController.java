@@ -106,13 +106,8 @@ public class PostController {
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
             Pageable pageable,
-            @RequestParam(required = false) Long minPrice,
-            @RequestParam(required = false) Long maxPrice,
-            @RequestParam(required = false) Boolean saleStatus,
-            @RequestParam(required = false) String keyword)
+            @ModelAttribute PostSearchRequest searchRequest)
     {
-        PostSearchRequest searchRequest = new PostSearchRequest(minPrice, maxPrice, saleStatus, keyword);
-
         Page<PostListDto> postList = postService.getPostsBySearch(pageable, searchRequest);
 
         return ResponseEntity.ok(postList);

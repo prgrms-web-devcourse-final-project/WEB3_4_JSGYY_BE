@@ -198,8 +198,9 @@ public class PostService {
                 searchRequest.getMaxPrice(),
                 searchRequest.getSaleStatus(),
                 searchRequest.getKeyword(),
+                searchRequest.getPlace(),
                 pageable
-        ).map(post -> PostListDto.Companion.from(post));  // 코틀린의 from() 메서드 호출
+        ).map(post -> PostListDto.Companion.from(post));
     }
 
     /**

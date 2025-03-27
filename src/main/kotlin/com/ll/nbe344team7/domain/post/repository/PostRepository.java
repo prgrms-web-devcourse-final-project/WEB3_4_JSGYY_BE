@@ -10,16 +10,19 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
+
     @Query("SELECT p FROM Post p WHERE " +
             "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
             "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
             "(:saleStatus IS NULL OR p.saleStatus = :saleStatus) AND " +
-            "(:keyword IS NULL OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
+            "(:keyword IS NULL OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%) AND " +
+            "(:place IS NULL OR p.place LIKE %:place%)")
     Page<Post> findBySearchCriteria(
             @Param("minPrice") Long minPrice,
             @Param("maxPrice") Long maxPrice,
             @Param("saleStatus") Boolean saleStatus,
             @Param("keyword") String keyword,
+            @Param("place") String place,
             Pageable pageable
     );
 }
