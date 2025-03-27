@@ -54,6 +54,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> requestMap = objectMapper.readValue(request.getInputStream(), Map.class);
