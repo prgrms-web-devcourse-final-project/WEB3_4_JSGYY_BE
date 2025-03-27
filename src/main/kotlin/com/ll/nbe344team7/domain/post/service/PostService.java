@@ -69,6 +69,7 @@ public class PostService {
         response.put("id", 1);
         response.put("authorId", 101);
         response.put("title", "아디다스 바지");
+        response.put("category", "의류");
         response.put("content", "아디다스 바지입니다.");
         response.put("place", "서울특별시_관악구_신림동");
         response.put("price", 50000);
