@@ -43,6 +43,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 
 
 	//jwt 토큰 생성 + 관리 의존성
