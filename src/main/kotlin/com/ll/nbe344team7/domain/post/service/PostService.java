@@ -132,7 +132,7 @@ public class PostService {
      * @since 2025-03-25
      */
     @Transactional
-    public Map<String, String> modifyPost(Long postId, PostRequest request, Long memberId) {
+    public void modifyPost(Long postId, PostRequest request, Long memberId) {
 
         validatePostRequest(request);
 
@@ -152,8 +152,6 @@ public class PostService {
         );
 
         postRepository.save(post);
-
-        return Map.of("message", postId + "번 게시글이 수정되었습니다.");
     }
 
     /**
@@ -229,7 +227,7 @@ public class PostService {
      * @author GAEUN220
      * @since 2025-03-26
      */
-    public Map<String, String> changeToAuction(Long postId, AuctionRequest auctionRequest, Long memberId) {
+    public void changeToAuction(Long postId, AuctionRequest auctionRequest, Long memberId) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
@@ -238,19 +236,21 @@ public class PostService {
         }
 
         if (post.getAuctionDetails() != null) {
-            throw new PostException(PostErrorCode.ALREADY_IN_AUCTION);
+            Auction existingAuction = post.getAuctionDetails();
+
+            existingAuction.updateAuction(auctionRequest.getStartedAt(), auctionRequest.getClosedAt());
+
+            auctionRepository.save(existingAuction);
+        } else if (post.getAuctionDetails() == null) {
+            post.updateAuctionStatus(true);
+
+            Auction auction = post.createAuction(
+                    auctionRequest.getStartedAt(),
+                    auctionRequest.getClosedAt()
+            );
+
+            auctionRepository.save(auction);
+            postRepository.save(post);
         }
-
-        post.updateAuctionStatus(true);
-
-        Auction auction = post.createAuction(
-                auctionRequest.getStartedAt(),
-                auctionRequest.getClosedAt()
-        );
-
-        auctionRepository.save(auction);
-        postRepository.save(post);
-
-        return Map.of("message", "경매 전환이 완료되었습니다.");
     }
 }

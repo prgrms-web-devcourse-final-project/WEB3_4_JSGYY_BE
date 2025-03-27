@@ -1,6 +1,5 @@
 package com.ll.nbe344team7.domain.post.controller;
 
-import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
@@ -82,7 +81,13 @@ public class PostController {
             @RequestBody PostRequest request,
             @RequestHeader(value = "memberId") Long memberId)
     {
-        return ResponseEntity.ok(postService.modifyPost(postId, request, memberId));
+        postService.modifyPost(postId, request, memberId);
+
+        if (request.getAuctionRequest() != null) {
+            postService.changeToAuction(postId, request.getAuctionRequest(), memberId);
+        }
+
+        return ResponseEntity.ok(Map.of("message", postId + "번 게시글 수정 성공"));
     }
 
     /**
@@ -130,27 +135,6 @@ public class PostController {
             @RequestHeader(value = "memberId") Long memberId)
     {
         return ResponseEntity.ok(postService.getPost(postId, memberId));
-    }
-
-    /**
-     *
-     * 게시글 경매 전환
-     *
-     * @param auctionRequest
-     * @param memberId
-     * @param postId
-     * @return
-     *
-     * @author GAEUN220
-     * @since 2025-03-26
-     */
-    @PostMapping("/{postId}/auction")
-    public ResponseEntity<?> changeToAuction(
-            @RequestBody AuctionRequest auctionRequest,
-            @RequestHeader(value = "memberId") Long memberId,
-            @PathVariable Long postId)
-    {
-        return ResponseEntity.ok(postService.changeToAuction(postId, auctionRequest, memberId));
     }
 
     /**
