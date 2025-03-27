@@ -12,7 +12,7 @@ data class PostDto(
     val price: Long,
     val saleStatus: Boolean,
     val auctionStatus: Boolean,
-    val auctionStartAt: LocalDateTime?,
+    val auctionStartedAt: LocalDateTime?,
     val auctionClosedAt: LocalDateTime?,
     val likes: Int,
     val reports: Int,
