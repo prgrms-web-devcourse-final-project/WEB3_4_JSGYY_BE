@@ -2,7 +2,7 @@ package com.ll.nbe344team7.domain.chat.participant.entity
 
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom
 
-import com.ll.nbe344team7.domain.member.Member
+import com.ll.nbe344team7.domain.member.entity.MemberEntity
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
 
@@ -20,7 +20,7 @@ class ChatParticipant(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    val member: Member
+    val member: MemberEntity
 ) : BaseEntity() {
   
     @Id
