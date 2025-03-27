@@ -4,7 +4,6 @@ package com.ll.nbe344team7.domain.member.controller;
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -75,7 +74,7 @@ public class MemberController {
      */
     @GetMapping("/member/mydetails")
     public ResponseEntity<Map<String, Object>> myDetails(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            CustomUserDetails customUserDetails
     ){
         MemberDTO memberDTOS= memberService.myDetails(customUserDetails.getMemberId());
 
