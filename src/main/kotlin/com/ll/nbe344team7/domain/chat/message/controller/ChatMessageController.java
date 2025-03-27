@@ -5,7 +5,6 @@ import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,18 +68,5 @@ public class ChatMessageController {
         Page<ChatMessageDTO> chats = chatMessageService.getChatMessages(roomId, message, page, size);
 
         return ResponseEntity.ok(chats);
-    }
-
-    @MessageMapping("/messages")
-    public ResponseEntity<?> send(
-            @PathVariable long roomId,
-            @RequestBody MessageDTO messageDTO
-    ) {
-        template.convertAndSend("/sub/message", messageDTO.getContent());
-        chatMessageService.send(messageDTO, roomId);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "메세지 전송완료"
-        ));
     }
 }
