@@ -1,12 +1,10 @@
 package com.ll.nbe344team7.domain.account.service;
 
 
-import com.ll.nbe344team7.domain.pay.entity.Payment;
-import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
-import com.ll.nbe344team7.domain.account.dto.ExchangeDTO;
 import com.ll.nbe344team7.domain.account.entity.Account;
 import com.ll.nbe344team7.domain.account.repository.AccountRepository;
-
+import com.ll.nbe344team7.domain.pay.entity.Exchange;
+import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,7 +51,7 @@ public class AccountService {
      */
     public Map<Object, Object> getExchangeAccount(Long memberId, String exchangeType) {
         try {
-            List<Payment> list;
+            List<Exchange> list;
             if (exchangeType.equals("sender")) {
                 list = this.paymentRepository.findByMyIdAndExchangeType(memberId, 0);
             } else if (exchangeType.equals("receiver")) {

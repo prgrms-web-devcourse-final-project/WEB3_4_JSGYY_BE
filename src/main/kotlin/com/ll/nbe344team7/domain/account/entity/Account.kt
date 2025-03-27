@@ -14,7 +14,7 @@ import jakarta.persistence.Id
  */
 @Entity
 data class Account (
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long,
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long? = null,
     val memberId: Long,
     var money: Long,
     var accountNumber: String,
