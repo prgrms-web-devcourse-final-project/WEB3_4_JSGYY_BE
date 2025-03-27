@@ -33,7 +33,7 @@ data class PostDto(
                 price = post.price,
                 saleStatus = post.saleStatus,
                 auctionStatus = post.auctionStatus,
-                auctionStartAt = post.auctionDetails?.startedAt,
+                auctionStartedAt = post.auctionDetails?.startedAt,
                 auctionClosedAt = post.auctionDetails?.closedAt,
                 likes = post.likes,
                 reports = post.reports,
