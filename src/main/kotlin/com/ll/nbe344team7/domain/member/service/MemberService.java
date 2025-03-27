@@ -38,7 +38,7 @@ public class MemberService {
     public void register(MemberDTO memberDTO) {
         String encodingPassword = bCryptPasswordEncoder.encode(memberDTO.getPassword());
 
-        Member memberEntity = new Member(
+        Member member = new Member(
                 null,
                 memberDTO.getUsername(),
                 memberDTO.getName(),
@@ -51,7 +51,7 @@ public class MemberService {
         );
 
         try {
-            memberRepository.save(memberEntity);
+            memberRepository.save(member);
         }catch (DataIntegrityViolationException e){
             throw new RuntimeException("이미 존재하는 사용자 정보입니다");
         }
@@ -66,16 +66,30 @@ public class MemberService {
      * @since 2025-03-26
      */
     public MemberDTO myDetails(Long memberId) {
-        Member memberEntity = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        return new MemberDTO(memberEntity.getId(),
-                memberEntity.getName(),
-                memberEntity.getUsername(),
+        return new MemberDTO(member.getId(),
+                member.getName(),
+                member.getUserName(),
                 "","",
-                memberEntity.getNickname(),
-                memberEntity.getEmail(),
-                memberEntity.getPhoneNum(),
-                memberEntity.getRole());
+                member.getNickname(),
+                member.getEmail(),
+                member.getPhoneNum(),
+                member.getRole());
+    }
+
+    /**
+     * 회원 탈퇴 메소드
+     *
+     * @param memberId
+     * @author 이광석
+     * @since 2025-03-27
+     */
+    public void withdrawal(Long memberId) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+            memberRepository.delete(member);
     }
 }
