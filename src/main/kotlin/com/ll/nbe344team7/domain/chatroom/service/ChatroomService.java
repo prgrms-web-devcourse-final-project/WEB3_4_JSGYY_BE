@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.domain.chatroom.service;
 
+import com.ll.nbe344team7.domain.chatroom.dto.ChatRoomRequestDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Map;
 @Service
 public class ChatroomService {
 
-    public Map<Object, Object> createRoom(Long postId, Long sellerId, Long buyerId) {
+    public Map<Object, Object> createRoom(ChatRoomRequestDto chatRoomRequestDto) {
         return Map.of("message","채팅방 생성 성공");
     }
 

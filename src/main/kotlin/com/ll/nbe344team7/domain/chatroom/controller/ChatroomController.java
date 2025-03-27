@@ -21,7 +21,7 @@ public class ChatroomController {
         if(requestDto.getSellerId() == 10000L || requestDto.getUserId() == 10000L){
             return ResponseEntity.status(404).body(Map.of("message","해당 유저를 찾을 수 없습니다."));
         }
-        return ResponseEntity.ok(this.chatroomService.createRoom(requestDto.getPostId(), requestDto.getSellerId(), requestDto.getUserId()));
+        return ResponseEntity.ok(this.chatroomService.createRoom(requestDto));
     }
 
     @GetMapping("/{id}")
