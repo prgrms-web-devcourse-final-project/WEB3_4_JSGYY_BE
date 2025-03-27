@@ -44,7 +44,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         if(member==null){
             System.out.println("member is null");
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
-
         }
 
 

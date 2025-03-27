@@ -4,9 +4,10 @@ package com.ll.nbe344team7.domain.chat.room.controller;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,8 @@ public class ChatroomController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createChatroom(@RequestBody ChatRoomRequestDto requestDto) {
-        return ResponseEntity.ok(chatroomService.createRoom(requestDto));
+    public ResponseEntity<?> createChatroom(@RequestBody ChatRoomRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(chatroomService.createRoom(requestDto,userDetails.getMemberId()));
     }
 
 

@@ -43,9 +43,9 @@ public class MemberService {
                 memberDTO.getUsername(),
                 memberDTO.getName(),
                 encodingPassword,
-                memberDTO.getNickName(),
+                memberDTO.getNickname(),
                 memberDTO.getEmail(),
-                memberDTO.getPhone_num(),
+                memberDTO.getPhoneNum(),
                 false,
                 "ROLE_ADMIN"
         );

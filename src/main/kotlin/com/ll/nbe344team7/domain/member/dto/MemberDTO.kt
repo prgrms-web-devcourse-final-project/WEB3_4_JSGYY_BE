@@ -12,8 +12,8 @@ data class MemberDTO(
     val username: String="",
     val password:String="",
     val password2: String="",
-    val nickName:String="",
+    val nickname:String="",
     val email:String="",
-    val phone_num: String="",
+    val phoneNum: String="",
     val role:String="ROLE_ADMIN"
 )
