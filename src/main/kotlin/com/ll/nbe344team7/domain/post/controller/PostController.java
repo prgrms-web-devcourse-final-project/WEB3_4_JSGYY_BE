@@ -1,6 +1,5 @@
 package com.ll.nbe344team7.domain.post.controller;
 
-import com.ll.nbe344team7.domain.post.dto.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
@@ -47,6 +46,10 @@ public class PostController {
             return ResponseEntity.status(400).body(Map.of("message", "가격을 0원 이상 입력해주세요."));
         }
 
+        if (request.getPlace().trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("message", "장소를 입력해주세요."));
+        }
+
         return ResponseEntity.ok(postService.createPost(request));
     }
 
@@ -73,7 +76,7 @@ public class PostController {
         }
 
         if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 삭제 권한이 없습니다."));
+            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 권한이 없습니다."));
         }
 
         return ResponseEntity.ok(postService.deletePost(postId));
@@ -104,7 +107,7 @@ public class PostController {
         }
 
         if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 수정 권한이 없습니다."));
+            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 권한이 없습니다."));
         }
 
         return ResponseEntity.ok(postService.modifyPost(postId, request));
@@ -142,37 +145,6 @@ public class PostController {
         }
 
         return ResponseEntity.ok(postService.getPost(postId));
-    }
-
-    @PostMapping("/{postId}/auction")
-    public ResponseEntity<?> changeToAuction(
-            @RequestBody AuctionRequest request,
-            @RequestHeader(value = "memberId") Long loggedInMemberId,
-            @PathVariable Long postId)
-    {
-        Long authorId = 1L;
-
-        if (postId == 10000) {
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시글이 존재하지 않습니다."));
-        }
-
-        if (!loggedInMemberId.equals(authorId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 경매 전환 권한이 없습니다."));
-        }
-
-        if (request.getStartedAt() == null) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 시작일을 입력해주세요."));
-        }
-
-        if (request.getClosedAt() == null) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 종료일을 입력해주세요."));
-        }
-
-        if (request.getStartPrice() <= 0) {
-            return ResponseEntity.status(400).body(Map.of("message", "경매 시작가를 0원 이상 입력해주세요."));
-        }
-
-        return ResponseEntity.ok(postService.changeToAuction(postId, request));
     }
 
     /**
