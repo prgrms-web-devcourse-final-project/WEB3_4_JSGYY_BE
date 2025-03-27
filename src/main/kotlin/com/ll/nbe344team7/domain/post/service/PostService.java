@@ -43,11 +43,17 @@ public class PostService {
         if (request.getTitle().trim().isEmpty() || request.getTitle().length() > 50) {
             throw new PostException(PostErrorCode.INVALID_TITLE);
         }
+
         if (request.getContent().trim().isEmpty() || request.getContent().length() > 500) {
             throw new PostException(PostErrorCode.INVALID_CONTENT);
         }
+
         if (request.getPrice() < 0) {
             throw new PostException(PostErrorCode.INVALID_PRICE);
+        }
+
+        if (request.getPlace().trim().isEmpty()) {
+            throw new PostException(PostErrorCode.INVALID_PLACE);
         }
     }
 

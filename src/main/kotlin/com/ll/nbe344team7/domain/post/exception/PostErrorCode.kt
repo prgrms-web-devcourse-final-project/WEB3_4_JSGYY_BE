@@ -8,5 +8,5 @@ enum class PostErrorCode(val status: HttpStatus, val code: String, val message: 
     INVALID_TITLE(HttpStatus.BAD_REQUEST, "INVALID_TITLE", "제목은 최소 1자, 최대 50자로 입력해주세요."),
     INVALID_CONTENT(HttpStatus.BAD_REQUEST, "INVALID_CONTENT","내용은 최소 1자, 최대 500자로 입력해주세요."),
     INVALID_PRICE(HttpStatus.BAD_REQUEST, "INVALID_PRICE", "가격은 0원 이상으로 입력해주세요."),
-    ALREADY_IN_AUCTION(HttpStatus.BAD_REQUEST, "ALREADY_IN_AUCTION", "이미 경매중인 게시글입니다."),
+    INVALID_PLACE(HttpStatus.BAD_REQUEST, "INVALID_PLACE", "장소를 입력해주세요.")
 }
