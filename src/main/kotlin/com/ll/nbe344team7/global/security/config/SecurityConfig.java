@@ -114,7 +114,7 @@ public class SecurityConfig {
 
 
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/api/auth/register","/h2-console/**").permitAll()  //인증없이 접속가능
+                        .requestMatchers("/reissue", "/", "/api/auth/register","/h2-console/**").permitAll()  //인증없이 접속가능
                         .anyRequest().authenticated()) // 인증 필요
 
                 .headers(headers -> headers
