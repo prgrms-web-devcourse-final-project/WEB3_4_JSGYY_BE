@@ -1,7 +1,5 @@
 package com.ll.nbe344team7.domain.member.dto
 
-import com.ll.nbe344team7.domain.member.entity.MemberEntity
-
 /**
  * 멤버 DTO
  *
