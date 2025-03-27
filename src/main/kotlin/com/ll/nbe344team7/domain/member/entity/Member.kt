@@ -35,7 +35,7 @@ class Member(
     val email: String,
 
     @Column(nullable = false, name = "phone_num")
-    val phone_num: String,
+    val phoneNum: String,
 
     @Column(nullable = false)
     val blocked: Boolean =false,
@@ -50,7 +50,7 @@ class Member(
        password=dto.password,
        nickname=dto.nickname,
        email=dto.email,
-       phone_num=dto.phone_num,
+       phoneNum=dto.phoneNum,
        blocked=false,
        role=dto.role
    )
@@ -62,7 +62,7 @@ class Member(
         password = "",
         nickname = "",
         email = "",
-        phone_num = "",
+        phoneNum = "",
         blocked = false,
         role = "ROLE_ADMIN"
     )

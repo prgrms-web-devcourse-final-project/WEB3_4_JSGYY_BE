@@ -45,7 +45,7 @@ public class MemberService {
                 encodingPassword,
                 memberDTO.getNickname(),
                 memberDTO.getEmail(),
-                memberDTO.getPhone_num(),
+                memberDTO.getPhoneNum(),
                 false,
                 "ROLE_ADMIN"
         );
@@ -75,7 +75,7 @@ public class MemberService {
                 "","",
                 memberEntity.getNickname(),
                 memberEntity.getEmail(),
-                memberEntity.getPhone_num(),
+                memberEntity.getPhoneNum(),
                 memberEntity.getRole());
     }
 }
