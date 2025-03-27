@@ -2,6 +2,8 @@ package com.ll.nbe344team7.global.security.service;
 
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,10 +41,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member member = memberRepository.findByUserName(username);
 
-        if(member != null){
-            CustomUserData customUserData = new CustomUserData(member.getId(), member.getUserName(), member.getRole(), member.getPassword());
-            return new CustomUserDetails(customUserData);
+        if(member==null){
+            System.out.println("member is null");
+            throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
+
         }
-        return null;
+
+
+        System.out.println("loadUserByUsername : "+member.getId()+" "+ member.getUserName()+" "+member.getRole()+" "+member.getPassword());
+        CustomUserData customUserData = new CustomUserData(member.getId(), member.getUserName(), member.getRole(), member.getPassword());
+
+        return new CustomUserDetails(customUserData);
     }
 }
