@@ -3,7 +3,7 @@ package com.ll.nbe344team7.domain.post.service;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +65,7 @@ public class PostService {
     }
 
     public Map<String, Object> getPost(Long postId) {
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new LinkedHashMap<>();
         response.put("id", 1);
         response.put("authorId", 101);
         response.put("title", "아디다스 바지");
@@ -73,7 +73,9 @@ public class PostService {
         response.put("place", "서울특별시_관악구_신림동");
         response.put("price", 50000);
         response.put("saleStatus", true);
-        response.put("auctionStatus", false);
+        response.put("auctionStatus", true);
+        response.put("auctionStartedAt", "2025-03-27T10:00:00");
+        response.put("auctionClosedAt", "2025-03-29T11:00:00");
         response.put("likes", 100);
         response.put("reports", 2);
         response.put("createdAt", "2025-03-27T10:00:00");
