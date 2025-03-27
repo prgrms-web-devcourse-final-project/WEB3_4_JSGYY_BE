@@ -102,12 +102,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = jwtUil.createJwt(username,memberId,role,60*60*10L);
 
-        Cookie cookie = new Cookie("accessToken",token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(600*60*10);
-        response.addCookie(cookie);
-
+        response.addHeader("Authorization","Bearer "+token);
+//
+//        Cookie cookie = new Cookie("accessToken",token);
+//        cookie.setHttpOnly(true);
+//        cookie.setPath("/");
+//        cookie.setMaxAge(600*60*10);
+//        response.addCookie(cookie);
 
     }
 

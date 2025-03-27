@@ -49,31 +49,23 @@ public class JWTFilter extends OncePerRequestFilter {
            return;
        }
 
-        Cookie[] cookies = request.getCookies();
+       String authorization = request.getHeader("Authorization");
 
-        if(cookies==null){
-            filterChain.doFilter(request, response);
-            return;
-        }
+       if(authorization == null || !authorization.startsWith("Bearer")){
+           filterChain.doFilter(request,response);
+           return;
+       }
 
-        String Token="";
+       String token = authorization.split(" ")[1];
 
-        //Cookie 중 accesToken을 찾음
-        for(Cookie cookie : cookies){
-            if("accessToken".equals(cookie.getName())){
-                Token = cookie.getValue();
-                break;
-            }
-        }
+       if(jwtUtil.isExpired(token)){
+           filterChain.doFilter(request,response);
+           return;
+       }
 
-        if(Token.isEmpty() || jwtUtil.isExpired(Token)){
-            filterChain.doFilter(request,response);
-            return;
-        }
-
-        String username = jwtUtil.getUsername(Token);
-        Long memberId= jwtUtil.getMemberId(Token);
-        String role = jwtUtil.getRole(Token);
+        String username = jwtUtil.getUsername(token);
+        Long memberId= jwtUtil.getMemberId(token);
+        String role = jwtUtil.getRole(token);
 
 
         CustomUserData customUserData = new CustomUserData(memberId,username,role,"tmp");
