@@ -6,7 +6,7 @@ import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
-import com.ll.nbe344team7.domain.member.entity.MemberEntity;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +44,7 @@ public class ChatMessageService {
     public void send(MessageDTO dto, long roomId) {
         ChatRoom chatRoom = chatroomService.getChatRoom(roomId);
 
-        ChatMessage chatMessage = new ChatMessage(new MemberEntity(), dto.getContent(), chatRoom);
+        ChatMessage chatMessage = new ChatMessage(new Member(), dto.getContent(), chatRoom);
 
         chatMessageRepository.save(chatMessage);
     }

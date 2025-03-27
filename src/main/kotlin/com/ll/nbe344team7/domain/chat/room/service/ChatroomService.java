@@ -7,7 +7,7 @@ import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
 import com.ll.nbe344team7.domain.chat.room.dto.CreateResponseDto;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRepository;
-import com.ll.nbe344team7.domain.member.entity.MemberEntity;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
@@ -49,8 +49,8 @@ public class ChatroomService {
      */
     @Transactional
     public CreateResponseDto createRoom(ChatRoomRequestDto requestDto) {
-        MemberEntity seller = memberRepository.findById(requestDto.getSellerId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-        MemberEntity user = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member seller = memberRepository.findById(requestDto.getSellerId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member user = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         ChatRoom chatroom = new ChatRoom();
         ChatParticipant userChatParticipant = new ChatParticipant(chatroom, user);
@@ -75,7 +75,7 @@ public class ChatroomService {
      */
     @Transactional(readOnly = true)
     public List<ChatRoomListResponseDto> listChatRoom(Long id) {
-        MemberEntity member = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member member = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         List<ChatRoomListResponseDto> list = chatParticipantRepository.findByMemberId(member.getId()).stream()
                 .map(cp ->{
                     ChatRoom chatroom = cp.getChatroom();
