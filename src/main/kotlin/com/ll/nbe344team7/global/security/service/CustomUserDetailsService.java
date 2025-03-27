@@ -42,13 +42,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findByUserName(username);
 
         if(member==null){
-            System.out.println("member is null");
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
 
         }
 
 
-        System.out.println("loadUserByUsername : "+member.getId()+" "+ member.getUserName()+" "+member.getRole()+" "+member.getPassword());
         CustomUserData customUserData = new CustomUserData(member.getId(), member.getUserName(), member.getRole(), member.getPassword());
 
         return new CustomUserDetails(customUserData);
