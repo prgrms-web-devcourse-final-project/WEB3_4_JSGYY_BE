@@ -15,7 +15,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
             "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
             "(:saleStatus IS NULL OR p.saleStatus = :saleStatus) AND " +
-            "(:keyword IS NULL OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%) AND " +
+            "(:keyword IS NULL OR p.title LIKE %:keyword%) AND " +
             "(:place IS NULL OR p.place LIKE %:place%)")
     Page<Post> findBySearchCriteria(
             @Param("minPrice") Long minPrice,
