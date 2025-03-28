@@ -50,3 +50,19 @@ allOpen {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+sourceSets {
+	main {
+		java {
+			// Kotlin과 Java 파일을 모두 src/main/kotlin에서 읽도록 설정
+			setSrcDirs(['src/main/kotlin'])
+		}
+	}
+
+	test {
+		java {
+			setSrcDirs(['src/test/kotlin'])
+		}
+	}
+}
