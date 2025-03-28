@@ -34,11 +34,11 @@ public class PostController {
             @RequestBody PostRequest request,
             @RequestHeader(value = "memberId") Long loggedInMemberId)
     {
-        if (request.getTitle().trim().isEmpty()){
+        if (request.getTitle().isBlank()){
             return ResponseEntity.status(400).body(Map.of("message", "제목을 입력해주세요."));
         }
 
-        if (request.getContent().trim().isEmpty()){
+        if (request.getContent().isBlank()){
             return ResponseEntity.status(400).body(Map.of("message", "내용을 입력해주세요."));
         }
 
@@ -46,7 +46,7 @@ public class PostController {
             return ResponseEntity.status(400).body(Map.of("message", "가격을 0원 이상 입력해주세요."));
         }
 
-        if (request.getPlace().trim().isEmpty()) {
+        if (request.getPlace().isBlank()) {
             return ResponseEntity.status(400).body(Map.of("message", "장소를 입력해주세요."));
         }
 
@@ -108,6 +108,22 @@ public class PostController {
 
         if (!loggedInMemberId.equals(authorId)) {
             return ResponseEntity.status(403).body(Map.of("message", "해당 게시글의 권한이 없습니다."));
+        }
+
+        if (request.getTitle().isBlank()){
+            return ResponseEntity.status(400).body(Map.of("message", "제목을 입력해주세요."));
+        }
+
+        if (request.getContent().isBlank()){
+            return ResponseEntity.status(400).body(Map.of("message", "내용을 입력해주세요."));
+        }
+
+        if (request.getPrice() <= 0) {
+            return ResponseEntity.status(400).body(Map.of("message", "가격을 0원 이상 입력해주세요."));
+        }
+
+        if (request.getPlace().isBlank()) {
+            return ResponseEntity.status(400).body(Map.of("message", "장소를 입력해주세요."));
         }
 
         return ResponseEntity.ok(postService.modifyPost(postId, request));
