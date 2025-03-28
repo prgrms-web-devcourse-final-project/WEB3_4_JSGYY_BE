@@ -45,11 +45,11 @@ public class PostService {
      * @since 2025-03-26
      */
     private void validatePostRequest(PostRequest request) {
-        if (request.getTitle().trim().isEmpty() || request.getTitle().length() > 50) {
+        if (request.getTitle().isBlank() || request.getTitle().length() > 50) {
             throw new PostException(PostErrorCode.INVALID_TITLE);
         }
 
-        if (request.getContent().trim().isEmpty() || request.getContent().length() > 500) {
+        if (request.getContent().isBlank() || request.getContent().length() > 500) {
             throw new PostException(PostErrorCode.INVALID_CONTENT);
         }
 
@@ -57,7 +57,7 @@ public class PostService {
             throw new PostException(PostErrorCode.INVALID_PRICE);
         }
 
-        if (request.getPlace().trim().isEmpty()) {
+        if (request.getPlace().isBlank()) {
             throw new PostException(PostErrorCode.INVALID_PLACE);
         }
     }
