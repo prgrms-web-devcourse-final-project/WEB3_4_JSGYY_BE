@@ -2,8 +2,11 @@ package com.ll.nbe344team7.global.security.jwt;
 
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import com.ll.nbe344team7.global.security.exception.SecurityException;
+import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,9 +30,11 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     final private JWTUtil jwtUtil;
+    final private RedisRepository redisRepository;
 
-    public JWTFilter(JWTUtil jwtUtil) {
+    public JWTFilter(JWTUtil jwtUtil,RedisRepository redisRepository) {
         this.jwtUtil = jwtUtil;
+        this.redisRepository = redisRepository;
     }
 
     /**
@@ -54,6 +59,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
        String accessToken = request.getHeader("access");
 
+       String refreshToken = getRefreshToken(request.getCookies());
+
+
+
        //토큰 존재 확인
        if(accessToken==null){
            filterChain.doFilter(request,response);
@@ -64,12 +73,18 @@ public class JWTFilter extends OncePerRequestFilter {
        try{
            jwtUtil.isExpired(accessToken);
        }catch (ExpiredJwtException e){
-           throw new GlobalException(GlobalExceptionCode.ACCESSTOKEN_IS_EXPIRED);
+           throw new SecurityException(SecurityExceptionCode.ACCESSTOKEN_IS_EXPIRED);
        }
 
        // 토큰 종류 확인
        if(!jwtUtil.getCategory(accessToken).equals("access")){
-           throw new GlobalException(GlobalExceptionCode.NOT_ACCESSTOKEN);
+           throw new SecurityException(SecurityExceptionCode.NOT_ACCESSTOKEN);
+       }
+
+       //Db와 비교
+       if(!accessToken.equals(redisRepository.get(refreshToken))){
+           redisRepository.delete(refreshToken);
+           throw new SecurityException(SecurityExceptionCode.TOKEN_MISMATCH);
        }
 
         String username = jwtUtil.getUsername(accessToken);
@@ -87,5 +102,17 @@ public class JWTFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request,response);
 
+    }
+
+
+    private String getRefreshToken(Cookie[] cookies){
+
+        for(Cookie cookie: cookies){
+            if(cookie.getName().equals("refresh")){
+                return cookie.getValue();
+            }
+        }
+
+        throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
     }
 }

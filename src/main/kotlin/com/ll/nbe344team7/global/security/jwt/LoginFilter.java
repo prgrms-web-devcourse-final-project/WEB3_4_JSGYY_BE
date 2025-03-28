@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.global.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
@@ -33,12 +34,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUil;
 
+    private final RedisRepository redisRepository;
+
     public LoginFilter(
             AuthenticationManager authenticationManager,
-            JWTUtil jwtUil) {
+            JWTUtil jwtUil,
+            RedisRepository redisRepository) {
 
         this.authenticationManager = authenticationManager;
         this.jwtUil = jwtUil;
+        this.redisRepository = redisRepository;
     }
 
     /**
@@ -103,6 +108,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUil.createJwt("access",username,memberId,role,6000000L);
         String refreshToken = jwtUil.createJwt("refresh",username,memberId,role,86400000L);
 
+        redisRepository.save(accessToken,refreshToken,60*60*24L);
 
        Cookie cookie = new Cookie("refresh",refreshToken);
        cookie.setHttpOnly(true);

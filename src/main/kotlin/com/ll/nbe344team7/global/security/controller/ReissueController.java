@@ -51,14 +51,9 @@ public class ReissueController {
         String role = jwtUtil.getRole(refresh);
 
         String newAccessToken = jwtUtil.createJwt("access",username,memberId,role,600000L);
-        String newRefreshToken = jwtUtil.createJwt("refresh",username,memberId,role,86400000L);
 
-        Cookie cookie = new Cookie("refresh",newRefreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
 
         response.setHeader("access",newAccessToken);
-        response.addCookie(cookie);
 
         return new ResponseEntity<>(HttpStatus.OK);
 
