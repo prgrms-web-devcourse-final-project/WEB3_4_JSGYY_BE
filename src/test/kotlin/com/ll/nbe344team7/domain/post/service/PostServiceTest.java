@@ -3,6 +3,7 @@ package com.ll.nbe344team7.domain.post.service;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -169,4 +171,33 @@ public class PostServiceTest {
                 .hasMessageContaining(PostErrorCode.INVALID_PLACE.getMessage());
     }
 
+    @Test
+    @DisplayName("경매 게시글 작성")
+    void t6() throws Exception {
+        // given
+        AuctionRequest auctionRequest = new AuctionRequest(
+                LocalDateTime.of(2025, 3, 27, 10, 0, 0, 0),
+                LocalDateTime.of(2025, 4, 10, 10, 0, 0, 0)
+        );
+
+        PostRequest postRequest = new PostRequest(
+                "testTitle",
+                "testContent",
+                1000,
+                "testPlace",
+                true,
+                true,
+                auctionRequest);
+
+        // when
+        postService.createPost(postRequest, member.getId());
+
+        Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
+
+        // then
+        assertThat(savedPost.isPresent()).isTrue();
+        assertThat(savedPost.get().getAuctionDetails().getStartedAt()).isEqualTo(auctionRequest.getStartedAt());
+        assertThat(savedPost.get().getAuctionDetails().getClosedAt()).isEqualTo(auctionRequest.getClosedAt());
+
+    }
 }
