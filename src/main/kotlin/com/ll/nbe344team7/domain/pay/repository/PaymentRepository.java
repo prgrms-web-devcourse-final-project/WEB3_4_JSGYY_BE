@@ -15,4 +15,6 @@ public interface PaymentRepository extends JpaRepository<Exchange, Long> {
     public List<Exchange> findByMyId(Long memberId);
 
     public List<Exchange> findByMyIdAndExchangeType(Long memberId, Integer exchangeType);
+
+    public long countByImpUidContainsIgnoreCase(String impUid);
 }
