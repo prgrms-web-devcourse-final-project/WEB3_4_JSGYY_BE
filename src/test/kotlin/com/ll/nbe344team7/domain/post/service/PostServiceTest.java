@@ -523,9 +523,9 @@ public class PostServiceTest {
         Page<PostListDto> result = postService.getPostsBySearch(pageable, searchRequest);
 
         // then
-        assertThat(result.getTotalElements()).isEqualTo(1); // 검색된 결과가 있어야 함
+        assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getTitle()).contains("제목 1"); // 제목에 '제목 1'이 포함된 게시글이 있어야 함
+        assertThat(result.getContent().get(0).getTitle()).contains("제목 1");
     }
 
     @Test
@@ -556,7 +556,7 @@ public class PostServiceTest {
         Page<PostListDto> result = postService.getPostsBySearch(pageable, searchRequest);
 
         // then
-        assertThat(result.getTotalElements()).isEqualTo(5L); // 검색된 결과가 있어야 함
+        assertThat(result.getTotalElements()).isEqualTo(5L);
         assertThat(result.getContent()).hasSize(5);
     }
 }
