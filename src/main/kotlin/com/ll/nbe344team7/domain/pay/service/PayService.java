@@ -28,9 +28,9 @@ public class PayService {
     private final IamportClient iamportClient;
 
     @Value("${iamport.REST_API_KEY}")
-    private final String REST_API_KEY = "";
+    private String REST_API_KEY;
     @Value("${iamport.REST_API_SECRET}")
-    private final String REST_API_SECRET = "";
+    private String REST_API_SECRET;
 
     public PayService(PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
