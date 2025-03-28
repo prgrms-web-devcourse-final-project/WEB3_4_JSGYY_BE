@@ -2,25 +2,44 @@ package com.ll.nbe344team7.global.security.controller;
 
 
 import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * access token 재발급
+ *
+ * @author 이광석
+ * @since 2025-03-27
+ */
 @RestController
 public class ReissueController {
     final private JWTUtil jwtUtil;
+    final private RedisRepository redisRepository;
 
-    public ReissueController(JWTUtil jwtUtil){
+    public ReissueController(JWTUtil jwtUtil , RedisRepository redisRepository){
         this.jwtUtil = jwtUtil;
+        this.redisRepository = redisRepository;
     }
 
 
+    /**
+     * accessToken이 만료되었을경우 refresh 토큰을 이용하여  새로운 accessToken을 재발급
+     * 새로운 accessToken을 redis에 저장
+     * @param request
+     * @param response
+     * @return ResponseEntity<?>
+     * @author 이광석
+     * @since 2025-03-27
+     */
     @PostMapping("/api/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response){
         String refresh = null;
@@ -52,6 +71,7 @@ public class ReissueController {
 
         String newAccessToken = jwtUtil.createJwt("access",username,memberId,role,600000L);
 
+        redisRepository.modify(refresh,newAccessToken);
 
         response.setHeader("access",newAccessToken);
 

@@ -105,6 +105,13 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
 
+    /**
+     * refresh 토큰 추출 메소드
+     * @param cookies
+     * @return
+     * @author 이광석
+     * @since 2025-03-28
+     */
     private String getRefreshToken(Cookie[] cookies){
 
         for(Cookie cookie: cookies){
@@ -115,4 +122,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
     }
+
+
 }

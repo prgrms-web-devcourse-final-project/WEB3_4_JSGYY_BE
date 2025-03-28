@@ -127,7 +127,7 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin())
                 )
 
-                .addFilterBefore(new JWTFilter(jwtUtil),LoginFilter.class)  // jwt 유효성 검사
+                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),LoginFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
 

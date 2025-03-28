@@ -2,6 +2,11 @@ package com.ll.nbe344team7.global.security.exception
 
 import org.springframework.http.HttpStatus
 
+/**
+ * 시큐리티 전용 예외 코드
+ * @author 이광석
+ * @since 2025-03-28
+ */
 enum class SecurityExceptionCode (
     val status:HttpStatus,
     val code:  String,
