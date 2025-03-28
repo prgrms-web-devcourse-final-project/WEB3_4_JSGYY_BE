@@ -1,9 +1,15 @@
 package com.ll.nbe344team7.domain.post.service;
 
+import com.ll.nbe344team7.domain.post.dto.PostDto;
+import com.ll.nbe344team7.domain.post.dto.PostImageDto;
+import com.ll.nbe344team7.domain.post.dto.PostListDto;
 import com.ll.nbe344team7.domain.post.dto.PostRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -22,66 +28,26 @@ public class PostService {
         return Map.of("message", postId + "번 게시글이 수정되었습니다.");
     }
 
-    public Map<String, Object> getPosts() {
-        return Map.of(
-                "content", List.of(
-                        Map.of(
-                                "id", 1,
-                                "title", "아디다스 바지",
-                                "category", "의류",
-                                "place", "서울특별시_관악구_신림동",
-                                "price", 50000,
-                                "saleStatus", true,
-                                "auctionStatus", false,
-                                "createdAt", "2025-03-27T10:00:00"
-                        ),
-                        Map.of(
-                                "id", 2,
-                                "title", "바지",
-                                "category", "의류",
-                                "place", "서울특별시_관악구_신림동",
-                                "price", 30000,
-                                "saleStatus", true,
-                                "auctionStatus", false,
-                                "createdAt", "2025-03-26T15:00:00"
-                        )
-                ),
-                "page", Map.of(
-                        "size", 10,
-                        "totalElements", 50,
-                        "totalPages", 5,
-                        "number", 0,
-                        "hasNext", true,
-                        "hasPrevious", false,
-                        "isFirst", true,
-                        "isLast", false,
-                        "sort", Map.of(
-                                "sorted", true,
-                                "unsorted", false,
-                                "empty", false
-                        )
-                )
+    public Page<PostListDto> getPosts() {
+        List<PostListDto> posts = List.of(
+                new PostListDto(1L, "아디다스 바지", 50000L, true, "/images/adidas_pants.jpg", LocalDateTime.of(2025, 3, 27, 10, 0)),
+                new PostListDto(2L, "바지", 30000L, true, "/images/pants.jpg", LocalDateTime.of(2025, 3, 26, 15, 0))
         );
+
+        return new PageImpl<>(posts, PageRequest.of(0, 10), 50);
     }
 
-    public Map<String, Object> getPost(Long postId) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("id", 1);
-        response.put("authorId", 101);
-        response.put("title", "아디다스 바지");
-        response.put("category", "의류");
-        response.put("content", "아디다스 바지입니다.");
-        response.put("place", "서울특별시_관악구_신림동");
-        response.put("price", 50000);
-        response.put("saleStatus", true);
-        response.put("auctionStatus", true);
-        response.put("auctionStartedAt", "2025-03-27T10:00:00");
-        response.put("auctionClosedAt", "2025-03-29T11:00:00");
-        response.put("likes", 100);
-        response.put("reports", 2);
-        response.put("createdAt", "2025-03-27T10:00:00");
-        response.put("modifiedAt", "2025-03-27T11:00:00");
-        response.put("isAuthor", true);
-        return response;
+    public PostDto getPost(Long postId) {
+        return new PostDto(
+                postId, 1L, "아디다스 바지", "아디다스 바지입니다.", "의류",
+                "서울특별시_관악구_신림동", 50000L, true, true,
+                LocalDateTime.parse("2025-03-27T10:00:00"),
+                LocalDateTime.parse("2025-03-29T11:00:00"),
+                100, 2,
+                LocalDateTime.parse("2025-03-27T10:00:00"),
+                LocalDateTime.parse("2025-03-27T11:00:00"),
+                true,
+                List.of(new PostImageDto(1L, "adidas_pants.jpg", "/images/adidas_pants.jpg", 204800L))
+        );
     }
 }
