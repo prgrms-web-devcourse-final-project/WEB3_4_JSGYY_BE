@@ -24,13 +24,13 @@ data class Exchange(
     val exchangeType: Int,
     val impUid: String
 ){
-    constructor(dto: DepositDTO) : this(
+    constructor(dto: DepositDTO, status: Int) : this(
         id = null,
         myId = dto.memberId,
         otherId = dto.memberId,
         payDate = LocalDateTime.now(),
         price = dto.price,
-        status = 1,
+        status = status,
         exchangeType = 0,
         impUid = dto.impUid
     )
