@@ -5,12 +5,14 @@ import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -30,7 +32,7 @@ public class PostController {
      * 게시글 작성
      *
      * @param request
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -39,9 +41,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<?> createPost(
             @Valid @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.createPost(request, memberId));
+        return ResponseEntity.ok(postService.createPost(request, userDetails.getMemberId()));
     }
 
     /**
@@ -49,7 +51,7 @@ public class PostController {
      * 게시글 삭제
      *
      * @param postId
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -58,9 +60,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long postId,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.deletePost(postId, memberId));
+        return ResponseEntity.ok(postService.deletePost(postId, userDetails.getMemberId()));
     }
 
     /**
@@ -69,7 +71,7 @@ public class PostController {
      *
      * @param postId
      * @param request
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -79,12 +81,12 @@ public class PostController {
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
             @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        postService.modifyPost(postId, request, memberId);
+        postService.modifyPost(postId, request, userDetails.getMemberId());
 
         if (request.getAuctionRequest() != null) {
-            postService.changeToAuction(postId, request.getAuctionRequest(), memberId);
+            postService.changeToAuction(postId, request.getAuctionRequest(), userDetails.getMemberId());
         }
 
         return ResponseEntity.ok(Map.of("message", postId + "번 게시글 수정 성공"));
@@ -118,7 +120,7 @@ public class PostController {
      * 게시글 상세 조회
      *
      * @param postId
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -127,9 +129,9 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPost(
             @PathVariable Long postId,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.getPost(postId, memberId));
+        return ResponseEntity.ok(postService.getPost(postId, userDetails.getMemberId()));
     }
 
     /**
