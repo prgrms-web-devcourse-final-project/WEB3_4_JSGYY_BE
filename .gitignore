@@ -40,6 +40,9 @@ out/
 .kotlin
 
 
+application-seceret.yml
+
+
 ### Custom ###
 db_dev2.mv.db
 
