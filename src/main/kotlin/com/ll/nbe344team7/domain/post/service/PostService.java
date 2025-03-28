@@ -275,8 +275,8 @@ public class PostService {
                     auctionRequest.getClosedAt()
             );
 
-            auctionRepository.save(auction);
             postRepository.save(post);
+            auctionRepository.save(auction);
         }
     }
 }
