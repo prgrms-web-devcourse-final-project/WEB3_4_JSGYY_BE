@@ -62,6 +62,12 @@ public class PostService {
         }
     }
 
+    private void validateAuctionRequest(AuctionRequest request) {
+        if (request.getStartedAt().isAfter(request.getClosedAt())) {
+            throw new PostException(PostErrorCode.INVALID_AUCTION_DATE);
+        }
+    }
+
 
     /**
      *
@@ -95,6 +101,8 @@ public class PostService {
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
             AuctionRequest auctionRequest = request.getAuctionRequest();
+
+            validateAuctionRequest(auctionRequest);
 
             Auction auction = post.createAuction(
                     auctionRequest.getStartedAt(),
@@ -252,11 +260,15 @@ public class PostService {
         if (post.getAuctionDetails() != null) {
             Auction existingAuction = post.getAuctionDetails();
 
+            validateAuctionRequest(auctionRequest);
+
             existingAuction.updateAuction(auctionRequest.getStartedAt(), auctionRequest.getClosedAt());
 
             auctionRepository.save(existingAuction);
         } else if (post.getAuctionDetails() == null) {
             post.updateAuctionStatus(true);
+
+            validateAuctionRequest(auctionRequest);
 
             Auction auction = post.createAuction(
                     auctionRequest.getStartedAt(),
