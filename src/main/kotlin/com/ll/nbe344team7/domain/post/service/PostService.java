@@ -2,6 +2,8 @@ package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
@@ -10,8 +12,9 @@ import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
-
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +27,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final AuctionRepository auctionRepository;
+    private final MemberRepository memberRepository;
 
-    public PostService(PostRepository postRepository, AuctionRepository auctionRepository) {
+    public PostService(PostRepository postRepository, AuctionRepository auctionRepository, MemberRepository memberRepository) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -40,11 +45,11 @@ public class PostService {
      * @since 2025-03-26
      */
     private void validatePostRequest(PostRequest request) {
-        if (request.getTitle().trim().isEmpty() || request.getTitle().length() > 50) {
+        if (request.getTitle().isBlank() || request.getTitle().length() > 50) {
             throw new PostException(PostErrorCode.INVALID_TITLE);
         }
 
-        if (request.getContent().trim().isEmpty() || request.getContent().length() > 500) {
+        if (request.getContent().isBlank() || request.getContent().length() > 500) {
             throw new PostException(PostErrorCode.INVALID_CONTENT);
         }
 
@@ -52,8 +57,14 @@ public class PostService {
             throw new PostException(PostErrorCode.INVALID_PRICE);
         }
 
-        if (request.getPlace().trim().isEmpty()) {
+        if (request.getPlace().isBlank()) {
             throw new PostException(PostErrorCode.INVALID_PLACE);
+        }
+    }
+
+    private void validateAuctionRequest(AuctionRequest request) {
+        if (request.getStartedAt().isAfter(request.getClosedAt())) {
+            throw new PostException(PostErrorCode.INVALID_AUCTION_DATE);
         }
     }
 
@@ -72,10 +83,12 @@ public class PostService {
     @Transactional
     public Map<String, String> createPost(PostRequest request, Long memberId) {
 
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
         validatePostRequest(request);
 
         Post post = new Post(
-                memberId,
+                member,
                 request.getTitle(),
                 request.getContent(),
                 request.getPrice(),
@@ -88,6 +101,8 @@ public class PostService {
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
             AuctionRequest auctionRequest = request.getAuctionRequest();
+
+            validateAuctionRequest(auctionRequest);
 
             Auction auction = post.createAuction(
                     auctionRequest.getStartedAt(),
@@ -116,7 +131,7 @@ public class PostService {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (post.getMemberId() != memberId) {
+        if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -144,7 +159,7 @@ public class PostService {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (post.getMemberId() != memberId) {
+        if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -238,12 +253,14 @@ public class PostService {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (post.getMemberId() != memberId) {
+        if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         if (post.getAuctionDetails() != null) {
             Auction existingAuction = post.getAuctionDetails();
+
+            validateAuctionRequest(auctionRequest);
 
             existingAuction.updateAuction(auctionRequest.getStartedAt(), auctionRequest.getClosedAt());
 
@@ -251,13 +268,15 @@ public class PostService {
         } else if (post.getAuctionDetails() == null) {
             post.updateAuctionStatus(true);
 
+            validateAuctionRequest(auctionRequest);
+
             Auction auction = post.createAuction(
                     auctionRequest.getStartedAt(),
                     auctionRequest.getClosedAt()
             );
 
-            auctionRepository.save(auction);
             postRepository.save(post);
+            auctionRepository.save(auction);
         }
     }
 }

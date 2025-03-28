@@ -22,11 +22,11 @@ data class PostDto(
 ) {
     companion object {
         fun from(post: Post, memberId: Long): PostDto {
-            val isAuthor = post.memberId == memberId
+            val isAuthor = post.member.id == memberId
 
             return PostDto(
                 id = post.id!!,
-                authorId = post.memberId,
+                authorId = post.member.id!!,
                 title = post.title,
                 content = post.content,
                 place = post.place,

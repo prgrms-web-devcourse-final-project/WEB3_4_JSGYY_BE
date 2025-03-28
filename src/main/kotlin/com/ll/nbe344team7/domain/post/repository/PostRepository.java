@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
@@ -25,4 +27,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("place") String place,
             Pageable pageable
     );
+
+    Optional<Post> findById(Long id);
+
+    Optional<Post> findFirstByOrderByIdDesc();
 }
