@@ -82,4 +82,12 @@ class Post (
             this.post = this@Post  // Post와 Auction 관계 설정
         }
     }
+
+    fun like() {
+        this.likes++ // 좋아요 수 증가
+    }
+
+    fun unlike() {
+        this.likes-- // 좋아요 수 감소
+    }
 }

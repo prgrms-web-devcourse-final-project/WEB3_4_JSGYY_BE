@@ -10,8 +10,10 @@ import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostDto;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.entity.PostLike;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
+import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
@@ -28,11 +30,13 @@ public class PostService {
     private final PostRepository postRepository;
     private final AuctionRepository auctionRepository;
     private final MemberRepository memberRepository;
+    private final PostLikeRepository postLikeRepository;
 
-    public PostService(PostRepository postRepository, AuctionRepository auctionRepository, MemberRepository memberRepository) {
+    public PostService(PostRepository postRepository, AuctionRepository auctionRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
         this.memberRepository = memberRepository;
+        this.postLikeRepository = postLikeRepository;
     }
 
     /**
@@ -278,5 +282,52 @@ public class PostService {
             postRepository.save(post);
             auctionRepository.save(auction);
         }
+    }
+
+    /**
+     *
+     * 게시글 좋아요
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-31
+     */
+    public Map<String, String> likePost(Long postId, Long memberId) {
+        Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        PostLike postLike = new PostLike(member, post);
+        postLikeRepository.save(postLike);
+
+        post.like();
+        postRepository.save(post);
+
+        return Map.of("message", postId + "번 게시글 좋아요 성공");
+    }
+
+    /**
+     *
+     * 게시글 좋아요 취소
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @since 2025-03-31
+     */
+    public Map<String, String> unlikePost(Long postId, Long memberId) {
+        Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        PostLike postLike = postLikeRepository.findByMemberAndPost(member, post).orElseThrow(() -> new PostException(PostErrorCode.POST_LIKE_NOT_FOUND));
+        postLikeRepository.delete(postLike);
+
+        post.unlike();
+        postRepository.save(post);
+
+        return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
     }
 }

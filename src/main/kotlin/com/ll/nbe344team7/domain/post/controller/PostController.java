@@ -139,18 +139,17 @@ public class PostController {
      * 게시글 좋아요
      *
      * @param postId
-     * @param loggedInMemberId
+     * @param userDetails
      * @return
      *
-     * @author shjung
-     * @since 25. 3. 24.
+     * @author GAEUN220
+     * @since 2025-03-31
      */
     @GetMapping("/{postId}/like")
-    public ResponseEntity<?> likePost(@PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
-        if(postId == 10000){
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(Map.of("message", "좋아요 성공"));
+    public ResponseEntity<?> likePost(@PathVariable Long postId,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        return ResponseEntity.ok(postService.likePost(postId, userDetails.getMemberId()));
     }
 
     /**
@@ -158,18 +157,17 @@ public class PostController {
      * 게시글 좋아요 취소
      *
      * @param postId
-     * @param loggedInMemberId
+     * @param userDetails
      * @return
      *
-     * @author shjung
-     * @since 25. 3. 24.
+     * @author GAEUN220
+     * @since 2025-03-31
      */
     @GetMapping("/{postId}/unlike")
-    public ResponseEntity<?> unlikePost(@PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
-        if(postId == 10000){
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(Map.of("message", "좋아요 취소 성공"));
+    public ResponseEntity<?> unlikePost(@PathVariable Long postId,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        return ResponseEntity.ok(postService.unlikePost(postId, userDetails.getMemberId()));
     }
 
     /**
