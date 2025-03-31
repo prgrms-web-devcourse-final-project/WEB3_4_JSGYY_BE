@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.domain.pay.service;
 
+import com.ll.nbe344team7.domain.account.entity.Account;
+import com.ll.nbe344team7.domain.account.repository.AccountRepository;
 import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
 import com.ll.nbe344team7.domain.pay.dto.WithdrawDTO;
 import com.ll.nbe344team7.domain.pay.entity.Exchange;
@@ -26,15 +28,17 @@ public class PayService {
 
     private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
+    private final AccountRepository accountRepository;
 
     @Value("${iamport.REST_API_KEY}")
     private String REST_API_KEY;
     @Value("${iamport.REST_API_SECRET}")
     private String REST_API_SECRET;
 
-    public PayService(PaymentRepository paymentRepository) {
+    public PayService(PaymentRepository paymentRepository, AccountRepository accountRepository) {
         this.paymentRepository = paymentRepository;
         this.iamportClient = new IamportClient(REST_API_KEY, REST_API_SECRET);
+        this.accountRepository = accountRepository;
     }
 
     /**
@@ -70,8 +74,13 @@ public class PayService {
             if(paymentRepository.countByImpUidContainsIgnoreCase(dto.getImpUid()) > 0){
                 throw new PaymentException(PayExceptionCode.PAYMENT_ERROR);
             }
+
+            Account account = this.accountRepository.findByMemberId(dto.getMemberId());
+            account.setMoney(account.getMoney() + dto.getPrice());
+
             // 8. 이상이 없는 경우 저장 후 리턴
             paymentRepository.save(exchange);
+            accountRepository.save(account);
             return Map.of("message", "충전 요청이 확인되었습니다.");
         } catch (IamportResponseException | IOException e) {
             throw new PaymentException(PayExceptionCode.PORTONE_ERROR);
