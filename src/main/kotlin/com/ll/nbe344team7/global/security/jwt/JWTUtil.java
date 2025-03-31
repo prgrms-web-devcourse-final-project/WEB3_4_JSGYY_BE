@@ -43,6 +43,10 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    public String getCategory(String token){
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category",String.class );
+    }
+
     /**
      * jwt 생성 메소드
      * @param username
@@ -53,8 +57,9 @@ public class JWTUtil {
      * @author 이광석
      * @since 2025-03-26
      */
-    public String createJwt(String username, Long memberId,String role,Long expiredMs){
+    public String createJwt(String category,String username, Long memberId,String role,Long expiredMs){
         return Jwts.builder()
+                .claim("category",category)
                 .claim("username",username)
                 .claim("role",role)
                 .claim("memberId",memberId)

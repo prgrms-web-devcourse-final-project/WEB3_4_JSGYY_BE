@@ -12,6 +12,8 @@ data class PostDto(
     val price: Long,
     val saleStatus: Boolean,
     val auctionStatus: Boolean,
+    val auctionStartedAt: LocalDateTime?,
+    val auctionClosedAt: LocalDateTime?,
     val likes: Int,
     val reports: Int,
     val createdAt: LocalDateTime?,
@@ -20,17 +22,19 @@ data class PostDto(
 ) {
     companion object {
         fun from(post: Post, memberId: Long): PostDto {
-            val isAuthor = post.memberId == memberId
+            val isAuthor = post.member.id == memberId
 
             return PostDto(
                 id = post.id!!,
-                authorId = post.memberId,
+                authorId = post.member.id!!,
                 title = post.title,
                 content = post.content,
                 place = post.place,
                 price = post.price,
                 saleStatus = post.saleStatus,
                 auctionStatus = post.auctionStatus,
+                auctionStartedAt = post.auctionDetails?.startedAt,
+                auctionClosedAt = post.auctionDetails?.closedAt,
                 likes = post.likes,
                 reports = post.reports,
                 createdAt = post.createdAt,

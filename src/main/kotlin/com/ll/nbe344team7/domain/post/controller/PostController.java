@@ -1,17 +1,18 @@
 package com.ll.nbe344team7.domain.post.controller;
 
-import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -31,7 +32,7 @@ public class PostController {
      * 게시글 작성
      *
      * @param request
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -40,9 +41,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<?> createPost(
             @Valid @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.createPost(request, memberId));
+        return ResponseEntity.ok(postService.createPost(request, userDetails.getMemberId()));
     }
 
     /**
@@ -50,7 +51,7 @@ public class PostController {
      * 게시글 삭제
      *
      * @param postId
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -59,9 +60,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long postId,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.deletePost(postId, memberId));
+        return ResponseEntity.ok(postService.deletePost(postId, userDetails.getMemberId()));
     }
 
     /**
@@ -70,7 +71,7 @@ public class PostController {
      *
      * @param postId
      * @param request
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -80,9 +81,15 @@ public class PostController {
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
             @RequestBody PostRequest request,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.modifyPost(postId, request, memberId));
+        postService.modifyPost(postId, request, userDetails.getMemberId());
+
+        if (request.getAuctionRequest() != null) {
+            postService.changeToAuction(postId, request.getAuctionRequest(), userDetails.getMemberId());
+        }
+
+        return ResponseEntity.ok(Map.of("message", postId + "번 게시글 수정 성공"));
     }
 
     /**
@@ -101,13 +108,8 @@ public class PostController {
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
             Pageable pageable,
-            @RequestParam(required = false) Long minPrice,
-            @RequestParam(required = false) Long maxPrice,
-            @RequestParam(required = false) Boolean saleStatus,
-            @RequestParam(required = false) String keyword)
+            @ModelAttribute PostSearchRequest searchRequest)
     {
-        PostSearchRequest searchRequest = new PostSearchRequest(minPrice, maxPrice, saleStatus, keyword);
-
         Page<PostListDto> postList = postService.getPostsBySearch(pageable, searchRequest);
 
         return ResponseEntity.ok(postList);
@@ -118,7 +120,7 @@ public class PostController {
      * 게시글 상세 조회
      *
      * @param postId
-     * @param memberId
+     * @param userDetails
      * @return
      *
      * @author GAEUN220
@@ -127,30 +129,9 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPost(
             @PathVariable Long postId,
-            @RequestHeader(value = "memberId") Long memberId)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.getPost(postId, memberId));
-    }
-
-    /**
-     *
-     * 게시글 경매 전환
-     *
-     * @param auctionRequest
-     * @param memberId
-     * @param postId
-     * @return
-     *
-     * @author GAEUN220
-     * @since 2025-03-26
-     */
-    @PostMapping("/{postId}/auction")
-    public ResponseEntity<?> changeToAuction(
-            @RequestBody AuctionRequest auctionRequest,
-            @RequestHeader(value = "memberId") Long memberId,
-            @PathVariable Long postId)
-    {
-        return ResponseEntity.ok(postService.changeToAuction(postId, auctionRequest, memberId));
+        return ResponseEntity.ok(postService.getPost(postId, userDetails.getMemberId()));
     }
 
     /**
@@ -158,18 +139,17 @@ public class PostController {
      * 게시글 좋아요
      *
      * @param postId
-     * @param loggedInMemberId
+     * @param userDetails
      * @return
      *
-     * @author shjung
-     * @since 25. 3. 24.
+     * @author GAEUN220
+     * @since 2025-03-31
      */
     @GetMapping("/{postId}/like")
-    public ResponseEntity<?> likePost(@PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
-        if(postId == 10000){
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(Map.of("message", "좋아요 성공"));
+    public ResponseEntity<?> likePost(@PathVariable Long postId,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        return ResponseEntity.ok(postService.likePost(postId, userDetails.getMemberId()));
     }
 
     /**
@@ -177,18 +157,17 @@ public class PostController {
      * 게시글 좋아요 취소
      *
      * @param postId
-     * @param loggedInMemberId
+     * @param userDetails
      * @return
      *
-     * @author shjung
-     * @since 25. 3. 24.
+     * @author GAEUN220
+     * @since 2025-03-31
      */
     @GetMapping("/{postId}/unlike")
-    public ResponseEntity<?> unlikePost(@PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
-        if(postId == 10000){
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(Map.of("message", "좋아요 취소 성공"));
+    public ResponseEntity<?> unlikePost(@PathVariable Long postId,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        return ResponseEntity.ok(postService.unlikePost(postId, userDetails.getMemberId()));
     }
 
     /**

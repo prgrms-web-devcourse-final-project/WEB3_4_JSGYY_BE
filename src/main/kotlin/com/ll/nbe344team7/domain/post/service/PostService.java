@@ -2,16 +2,21 @@ package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostDto;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.entity.PostLike;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
-
+import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +29,14 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final AuctionRepository auctionRepository;
+    private final MemberRepository memberRepository;
+    private final PostLikeRepository postLikeRepository;
 
-    public PostService(PostRepository postRepository, AuctionRepository auctionRepository) {
+    public PostService(PostRepository postRepository, AuctionRepository auctionRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
+        this.memberRepository = memberRepository;
+        this.postLikeRepository = postLikeRepository;
     }
 
     /**
@@ -40,14 +49,26 @@ public class PostService {
      * @since 2025-03-26
      */
     private void validatePostRequest(PostRequest request) {
-        if (request.getTitle().trim().isEmpty() || request.getTitle().length() > 50) {
+        if (request.getTitle().isBlank() || request.getTitle().length() > 50) {
             throw new PostException(PostErrorCode.INVALID_TITLE);
         }
-        if (request.getContent().trim().isEmpty() || request.getContent().length() > 500) {
+
+        if (request.getContent().isBlank() || request.getContent().length() > 500) {
             throw new PostException(PostErrorCode.INVALID_CONTENT);
         }
+
         if (request.getPrice() < 0) {
             throw new PostException(PostErrorCode.INVALID_PRICE);
+        }
+
+        if (request.getPlace().isBlank()) {
+            throw new PostException(PostErrorCode.INVALID_PLACE);
+        }
+    }
+
+    private void validateAuctionRequest(AuctionRequest request) {
+        if (request.getStartedAt().isAfter(request.getClosedAt())) {
+            throw new PostException(PostErrorCode.INVALID_AUCTION_DATE);
         }
     }
 
@@ -66,10 +87,12 @@ public class PostService {
     @Transactional
     public Map<String, String> createPost(PostRequest request, Long memberId) {
 
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
         validatePostRequest(request);
 
         Post post = new Post(
-                memberId,
+                member,
                 request.getTitle(),
                 request.getContent(),
                 request.getPrice(),
@@ -82,6 +105,8 @@ public class PostService {
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
             AuctionRequest auctionRequest = request.getAuctionRequest();
+
+            validateAuctionRequest(auctionRequest);
 
             Auction auction = post.createAuction(
                     auctionRequest.getStartedAt(),
@@ -110,7 +135,7 @@ public class PostService {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (post.getMemberId() != memberId) {
+        if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -132,13 +157,13 @@ public class PostService {
      * @since 2025-03-25
      */
     @Transactional
-    public Map<String, String> modifyPost(Long postId, PostRequest request, Long memberId) {
+    public void modifyPost(Long postId, PostRequest request, Long memberId) {
 
         validatePostRequest(request);
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (post.getMemberId() != memberId) {
+        if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -152,8 +177,6 @@ public class PostService {
         );
 
         postRepository.save(post);
-
-        return Map.of("message", postId + "번 게시글이 수정되었습니다.");
     }
 
     /**
@@ -194,8 +217,9 @@ public class PostService {
                 searchRequest.getMaxPrice(),
                 searchRequest.getSaleStatus(),
                 searchRequest.getKeyword(),
+                searchRequest.getPlace(),
                 pageable
-        ).map(post -> PostListDto.Companion.from(post));  // 코틀린의 from() 메서드 호출
+        ).map(post -> PostListDto.Companion.from(post));
     }
 
     /**
@@ -229,28 +253,81 @@ public class PostService {
      * @author GAEUN220
      * @since 2025-03-26
      */
-    public Map<String, String> changeToAuction(Long postId, AuctionRequest auctionRequest, Long memberId) {
+    public void changeToAuction(Long postId, AuctionRequest auctionRequest, Long memberId) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        if (post.getMemberId() != memberId) {
+        if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         if (post.getAuctionDetails() != null) {
-            throw new PostException(PostErrorCode.ALREADY_IN_AUCTION);
+            Auction existingAuction = post.getAuctionDetails();
+
+            validateAuctionRequest(auctionRequest);
+
+            existingAuction.updateAuction(auctionRequest.getStartedAt(), auctionRequest.getClosedAt());
+
+            auctionRepository.save(existingAuction);
+        } else if (post.getAuctionDetails() == null) {
+            post.updateAuctionStatus(true);
+
+            validateAuctionRequest(auctionRequest);
+
+            Auction auction = post.createAuction(
+                    auctionRequest.getStartedAt(),
+                    auctionRequest.getClosedAt()
+            );
+
+            postRepository.save(post);
+            auctionRepository.save(auction);
         }
+    }
 
-        post.updateAuctionStatus(true);
+    /**
+     *
+     * 게시글 좋아요
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-03-31
+     */
+    public Map<String, String> likePost(Long postId, Long memberId) {
+        Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        Auction auction = post.createAuction(
-                auctionRequest.getStartedAt(),
-                auctionRequest.getClosedAt()
-        );
+        PostLike postLike = new PostLike(member, post);
+        postLikeRepository.save(postLike);
 
-        auctionRepository.save(auction);
+        post.like();
         postRepository.save(post);
 
-        return Map.of("message", "경매 전환이 완료되었습니다.");
+        return Map.of("message", postId + "번 게시글 좋아요 성공");
+    }
+
+    /**
+     *
+     * 게시글 좋아요 취소
+     *
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @since 2025-03-31
+     */
+    public Map<String, String> unlikePost(Long postId, Long memberId) {
+        Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        PostLike postLike = postLikeRepository.findByMemberAndPost(member, post).orElseThrow(() -> new PostException(PostErrorCode.POST_LIKE_NOT_FOUND));
+        postLikeRepository.delete(postLike);
+
+        post.unlike();
+        postRepository.save(post);
+
+        return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
     }
 }
