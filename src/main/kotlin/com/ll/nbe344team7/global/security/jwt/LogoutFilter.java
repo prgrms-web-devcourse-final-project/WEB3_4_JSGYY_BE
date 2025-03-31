@@ -1,6 +1,8 @@
 package com.ll.nbe344team7.global.security.jwt;
 
 import com.ll.nbe344team7.global.redis.RedisRepository;
+import com.ll.nbe344team7.global.security.exception.SecurityException;
+import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -60,25 +62,28 @@ public class LogoutFilter extends OncePerRequestFilter {
         // refresh 토큰 검증
         if (refresh == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            response.getWriter().write("message : 리프레쉬 토큰이 없습니다.");
+            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
         }
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            response.getWriter().write("message : ");
+            throw new SecurityException(SecurityExceptionCode.REFRESHTOKEN_IS_EXPIRED);
         }
 
         if (!"refresh".equals(jwtUtil.getCategory(refresh))) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            response.getWriter().write("message : ");
+            throw new SecurityException(SecurityExceptionCode.IS_NOT_REFRESHTOKEN);
         }
 
         // Redis에서 해당 refresh로 저장된 access 토큰 삭제
         String accessToken = redisRepository.get(refresh);
         if (accessToken == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
         }
 
         redisRepository.delete(refresh);
