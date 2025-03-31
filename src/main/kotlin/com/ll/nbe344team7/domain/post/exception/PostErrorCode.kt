@@ -10,4 +10,5 @@ enum class PostErrorCode(val status: HttpStatus, val code: String, val message: 
     INVALID_PRICE(HttpStatus.BAD_REQUEST, "INVALID_PRICE", "가격은 0원 이상으로 입력해주세요."),
     INVALID_PLACE(HttpStatus.BAD_REQUEST, "INVALID_PLACE", "장소를 입력해주세요."),
     INVALID_AUCTION_DATE(HttpStatus.BAD_REQUEST, "INVALID_AUCTION_DATE", "경매 종료일은 경매 시작일 이후로 입력해주세요."),
+    POST_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_LIKE_NOT_FOUND", "존재하지 않는 좋아요입니다."),
 }
