@@ -5,6 +5,7 @@ import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.jwt.JWTFilter;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import com.ll.nbe344team7.global.security.jwt.LoginFilter;
+import com.ll.nbe344team7.global.security.jwt.LogoutFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -130,6 +131,8 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),LoginFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
+
+                .addFilterBefore(new LogoutFilter(jwtUtil, redisRepository), UsernamePasswordAuthenticationFilter.class)
 
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));  //세션 stateless 상태 설정

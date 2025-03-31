@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -51,11 +53,18 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-      //로그인 시에는 검증할 필요 없음
-       if("/api/auth/login".equals(request.getServletPath())){
-           filterChain.doFilter(request,response);
-           return;
-       }
+        List<String> noCertifiedUrls = new ArrayList<>();
+        noCertifiedUrls.add("/api/auth/login");
+        noCertifiedUrls.add("/h2-console");
+        noCertifiedUrls.add("/api/auth/register");
+
+        for (String noCertifiedUrl : noCertifiedUrls){
+            if(request.getServletPath().contains(noCertifiedUrl)){
+                filterChain.doFilter(request,response);
+                return;
+            }
+        }
+
 
        String accessToken = request.getHeader("access");
 
