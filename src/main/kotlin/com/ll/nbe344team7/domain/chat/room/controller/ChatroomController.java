@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 채팅방 컨트롤러
+ *
+ * @author kjm72
+ * @since 2025-03-31
+ */
 @RestController
 @RequestMapping("/api/chat/rooms")
 public class ChatroomController {
@@ -27,9 +33,9 @@ public class ChatroomController {
     }
 
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> getChatRooms(@PathVariable Long id) {
-        List<ChatRoomListResponseDto> response = chatroomService.listChatRoom(id);
+    @GetMapping("/user")
+    public ResponseEntity<?> getChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<ChatRoomListResponseDto> response = chatroomService.listChatRoom(userDetails.getMemberId());
         return ResponseEntity.ok(Map.of("rooms", response));
     }
 
