@@ -31,7 +31,7 @@ public class HomeController {
                        
                                    // websocket URL을 사용하여 stompClient 초기화
                                    stompClient = Stomp.client(url);
-                                   stompClient.connect({}, stompConnectHandler, stompErrorHandler);
+                                   stompClient.connect({} , stompConnectHandler, stompErrorHandler);
                                    console.log(stompClient);
                                }
                        
@@ -116,11 +116,34 @@ public class HomeController {
                                        }
                                    });
                                });
+                               
+                                   function login() {
+                                       const data = {
+                                           username: document.getElementById('username').value,
+                                           password: document.getElementById('password').value
+                                       };
+                               
+                                       fetch('/api/auth/login', {
+                                           method: 'POST',
+                                           headers: {
+                                               'Content-Type': 'application/json'
+                                           },
+                                           body: JSON.stringify(data)
+                                       }).then(response => {
+                                           // 로그인 성공/실패 처리
+                                       });
+                                   }
                            </script>
                        </head>
                        
                        <body>
                            <div class="container">
+                                <form id="loginForm">
+                                                                  <input type="text" id="username"/>
+                                                                  <input type="password" id="password"/>
+                                                                  <button type="button" onclick="login()">login</button>
+                                                               </form>
+                           
                                <h1>WebSocket CONNECT</h1>
                                <div class="mb-3 input-group" style="width: 500px;">
                                    <input type="text" id="websocketUrl" class="form-control" value="ws://localhost:8080/ws"/>
