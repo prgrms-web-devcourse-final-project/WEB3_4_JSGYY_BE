@@ -1,12 +1,14 @@
 package com.ll.nbe344team7.domain.account.service;
 
 
-import com.ll.nbe344team7.domain.pay.entity.Payment;
-import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
-import com.ll.nbe344team7.domain.account.dto.ExchangeDTO;
+import com.ll.nbe344team7.domain.account.dto.AccountDTO;
 import com.ll.nbe344team7.domain.account.entity.Account;
 import com.ll.nbe344team7.domain.account.repository.AccountRepository;
-
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.domain.pay.entity.Payment;
+import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,10 +23,12 @@ public class AccountService {
 
     private final PaymentRepository paymentRepository;
     private final AccountRepository accountRepository;
+    private final MemberRepository memberRepository;
 
-    public AccountService(AccountRepository accountRepository, PaymentRepository paymentRepository) {
+    public AccountService(AccountRepository accountRepository, PaymentRepository paymentRepository, MemberRepository memberRepository) {
         this.accountRepository = accountRepository;
         this.paymentRepository = paymentRepository;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -70,5 +74,34 @@ public class AccountService {
         } catch (NullPointerException e) {
             throw new NullPointerException();
         }
+    }
+
+    /**
+     *
+     * 계좌번호 및 은행 이름 저장
+     *
+     * @param dto
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 31.
+     */
+    public Map<Object, Object> createAccount(AccountDTO dto) {
+        if(!memberRepository.existsById(dto.getMemberId())) {
+            throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
+        }
+
+        Account account;
+        if(accountRepository.count() > 0) {
+            account = this.accountRepository.findByMemberId(dto.getMemberId());
+            account.setBankName(dto.getBankName());
+            account.setAccountNumber(dto.getAccountNumber());
+        }else {
+            account = new Account(dto);
+        }
+
+        accountRepository.save(account);
+
+        return Map.of("message", "계좌번호 및 은행이 저장되었습니다.");
     }
 }

@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.domain.account.controller;
 
+import com.ll.nbe344team7.domain.account.dto.AccountDTO;
 import com.ll.nbe344team7.domain.account.enums.ExchangeSearchType;
 import com.ll.nbe344team7.domain.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
@@ -63,5 +64,10 @@ public class AccountController {
             String exchangeName = String.valueOf(ExchangeSearchType.valueOf(type.toUpperCase()).getType());
             return ResponseEntity.status(404).body(Map.of("message", "멤버의 " + exchangeName + " 거래 내역이 조회되지 않습니다."));
         }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createAccount(@RequestBody AccountDTO account) {
+        return ResponseEntity.ok(this.accountService.createAccount(account));
     }
 }
