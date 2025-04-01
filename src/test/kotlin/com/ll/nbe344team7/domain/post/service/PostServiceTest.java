@@ -494,7 +494,7 @@ public class PostServiceTest {
     @Test
     @DisplayName("게시글 검색 테스트 - 단일 검색")
     @Transactional
-    void t16() throws Exception {
+    void t15() throws Exception {
         // given
         for (int i = 1; i <= 30; i++) {
             PostRequest request = new PostRequest(
@@ -536,7 +536,7 @@ public class PostServiceTest {
     @Test
     @DisplayName("게시글 검색 테스트 - 리스트 검색")
     @Transactional
-    void t17() throws Exception {
+    void t16() throws Exception {
         // given
         for (int i = 1; i <= 30; i++) {
             PostRequest request = new PostRequest(
