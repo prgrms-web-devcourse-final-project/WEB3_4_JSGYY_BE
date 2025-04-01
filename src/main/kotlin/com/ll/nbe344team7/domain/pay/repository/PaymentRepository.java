@@ -1,6 +1,6 @@
 package com.ll.nbe344team7.domain.pay.repository;
 
-import com.ll.nbe344team7.domain.pay.entity.Payment;
+import com.ll.nbe344team7.domain.pay.entity.Exchange;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,8 +11,10 @@ import java.util.List;
  * @since 25. 3. 25.
  */
 @Repository
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    public List<Payment> findByMyId(Long memberId);
+public interface PaymentRepository extends JpaRepository<Exchange, Long> {
+    public List<Exchange> findByMyId(Long memberId);
 
-    public List<Payment> findByMyIdAndExchangeType(Long memberId, Integer exchangeType);
+    public List<Exchange> findByMyIdAndExchangeType(Long memberId, Integer exchangeType);
+
+    public long countByImpUidContainsIgnoreCase(String impUid);
 }
