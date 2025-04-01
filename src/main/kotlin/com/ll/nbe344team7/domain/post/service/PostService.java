@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -85,7 +86,7 @@ public class PostService {
      * @since 2025-03-25
      */
     @Transactional
-    public Map<String, String> createPost(PostRequest request, Long memberId) {
+    public Map<String, String> createPost(PostRequest request, MultipartFile[] images, Long memberId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
