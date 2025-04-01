@@ -18,7 +18,8 @@ data class PostDto(
     val reports: Int,
     val createdAt: LocalDateTime?,
     val modifiedAt: LocalDateTime?,
-    val isAuthor: Boolean
+    val isAuthor: Boolean,
+    val images: List<String>
 ) {
     companion object {
         fun from(post: Post, memberId: Long): PostDto {
@@ -39,7 +40,8 @@ data class PostDto(
                 reports = post.reports,
                 createdAt = post.createdAt,
                 modifiedAt = post.modifiedAt,
-                isAuthor = isAuthor // 작성자 여부 설정
+                isAuthor = isAuthor, // 작성자 여부 설정
+                images = post.images.map { it.url }
             )
         }
     }
