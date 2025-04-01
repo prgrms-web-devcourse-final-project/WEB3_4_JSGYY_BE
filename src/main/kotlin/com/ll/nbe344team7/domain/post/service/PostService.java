@@ -17,12 +17,19 @@ import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
+import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
+import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -31,12 +38,22 @@ public class PostService {
     private final AuctionRepository auctionRepository;
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
+    private final S3ImageService s3ImageService;
+    private final ImageFileRepository imageFileRepository;
 
-    public PostService(PostRepository postRepository, AuctionRepository auctionRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository) {
+    public PostService(PostRepository postRepository,
+                       AuctionRepository auctionRepository,
+                       MemberRepository memberRepository,
+                       PostLikeRepository postLikeRepository,
+                       S3ImageService s3ImageService,
+                       ImageFileRepository imageFileRepository
+    ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
+        this.s3ImageService = s3ImageService;
+        this.imageFileRepository = imageFileRepository;
     }
 
     /**
@@ -66,8 +83,8 @@ public class PostService {
         }
     }
 
-    private void validateAuctionRequest(AuctionRequest request) {
-        if (request.getStartedAt().isAfter(request.getClosedAt())) {
+    private void validateAuctionRequest(AuctionRequest auctionRequest) {
+        if (auctionRequest.getStartedAt().isAfter(auctionRequest.getClosedAt())) {
             throw new PostException(PostErrorCode.INVALID_AUCTION_DATE);
         }
     }
@@ -75,14 +92,78 @@ public class PostService {
 
     /**
      *
-     * 게시글 작성
+     * 게시글 작성 - 이미지 파일 O
+     *
+     * @param request
+     * @param images
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-01
+     */
+    @Transactional
+    public Map<String, String> createPost(PostRequest request, MultipartFile[] images, Long memberId) {
+
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        validatePostRequest(request);
+
+        Post post = new Post(
+                member,
+                request.getTitle(),
+                request.getContent(),
+                request.getPrice(),
+                request.getPlace(),
+                request.getAuctionStatus()
+        );
+
+        final Post savedPost = postRepository.save(post);
+
+
+        // 이미지 업로드
+        if (images != null && images.length > 0) {
+            List<ImageFile> imageFiles = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl);
+                        imageFile.setPost(savedPost); // Post와 연관 설정
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(imageFiles);
+            post.getImages().addAll(imageFiles);
+        }
+
+        // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
+        if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
+            AuctionRequest auctionRequest = request.getAuctionRequest();
+
+            validateAuctionRequest(auctionRequest);
+
+            Auction auction = post.createAuction(
+                    auctionRequest.getStartedAt(),
+                    auctionRequest.getClosedAt()
+            );
+
+            auctionRepository.save(auction);
+        }
+
+        // 반환 메시지
+        return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
+    }
+
+    /**
+     *
+     * 게시글 작성 - 이미지 파일 X (테스트 코드용)
      *
      * @param request
      * @param memberId
      * @return
      *
      * @author GAEUN220
-     * @since 2025-03-25
+     * @since 2025-04-01
      */
     @Transactional
     public Map<String, String> createPost(PostRequest request, Long memberId) {
@@ -100,7 +181,7 @@ public class PostService {
                 request.getAuctionStatus()
         );
 
-        post = postRepository.save(post);
+        postRepository.save(post);
 
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
@@ -146,15 +227,72 @@ public class PostService {
 
     /**
      *
-     * 게시글 수정
+     * 게시글 수정 - 이미지 O
+     *
+     * @param postId
+     * @param request
+     * @param images
+     * @param memberId
+     *
+     * @author GAEUN220
+     * @since 2025-04-01
+     */
+    @Transactional
+    public void modifyPost(Long postId, PostRequest request, MultipartFile[] images, Long memberId) {
+
+        validatePostRequest(request);
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!post.getMember().getId().equals(memberId)) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        post.update(
+                request.getTitle(),
+                request.getContent(),
+                request.getPrice(),
+                request.getPlace(),
+                request.getSaleStatus(),
+                request.getAuctionStatus()
+        );
+
+        if (images != null && images.length > 0) {
+            // 기존 이미지 삭제 (S3 + DB)
+            List<ImageFile> existingImages = post.getImages();
+            existingImages.forEach(image -> {
+                s3ImageService.deleteImageFromS3(image.getUrl());
+                imageFileRepository.delete(image);
+            });
+            post.getImages().clear();
+
+            // 새 이미지 업로드
+            List<ImageFile> newImages = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl);
+                        imageFile.setPost(post); // 게시글과 연관 설정
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(newImages);
+            post.getImages().addAll(newImages);
+        }
+
+        postRepository.save(post);
+    }
+
+    /**
+     *
+     * 게시글 수정 - 이미지 X (테스트 코드 용)
      *
      * @param postId
      * @param request
      * @param memberId
-     * @return
      *
      * @author GAEUN220
-     * @since 2025-03-25
+     * @since 2025-04-01
      */
     @Transactional
     public void modifyPost(Long postId, PostRequest request, Long memberId) {
@@ -238,7 +376,9 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        return PostDto.Companion.from(post, memberId);
+        boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(postId, memberId);
+
+        return PostDto.Companion.from(post, memberId, isLiked);
     }
 
 

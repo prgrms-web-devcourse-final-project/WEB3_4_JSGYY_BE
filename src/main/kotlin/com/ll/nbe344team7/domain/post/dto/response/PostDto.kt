@@ -18,10 +18,12 @@ data class PostDto(
     val reports: Int,
     val createdAt: LocalDateTime?,
     val modifiedAt: LocalDateTime?,
-    val isAuthor: Boolean
+    val isAuthor: Boolean,
+    val isLiked: Boolean = false,
+    val images: List<String>
 ) {
     companion object {
-        fun from(post: Post, memberId: Long): PostDto {
+        fun from(post: Post, memberId: Long, isLiked: Boolean): PostDto {
             val isAuthor = post.member.id == memberId
 
             return PostDto(
@@ -39,7 +41,9 @@ data class PostDto(
                 reports = post.reports,
                 createdAt = post.createdAt,
                 modifiedAt = post.modifiedAt,
-                isAuthor = isAuthor // 작성자 여부 설정
+                isAuthor = isAuthor, // 작성자 여부 설정
+                isLiked = isLiked,
+                images = post.images.map { it.url }
             )
         }
     }
