@@ -27,4 +27,6 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
     org.springframework.security: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
     com.example: DEBUG
