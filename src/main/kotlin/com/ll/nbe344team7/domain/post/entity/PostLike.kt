@@ -3,6 +3,7 @@ package com.ll.nbe344team7.domain.post.entity
 import com.ll.nbe344team7.domain.member.entity.Member
 import jakarta.persistence.*
 
+@Entity
 class PostLike (
     member: Member,
     post: Post
