@@ -17,13 +17,19 @@ import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
+import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
+import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -32,12 +38,22 @@ public class PostService {
     private final AuctionRepository auctionRepository;
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
+    private final S3ImageService s3ImageService;
+    private final ImageFileRepository imageFileRepository;
 
-    public PostService(PostRepository postRepository, AuctionRepository auctionRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository) {
+    public PostService(PostRepository postRepository,
+                       AuctionRepository auctionRepository,
+                       MemberRepository memberRepository,
+                       PostLikeRepository postLikeRepository,
+                       S3ImageService s3ImageService,
+                       ImageFileRepository imageFileRepository
+    ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
+        this.s3ImageService = s3ImageService;
+        this.imageFileRepository = imageFileRepository;
     }
 
     /**
@@ -67,8 +83,8 @@ public class PostService {
         }
     }
 
-    private void validateAuctionRequest(AuctionRequest request) {
-        if (request.getStartedAt().isAfter(request.getClosedAt())) {
+    private void validateAuctionRequest(AuctionRequest auctionRequest) {
+        if (auctionRequest.getStartedAt().isAfter(auctionRequest.getClosedAt())) {
             throw new PostException(PostErrorCode.INVALID_AUCTION_DATE);
         }
     }
@@ -101,7 +117,23 @@ public class PostService {
                 request.getAuctionStatus()
         );
 
-        post = postRepository.save(post);
+        final Post savedPost = postRepository.save(post);
+
+
+        // 이미지 업로드
+        if (images != null && images.length > 0) {
+            List<ImageFile> imageFiles = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl);
+                        imageFile.setPost(savedPost); // Post와 연관 설정
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(imageFiles);
+            post.getImages().addAll(imageFiles);
+        }
 
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
