@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
     public Account findByMemberId(Long memberId);
+
+    Long countByMemberId(Long memberId);
 }
