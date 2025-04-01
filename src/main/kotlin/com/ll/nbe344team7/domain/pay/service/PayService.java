@@ -106,6 +106,7 @@ public class PayService {
      * @since 25. 3. 24.
      */
     public Map<Object, Object> withdrawAccount(WithdrawDTO dto){
+        // 1. 멤버 오류 및 계좌 오류
         Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Account account = this.accountRepository.findByMemberId(dto.getMemberId());
 
@@ -113,10 +114,12 @@ public class PayService {
             throw new AccountException(AccountExceptionCode.NOT_FOUND_ACCOUNT);
         }
 
+        // 2. 보유금 보다 큰 금액 출금 요청할 경우
         if(dto.getPrice() > account.getMoney()){
             throw new PaymentException(PayExceptionCode.PRICE_ERROR);
         }
 
+        // 3. 출금 요청 저장
         Withdraw withdraw = new Withdraw(null, member.getName(), dto.getPrice(), account.getBankName(), account.getAccountNumber(), LocalDateTime.now());
 
         this.withdrawRepository.save(withdraw);
