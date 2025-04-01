@@ -21,6 +21,7 @@ import com.siot.IamportRestClient.response.Payment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -107,6 +108,10 @@ public class PayService {
     public Map<Object, Object> withdrawAccount(WithdrawDTO dto){
         Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Account account = this.accountRepository.findByMemberId(dto.getMemberId());
+
+        if(account == null){
+            throw new AccountException(AccountExceptionCode.NOT_FOUND_ACCOUNT);
+        }
 
         if(dto.getPrice() > account.getMoney()){
             throw new PaymentException(PayExceptionCode.PRICE_ERROR);
