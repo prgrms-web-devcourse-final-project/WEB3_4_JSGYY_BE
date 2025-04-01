@@ -71,7 +71,7 @@ public class MemberService {
 
         return new MemberDTO(member.getId(),
                 member.getName(),
-                member.getUserName(),
+                member.getUsername(),
                 "","",
                 member.getNickname(),
                 member.getEmail(),
