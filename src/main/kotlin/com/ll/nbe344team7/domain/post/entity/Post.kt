@@ -3,6 +3,7 @@ package com.ll.nbe344team7.domain.post.entity
 import com.ll.nbe344team7.domain.auction.entity.Auction
 import com.ll.nbe344team7.domain.member.entity.Member
 import com.ll.nbe344team7.global.base.BaseEntity
+import com.ll.nbe344team7.global.imageFIle.entity.ImageFile
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -53,6 +54,10 @@ class Post (
         protected set
 
     var reports: Int = 0
+        protected set
+
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    var images: MutableList<ImageFile> = mutableListOf()
         protected set
 
     fun update(title: String, content: String, price: Long, place: String, saleStatus: Boolean, auctionStatus: Boolean) {
