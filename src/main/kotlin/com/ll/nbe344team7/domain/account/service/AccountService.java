@@ -3,7 +3,11 @@ package com.ll.nbe344team7.domain.account.service;
 
 import com.ll.nbe344team7.domain.account.dto.AccountDTO;
 import com.ll.nbe344team7.domain.account.entity.Account;
+import com.ll.nbe344team7.domain.account.enums.ExchangeSearchType;
+import com.ll.nbe344team7.domain.account.exception.AccountException;
+import com.ll.nbe344team7.domain.account.exception.AccountExceptionCode;
 import com.ll.nbe344team7.domain.account.repository.AccountRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.pay.entity.Payment;
 import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
@@ -39,24 +43,26 @@ public class AccountService {
      * @since 25. 3. 24.
      */
     public Map<Object, Object> getAccount(Long memberId) {
-        try{
-            Account account = this.accountRepository.findByMemberId(memberId);
-            return Map.of("money", account.getMoney());
-        } catch (NullPointerException e) {
-            throw new NullPointerException();
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Account account = this.accountRepository.findByMemberId(memberId);
+        if(account == null) {
+            throw new AccountException(AccountExceptionCode.NOT_FOUND_ACCOUNT);
         }
+        return Map.of("money", account.getMoney());
     }
 
     /**
      * 거래 내역 조회 기능
      *
-     * @param exchangeType
+     * @param type
      * @return
      * @author shjung
      * @since 25. 3. 24.
      */
-    public Map<Object, Object> getExchangeAccount(Long memberId, String exchangeType) {
-        try {
+    public Map<Object, Object> getExchangeAccount(Long memberId, String type) {
+        try{
+            String exchangeType = String.valueOf(ExchangeSearchType.valueOf(type.toUpperCase()));
+            Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
             List<Payment> list;
             if (exchangeType.equals("sender")) {
                 list = this.paymentRepository.findByMyIdAndExchangeType(memberId, 0);
@@ -67,12 +73,12 @@ public class AccountService {
             }
 
             if(list.isEmpty()) {
-                throw new NullPointerException();
+                throw new AccountException(AccountExceptionCode.NOT_FOUND_EXCHANGE);
             }
 
             return Map.of("exchanges", list);
-        } catch (NullPointerException e) {
-            throw new NullPointerException();
+        } catch (IllegalArgumentException e) {
+            throw new AccountException(AccountExceptionCode.NOT_TYPE_EXCHANGE);
         }
     }
 
