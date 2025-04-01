@@ -27,7 +27,7 @@ public class StompHandler implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) { // WebSocket 연결 요청 시
 
@@ -45,7 +45,6 @@ public class StompHandler implements ChannelInterceptor {
             }
 
             System.out.println("token = " + token);
-
             String username = jwtUtil.getUsername(token);
             Long memberId = jwtUtil.getMemberId(token);
             String role = jwtUtil.getRole(token);

@@ -33,7 +33,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findById(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Post p WHERE p.id = :groupId")
+    @Query("SELECT p FROM Post p WHERE p.id = :id")
     Optional<Post> findByIdWithLock(Long id);
 
     Optional<Post> findFirstByOrderByIdDesc();

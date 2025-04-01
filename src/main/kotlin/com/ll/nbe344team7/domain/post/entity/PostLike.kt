@@ -8,6 +8,10 @@ class PostLike (
     member: Member,
     post: Post
 ) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     var member: Member = member
