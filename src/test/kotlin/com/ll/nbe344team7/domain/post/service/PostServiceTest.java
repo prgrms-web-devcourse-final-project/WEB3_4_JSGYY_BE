@@ -12,6 +12,7 @@ import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -44,7 +48,15 @@ public class PostServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @MockitoBean
+    private S3ImageService s3ImageService;
+
     private Member member;
+
+    MultipartFile[] files = {
+            new MockMultipartFile("file1", "test1.jpg", "image/jpeg", "file1-content".getBytes()),
+            new MockMultipartFile("file2", "test2.jpg", "image/jpeg", "file2-content".getBytes())
+    };
 
     @BeforeEach
     public void setUp() {
@@ -86,7 +98,7 @@ public class PostServiceTest {
 
 
         // when
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -113,7 +125,7 @@ public class PostServiceTest {
 
         // when
         // then
-        assertThatThrownBy(() -> postService.createPost(postRequest, member.getId()))
+        assertThatThrownBy(() -> postService.createPost(postRequest, files, member.getId()))
                 .isInstanceOf(PostException.class)
                 .hasMessageContaining(PostErrorCode.INVALID_TITLE.getMessage());
     }
@@ -133,7 +145,7 @@ public class PostServiceTest {
 
         // when
         // then
-        assertThatThrownBy(() -> postService.createPost(postRequest, member.getId()))
+        assertThatThrownBy(() -> postService.createPost(postRequest, files, member.getId()))
                 .isInstanceOf(PostException.class)
                 .hasMessageContaining(PostErrorCode.INVALID_CONTENT.getMessage());
     }
@@ -153,7 +165,7 @@ public class PostServiceTest {
 
         // when
         // then
-        assertThatThrownBy(() -> postService.createPost(postRequest, member.getId()))
+        assertThatThrownBy(() -> postService.createPost(postRequest, files, member.getId()))
                 .isInstanceOf(PostException.class)
                 .hasMessageContaining(PostErrorCode.INVALID_PRICE.getMessage());
     }
@@ -173,7 +185,7 @@ public class PostServiceTest {
 
         // when
         // then
-        assertThatThrownBy(() -> postService.createPost(postRequest, member.getId()))
+        assertThatThrownBy(() -> postService.createPost(postRequest, files, member.getId()))
                 .isInstanceOf(PostException.class)
                 .hasMessageContaining(PostErrorCode.INVALID_PLACE.getMessage());
     }
@@ -197,7 +209,7 @@ public class PostServiceTest {
                 auctionRequest);
 
         // when
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -228,7 +240,7 @@ public class PostServiceTest {
 
         // when
         // then
-        assertThatThrownBy(() -> postService.createPost(postRequest, member.getId()))
+        assertThatThrownBy(() -> postService.createPost(postRequest, files, member.getId()))
                 .isInstanceOf(PostException.class)
                 .hasMessageContaining(PostErrorCode.INVALID_AUCTION_DATE.getMessage());
     }
@@ -246,7 +258,7 @@ public class PostServiceTest {
                 false,
                 null);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -260,7 +272,7 @@ public class PostServiceTest {
                 null);
 
         // when
-        postService.modifyPost(savedPost.get().getId(), updatePostRequest, member.getId());
+        postService.modifyPost(savedPost.get().getId(), updatePostRequest, files, member.getId());
 
         Optional<Post> updatedPost = postRepository.findById(savedPost.get().getId());
 
@@ -290,7 +302,7 @@ public class PostServiceTest {
                 true,
                 auctionRequest);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -309,7 +321,7 @@ public class PostServiceTest {
                 updateAuctionRequest);
 
         // when
-        postService.modifyPost(savedPost.get().getId(), updatePostRequest, member.getId());
+        postService.modifyPost(savedPost.get().getId(), updatePostRequest, files, member.getId());
         postService.changeToAuction(savedPost.get().getId(), updateAuctionRequest, member.getId());
 
         Optional<Post> updatedPost = postRepository.findById(savedPost.get().getId());
@@ -333,7 +345,7 @@ public class PostServiceTest {
                 false,
                 null);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -366,7 +378,7 @@ public class PostServiceTest {
                 false,
                 null);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -392,7 +404,7 @@ public class PostServiceTest {
                 false,
                 null);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -418,7 +430,7 @@ public class PostServiceTest {
                     false,
                     null
             );
-            postService.createPost(request, member.getId());
+            postService.createPost(request, files, member.getId());
         }
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
@@ -445,7 +457,7 @@ public class PostServiceTest {
                 false,
                 null);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -478,7 +490,7 @@ public class PostServiceTest {
                 true,
                 auctionRequest);
 
-        postService.createPost(postRequest, member.getId());
+        postService.createPost(postRequest, files, member.getId());
 
         Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
 
@@ -509,7 +521,7 @@ public class PostServiceTest {
                     false,
                     null
             );
-            postService.createPost(request, member.getId());
+            postService.createPost(request, files, member.getId());
         }
 
         // 검색 조건 설정
@@ -542,7 +554,7 @@ public class PostServiceTest {
                     false,
                     null
             );
-            postService.createPost(request, member.getId());
+            postService.createPost(request, files, member.getId());
         }
 
         // 검색 조건 설정
