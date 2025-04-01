@@ -342,7 +342,9 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        return PostDto.Companion.from(post, memberId);
+        boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(postId, memberId);
+
+        return PostDto.Companion.from(post, memberId, isLiked);
     }
 
 
