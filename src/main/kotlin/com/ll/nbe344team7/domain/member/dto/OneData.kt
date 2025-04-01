@@ -1,8 +1,8 @@
 package com.ll.nbe344team7.domain.member.dto
 
 /**
- * 수정항 데이터를 담는 클래스
+ * 특정 데이터 하나만 담는 클래스
  */
-data class ModifyData(
+data class OneData(
     val data : String
 )

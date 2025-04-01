@@ -2,8 +2,7 @@ package com.ll.nbe344team7.domain.member.controller;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.dto.ModifyData;
-import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.dto.OneData;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -94,11 +93,16 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
-    @DeleteMapping("/member/withdrawal")
-    public ResponseEntity<Map<String,Object>> withdrawal(){
-        Map<String,Object> mockResponseMap = new HashMap<>();
-        mockResponseMap.put("Message","회원 탈퇴 성공");
-        return ResponseEntity.ok(mockResponseMap);
+    @PostMapping("/member/withdrawal")
+    public ResponseEntity<Map<String,Object>> withdrawal(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OneData data
+    ){
+        Map<String,Object> response = new HashMap<>();
+
+        boolean result =memberService.withdrawal(data,userDetails.getMemberId());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -123,7 +127,7 @@ public class MemberController {
     @PutMapping("/member/modify/{category}")
     public ResponseEntity<Map<String,Object>> modifyMyDetails(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody ModifyData data,
+            @RequestBody OneData data,
             @PathVariable(value = "category") String category
     ){
         Map<String,Object> request = new HashMap<>();

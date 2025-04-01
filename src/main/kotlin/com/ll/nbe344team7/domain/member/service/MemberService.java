@@ -2,7 +2,7 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.dto.ModifyData;
+import com.ll.nbe344team7.domain.member.dto.OneData;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -68,9 +68,7 @@ public class MemberService {
      * @since 2025-03-26
      */
     public MemberDTO myDetails(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
+        Member member = findMember(memberId);
         return new MemberDTO(member.getId(),
                 member.getName(),
                 member.getUserName(),
@@ -90,9 +88,8 @@ public class MemberService {
      * @author 이광석
      * @since 2025-04-01
      */
-    public void modifyMyDetails(String category, ModifyData data, Long memberId) {
-        Member preMember = memberRepository.findById(memberId)
-                .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+    public void modifyMyDetails(String category, OneData data, Long memberId) {
+        Member preMember = findMember(memberId);
         MemberDTO preMemberDTO = new MemberDTO(preMember);
 
         switch(category){
@@ -109,5 +106,38 @@ public class MemberService {
 
         Member newMember = new Member(preMemberDTO);
         memberRepository.save(newMember);
+    }
+
+    /**
+     * 회원 탈퇴 메소드
+     *
+     * @param data
+     * @param memberId
+     * @return boolean
+     * @author 이광석
+     * @since 2025-04-01
+     */
+    public boolean withdrawal(OneData data, Long memberId) {
+        Member member = findMember(memberId);
+
+        if(!member.getPassword().equals(bCryptPasswordEncoder.encode(data.getData()))){
+            return false;
+        }
+        memberRepository.delete(member);
+        return true;
+    }
+
+
+    /**
+     * 회원 조회 메소드
+     *
+     * @param id
+     * @return Member
+     * @author 이광석
+     * @since 2025-04-01
+     */
+    private Member findMember(Long id){
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
     }
 }
