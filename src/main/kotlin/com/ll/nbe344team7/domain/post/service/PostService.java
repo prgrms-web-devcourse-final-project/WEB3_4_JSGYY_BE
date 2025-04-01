@@ -95,11 +95,12 @@ public class PostService {
      * 게시글 작성
      *
      * @param request
+     * @param images
      * @param memberId
      * @return
      *
      * @author GAEUN220
-     * @since 2025-03-25
+     * @since 2025-04-01
      */
     @Transactional
     public Map<String, String> createPost(PostRequest request, MultipartFile[] images, Long memberId) {
@@ -183,14 +184,14 @@ public class PostService {
      *
      * @param postId
      * @param request
+     * @param images
      * @param memberId
-     * @return
      *
      * @author GAEUN220
-     * @since 2025-03-25
+     * @since 2025-04-01
      */
     @Transactional
-    public void modifyPost(Long postId, PostRequest request, Long memberId) {
+    public void modifyPost(Long postId, PostRequest request, MultipartFile[] images, Long memberId) {
 
         validatePostRequest(request);
 
@@ -208,6 +209,29 @@ public class PostService {
                 request.getSaleStatus(),
                 request.getAuctionStatus()
         );
+
+        if (images != null && images.length > 0) {
+            // 기존 이미지 삭제 (S3 + DB)
+            List<ImageFile> existingImages = post.getImages();
+            existingImages.forEach(image -> {
+                s3ImageService.deleteImageFromS3(image.getUrl());
+                imageFileRepository.delete(image);
+            });
+            post.getImages().clear();
+
+            // 새 이미지 업로드
+            List<ImageFile> newImages = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl);
+                        imageFile.setPost(post); // 게시글과 연관 설정
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(newImages);
+            post.getImages().addAll(newImages);
+        }
 
         postRepository.save(post);
     }

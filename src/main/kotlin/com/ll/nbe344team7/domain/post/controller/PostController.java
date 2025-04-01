@@ -83,9 +83,10 @@ public class PostController {
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
             @RequestBody PostRequest request,
+            @RequestPart(value = "images", required = false) MultipartFile[] images,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        postService.modifyPost(postId, request, userDetails.getMemberId());
+        postService.modifyPost(postId, request, images, userDetails.getMemberId());
 
         if (request.getAuctionRequest() != null) {
             postService.changeToAuction(postId, request.getAuctionRequest(), userDetails.getMemberId());
