@@ -17,8 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 /**
  * @author jyson
  * @since 25. 3. 24.
@@ -55,10 +53,12 @@ public class ChatMessageService {
         ChatRoom chatRoom = chatroomService.getChatRoom(dto.getRoomId());
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom, LocalDateTime.now());
+        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
 
         chatMessageRepository.save(chatMessage);
-        //LocalDateTime json 직렬화 해줘야함 지금은 직렬화가 안되어 에러
+
+        System.out.println("ChatMessageId = " + chatMessage.getId());
+
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
     }
 
