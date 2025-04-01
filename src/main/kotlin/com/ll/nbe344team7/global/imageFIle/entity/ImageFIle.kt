@@ -5,7 +5,7 @@ import jakarta.persistence.*
 
 @Entity
 data class ImageFile(
-    var url: String, // 이미지 URL
+    var url: String? = null // 이미지 URL
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
