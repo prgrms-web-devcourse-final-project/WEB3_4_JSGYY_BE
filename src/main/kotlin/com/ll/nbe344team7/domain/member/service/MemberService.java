@@ -2,6 +2,7 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
+import com.ll.nbe344team7.domain.member.dto.ModifyData;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -43,11 +44,12 @@ public class MemberService {
                 memberDTO.getUsername(),
                 memberDTO.getName(),
                 encodingPassword,
-                memberDTO.getNickName(),
+                memberDTO.getNickname(),
                 memberDTO.getEmail(),
-                memberDTO.getPhone_num(),
+                memberDTO.getPhoneNum(),
                 false,
-                "ROLE_ADMIN"
+                "ROLE_ADMIN",
+                memberDTO.getAddress()
         );
 
         try {
@@ -76,6 +78,36 @@ public class MemberService {
                 member.getNickname(),
                 member.getEmail(),
                 member.getPhoneNum(),
-                member.getRole());
+                member.getRole(),
+                member.getAddress());
+    }
+
+    /**
+     * member 데이터 수정 메소드
+     * @param category
+     * @param data
+     * @param memberId
+     * @author 이광석
+     * @since 2025-04-01
+     */
+    public void modifyMyDetails(String category, ModifyData data, Long memberId) {
+        Member preMember = memberRepository.findById(memberId)
+                .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        MemberDTO preMemberDTO = new MemberDTO(preMember);
+
+        switch(category){
+            case "phoneNum":
+                preMemberDTO.setPhoneNum(data.getData());
+                break;
+            case "nickname" :
+                preMemberDTO.setNickname(data.getData());
+                break;
+            case "address" :
+                preMemberDTO.setAddress(data.getData());
+                break;
+        }
+
+        Member newMember = new Member(preMemberDTO);
+        memberRepository.save(newMember);
     }
 }

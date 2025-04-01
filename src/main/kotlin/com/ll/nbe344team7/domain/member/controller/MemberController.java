@@ -2,6 +2,8 @@ package com.ll.nbe344team7.domain.member.controller;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
+import com.ll.nbe344team7.domain.member.dto.ModifyData;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -117,4 +119,17 @@ public class MemberController {
         return ResponseEntity.ok(test);
 
     }
+
+    @PutMapping("/member/modify/{category}")
+    public ResponseEntity<Map<String,Object>> modifyMyDetails(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody ModifyData data,
+            @PathVariable(value = "category") String category
+    ){
+        Map<String,Object> request = new HashMap<>();
+        memberService.modifyMyDetails(category,data,customUserDetails.getMemberId());
+        request.put("message","수정 성공");
+        return ResponseEntity.ok(request);
+    }
+
 }

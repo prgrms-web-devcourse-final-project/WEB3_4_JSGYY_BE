@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.domain.member.dto
 
+import com.ll.nbe344team7.domain.member.entity.Member
+
 /**
  * 멤버 DTO
  *
@@ -12,8 +14,23 @@ data class MemberDTO(
     val username: String="",
     val password:String="",
     val password2: String="",
-    val nickName:String="",
+    var nickname:String="",
     val email:String="",
-    val phone_num: String="",
-    val role:String="ROLE_ADMIN"
-)
+    var phoneNum: String="",
+    val role:String="ROLE_ADMIN",
+    var address:String =""
+){
+    constructor(member: Member): this(
+        id= member.id,
+        name = member.name,
+        username = member.userName,
+        password = member.password,
+        password2 = "",
+        nickname = member.nickname,
+        email = member.email,
+        phoneNum = member.phoneNum,
+        role = member.role,
+        address = member.address
+
+    )
+}
