@@ -5,7 +5,6 @@ import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -19,11 +18,9 @@ import java.util.Map;
 public class ChatMessageController {
 
     private final ChatMessageService chatMessageService;
-    private final SimpMessagingTemplate template;
 
-    public ChatMessageController(ChatMessageService chatMessageService, SimpMessagingTemplate template) {
+    public ChatMessageController(ChatMessageService chatMessageService) {
         this.chatMessageService = chatMessageService;
-        this.template = template;
     }
 
     /**
