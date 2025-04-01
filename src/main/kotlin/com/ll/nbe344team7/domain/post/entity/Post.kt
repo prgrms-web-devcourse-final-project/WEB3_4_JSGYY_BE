@@ -56,7 +56,7 @@ class Post (
     var reports: Int = 0
         protected set
 
-    @OneToMany(mappedBy = "post", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
     var images: MutableList<ImageFile> = mutableListOf()
         protected set
 
