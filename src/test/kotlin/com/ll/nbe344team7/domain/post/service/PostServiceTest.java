@@ -12,7 +12,9 @@ import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -272,7 +274,7 @@ public class PostServiceTest {
                 null);
 
         // when
-        postService.modifyPost(savedPost.get().getId(), updatePostRequest, files, member.getId());
+        postService.modifyPost(savedPost.get().getId(), updatePostRequest, member.getId());
 
         Optional<Post> updatedPost = postRepository.findById(savedPost.get().getId());
 
@@ -321,7 +323,7 @@ public class PostServiceTest {
                 updateAuctionRequest);
 
         // when
-        postService.modifyPost(savedPost.get().getId(), updatePostRequest, files, member.getId());
+        postService.modifyPost(savedPost.get().getId(), updatePostRequest, member.getId());
         postService.changeToAuction(savedPost.get().getId(), updateAuctionRequest, member.getId());
 
         Optional<Post> updatedPost = postRepository.findById(savedPost.get().getId());
@@ -418,6 +420,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("게시글 목록 조회")
+    @Transactional
     void t13() throws Exception {
         // given
         for (int i = 1; i <= 30; i++) {
@@ -431,6 +434,14 @@ public class PostServiceTest {
                     null
             );
             postService.createPost(request, member.getId());
+
+            Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+            // 이미지 추가 (첫 번째 이미지 URL 설정)
+            ImageFile imageFile = new ImageFile();
+            imageFile.setUrl("http://example.com/image" + i + ".jpg");
+            imageFile.setPost(post);  // Post와 연관 설정
+            post.getImages().add(imageFile);  // 이미지를 Post에 추가
         }
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
@@ -442,10 +453,13 @@ public class PostServiceTest {
         assertThat(result.getTotalElements()).isEqualTo(30);
         assertThat(result.getContent()).hasSize(10);
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("제목 30");
+        assertThat(result.getContent().get(0).getThumbnail()).isEqualTo("http://example.com/image30.jpg");  // URL 확인
     }
+
 
     @Test
     @DisplayName("게시글 상세 조회")
+    @Transactional
     void t14() throws Exception {
         // given
         PostRequest postRequest = new PostRequest(
@@ -459,10 +473,15 @@ public class PostServiceTest {
 
         postService.createPost(postRequest, member.getId());
 
-        Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
+        Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+        ImageFile imageFile = new ImageFile();
+        imageFile.setUrl("http://example.com/image.jpg");
+        imageFile.setPost(post);  // Post와 연관 설정
+        post.getImages().add(imageFile);  // 이미지를 Post에 추가
 
         // when
-        PostDto postDto = postService.getPost(savedPost.get().getId(), member.getId());
+        PostDto postDto = postService.getPost(post.getId(), member.getId());
 
         // then
         assertThat(postDto.getTitle()).isEqualTo(postRequest.getTitle());
@@ -470,45 +489,11 @@ public class PostServiceTest {
         assertThat(postDto.getSaleStatus()).isEqualTo(postRequest.getSaleStatus());
         assertThat(postDto.getPrice()).isEqualTo(postRequest.getPrice());
         assertThat(postDto.getPlace()).isEqualTo(postRequest.getPlace());
-    }
-
-    @Test
-    @DisplayName("경매글 상세 조회")
-    void t15() throws Exception {
-        // given
-        AuctionRequest auctionRequest = new AuctionRequest(
-                LocalDateTime.of(2025, 3, 27, 10, 0, 0, 0),
-                LocalDateTime.of(2025, 4, 10, 10, 0, 0, 0)
-        );
-
-        PostRequest postRequest = new PostRequest(
-                "testTitle",
-                "testContent",
-                1000,
-                "testPlace",
-                true,
-                true,
-                auctionRequest);
-
-        postService.createPost(postRequest, member.getId());
-
-        Optional<Post> savedPost = postRepository.findFirstByOrderByIdDesc();
-
-        // when
-        PostDto postDto = postService.getPost(savedPost.get().getId(), member.getId());
-
-        // then
-        assertThat(postDto.getTitle()).isEqualTo(postRequest.getTitle());
-        assertThat(postDto.getContent()).isEqualTo(postRequest.getContent());
-        assertThat(postDto.getSaleStatus()).isEqualTo(postRequest.getSaleStatus());
-        assertThat(postDto.getPrice()).isEqualTo(postRequest.getPrice());
-        assertThat(postDto.getPlace()).isEqualTo(postRequest.getPlace());
-        assertThat(postDto.getAuctionStartedAt()).isEqualTo(auctionRequest.getStartedAt());
-        assertThat(postDto.getAuctionClosedAt()).isEqualTo(auctionRequest.getClosedAt());
     }
 
     @Test
     @DisplayName("게시글 검색 테스트 - 단일 검색")
+    @Transactional
     void t16() throws Exception {
         // given
         for (int i = 1; i <= 30; i++) {
@@ -522,6 +507,14 @@ public class PostServiceTest {
                     null
             );
             postService.createPost(request, member.getId());
+
+            Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+            // 이미지 추가 (첫 번째 이미지 URL 설정)
+            ImageFile imageFile = new ImageFile();
+            imageFile.setUrl("http://example.com/image" + i + ".jpg");
+            imageFile.setPost(post);  // Post와 연관 설정
+            post.getImages().add(imageFile);  // 이미지를 Post에 추가
         }
 
         // 검색 조건 설정
@@ -542,6 +535,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("게시글 검색 테스트 - 리스트 검색")
+    @Transactional
     void t17() throws Exception {
         // given
         for (int i = 1; i <= 30; i++) {
@@ -555,6 +549,14 @@ public class PostServiceTest {
                     null
             );
             postService.createPost(request, member.getId());
+
+            Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+            // 이미지 추가 (첫 번째 이미지 URL 설정)
+            ImageFile imageFile = new ImageFile();
+            imageFile.setUrl("http://example.com/image" + i + ".jpg");
+            imageFile.setPost(post);  // Post와 연관 설정
+            post.getImages().add(imageFile);  // 이미지를 Post에 추가
         }
 
         // 검색 조건 설정

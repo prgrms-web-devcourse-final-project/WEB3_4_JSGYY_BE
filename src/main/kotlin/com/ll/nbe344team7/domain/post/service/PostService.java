@@ -156,7 +156,7 @@ public class PostService {
 
     /**
      *
-     * 게시글 작성 - 이미지 파일 X
+     * 게시글 작성 - 이미지 파일 X (테스트 코드용)
      *
      * @param request
      * @param memberId
@@ -227,7 +227,7 @@ public class PostService {
 
     /**
      *
-     * 게시글 수정
+     * 게시글 수정 - 이미지 O
      *
      * @param postId
      * @param request
@@ -279,6 +279,40 @@ public class PostService {
             imageFileRepository.saveAll(newImages);
             post.getImages().addAll(newImages);
         }
+
+        postRepository.save(post);
+    }
+
+    /**
+     *
+     * 게시글 수정 - 이미지 X (테스트 코드 용)
+     *
+     * @param postId
+     * @param request
+     * @param memberId
+     *
+     * @author GAEUN220
+     * @since 2025-04-01
+     */
+    @Transactional
+    public void modifyPost(Long postId, PostRequest request, Long memberId) {
+
+        validatePostRequest(request);
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!post.getMember().getId().equals(memberId)) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        post.update(
+                request.getTitle(),
+                request.getContent(),
+                request.getPrice(),
+                request.getPlace(),
+                request.getSaleStatus(),
+                request.getAuctionStatus()
+        );
 
         postRepository.save(post);
     }
