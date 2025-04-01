@@ -55,12 +55,6 @@ public class PayController {
      */
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawAccount(@RequestBody WithdrawDTO withdrawDTO){
-        if(withdrawDTO.getMemberId() == null){
-            return ResponseEntity.status(404).body(Map.of("message", "멤버가 조회되지 않습니다."));
-        }
-        else if(withdrawDTO.getPrice() == null || withdrawDTO.getPrice() > 50000){
-            return ResponseEntity.status(404).body(Map.of("message", "보유금의 한도를 넘어선 금액입니다."));
-        }
         return ResponseEntity.ok(this.payService.withdrawAccount(withdrawDTO));
     }
 }

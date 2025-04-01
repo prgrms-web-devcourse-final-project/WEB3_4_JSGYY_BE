@@ -1,11 +1,19 @@
 package com.ll.nbe344team7.domain.pay.service;
 
+import com.ll.nbe344team7.domain.account.entity.Account;
+import com.ll.nbe344team7.domain.account.repository.AccountRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
 import com.ll.nbe344team7.domain.pay.dto.WithdrawDTO;
 import com.ll.nbe344team7.domain.pay.entity.Exchange;
+import com.ll.nbe344team7.domain.pay.entity.Withdraw;
 import com.ll.nbe344team7.domain.pay.exception.PayExceptionCode;
 import com.ll.nbe344team7.domain.pay.exception.PaymentException;
 import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
+import com.ll.nbe344team7.domain.pay.repository.WithdrawRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
@@ -14,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,15 +35,22 @@ public class PayService {
 
     private final PaymentRepository paymentRepository;
     private final IamportClient iamportClient;
+    private final WithdrawRepository withdrawRepository;
+    private final MemberRepository memberRepository;
+    private final AccountRepository accountRepository;
 
     @Value("${iamport.REST_API_KEY}")
     private String REST_API_KEY;
     @Value("${iamport.REST_API_SECRET}")
     private String REST_API_SECRET;
 
-    public PayService(PaymentRepository paymentRepository) {
+    public PayService(PaymentRepository paymentRepository, WithdrawRepository withdrawRepository,
+                      MemberRepository memberRepository, AccountRepository accountRepository) {
         this.paymentRepository = paymentRepository;
         this.iamportClient = new IamportClient(REST_API_KEY, REST_API_SECRET);
+        this.withdrawRepository = withdrawRepository;
+        this.memberRepository = memberRepository;
+        this.accountRepository = accountRepository;
     }
 
     /**
@@ -89,6 +105,16 @@ public class PayService {
      * @since 25. 3. 24.
      */
     public Map<Object, Object> withdrawAccount(WithdrawDTO dto){
+        Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Account account = this.accountRepository.findByMemberId(dto.getMemberId());
+
+        if(dto.getPrice() > account.getMoney()){
+            throw new PaymentException(PayExceptionCode.PRICE_ERROR);
+        }
+
+        Withdraw withdraw = new Withdraw(null, member.getName(), dto.getPrice(), account.getBankName(), account.getAccountNumber(), LocalDateTime.now());
+
+        this.withdrawRepository.save(withdraw);
         return Map.of("message", "출금 요청이 확인되었습니다.");
     }
 }
