@@ -92,7 +92,7 @@ public class PostService {
 
     /**
      *
-     * 게시글 작성
+     * 게시글 작성 - 이미지 파일 O
      *
      * @param request
      * @param images
@@ -135,6 +135,53 @@ public class PostService {
             imageFileRepository.saveAll(imageFiles);
             post.getImages().addAll(imageFiles);
         }
+
+        // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
+        if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
+            AuctionRequest auctionRequest = request.getAuctionRequest();
+
+            validateAuctionRequest(auctionRequest);
+
+            Auction auction = post.createAuction(
+                    auctionRequest.getStartedAt(),
+                    auctionRequest.getClosedAt()
+            );
+
+            auctionRepository.save(auction);
+        }
+
+        // 반환 메시지
+        return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
+    }
+
+    /**
+     *
+     * 게시글 작성 - 이미지 파일 X
+     *
+     * @param request
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-01
+     */
+    @Transactional
+    public Map<String, String> createPost(PostRequest request, Long memberId) {
+
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        validatePostRequest(request);
+
+        Post post = new Post(
+                member,
+                request.getTitle(),
+                request.getContent(),
+                request.getPrice(),
+                request.getPlace(),
+                request.getAuctionStatus()
+        );
+
+        postRepository.save(post);
 
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {

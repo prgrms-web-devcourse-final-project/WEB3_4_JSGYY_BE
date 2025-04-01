@@ -103,8 +103,7 @@ public class S3ImageService {
     }
 
     private void saveImageFileToDb(String imageUrl) {
-        ImageFile imageFile = new ImageFile();
-        imageFile.setUrl(imageUrl); // URL만 저장
+        ImageFile imageFile = new ImageFile(imageUrl);
         imageFileRepository.save(imageFile);
     }
 
