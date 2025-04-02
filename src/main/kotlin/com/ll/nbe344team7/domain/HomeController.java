@@ -92,7 +92,7 @@ public class HomeController {
                                        $(this).prop('disabled', true).hide(); // 구독 버튼 비활성화 및 숨김
                                        $(this).siblings('.unsubscribeBtn').show(); // 구독 해제 버튼 표시
                                    });
-                       
+                                   
                                    // 구독 해제 버튼 클릭 시
                                    $(document).on('click', '.unsubscribeBtn', function () {
                                        const inputField = $(this).siblings('input');

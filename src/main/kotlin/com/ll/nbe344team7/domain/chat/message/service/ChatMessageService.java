@@ -4,12 +4,15 @@ import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
+import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
+import com.ll.nbe344team7.domain.chat.participant.service.ChatParticipantService;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import com.ll.nbe344team7.global.redis.RedisRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +20,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author jyson
@@ -28,12 +32,16 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatroomService chatroomService;
+    private final ChatParticipantService chatParticipantService;
+    private final RedisRepository redisRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MemberRepository memberRepository;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatParticipantService chatParticipantService, RedisRepository redisRepository, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
+        this.chatParticipantService = chatParticipantService;
+        this.redisRepository = redisRepository;
         this.redisTemplate = redisTemplate;
         this.memberRepository = memberRepository;
     }
@@ -55,11 +63,22 @@ public class ChatMessageService {
         ChatRoom chatRoom = chatroomService.getChatRoom(dto.getRoomId());
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom, LocalDateTime.now());
+        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
 
         chatMessageRepository.save(chatMessage);
-        //LocalDateTime json 직렬화 해줘야함 지금은 직렬화가 안되어 에러
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
+
+        Long roomId = chatRoom.getId();
+        Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
+
+        if (chatroomUsers.size() < 2) {
+            List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
+            List<ChatParticipant> offlineUsers = chatParticipants.stream()
+                    .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
+                    .toList();
+
+            // offlineUsers 에 담긴 user 에게 알람 전송 코드 넣으면 됨
+        }
     }
 
     /**
@@ -82,4 +101,5 @@ public class ChatMessageService {
         if (!message.isEmpty()) return chatMessageRepository.findByChatRoomIdAndContentContaining(pageable, roomId, message).map(ChatMessageDTO::new);
         return chatMessageRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
     }
+
 }

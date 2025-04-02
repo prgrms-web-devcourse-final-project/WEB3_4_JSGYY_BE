@@ -13,4 +13,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 interface ChatParticipantRepository : JpaRepository<ChatParticipant, Long> {
     fun findByMemberId(memberId : Long): List<ChatParticipant>
+    fun findByChatroomId(chatroomId: Long): List<ChatParticipant>
 }
