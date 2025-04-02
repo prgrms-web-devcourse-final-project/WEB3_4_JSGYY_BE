@@ -3,6 +3,7 @@ package com.ll.nbe344team7.domain.member.service;
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.dto.OneData;
+
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -10,6 +11,7 @@ import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import retrofit2.http.HEAD;
 
 
 /**
@@ -68,14 +70,19 @@ public class MemberService {
      * @since 2025-03-26
      */
     public MemberDTO myDetails(Long memberId) {
-        Member member = findMember(memberId);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
         return new MemberDTO(member.getId(),
                 member.getName(),
-                member.getUserName(),
+                member.getUsername(),
+
                 "","",
                 member.getNickname(),
                 member.getEmail(),
                 member.getPhoneNum(),
+
                 member.getRole(),
                 member.getAddress());
     }
@@ -106,11 +113,13 @@ public class MemberService {
 
         Member newMember = new Member(preMemberDTO);
         memberRepository.save(newMember);
+
     }
 
     /**
      * 회원 탈퇴 메소드
      *
+
      * @param data
      * @param memberId
      * @return boolean
@@ -139,5 +148,6 @@ public class MemberService {
     private Member findMember(Long id){
         return memberRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
     }
 }

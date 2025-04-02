@@ -7,11 +7,19 @@ import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.domain.member.entity.Member;
+
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 /**
  * @author jyson
@@ -22,10 +30,14 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatroomService chatroomService;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final MemberRepository memberRepository;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
+        this.redisTemplate = redisTemplate;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -35,18 +47,22 @@ public class ChatMessageService {
      * 2. 채팅방에 자신이 포함되어 있는지 확인해야 될까?????
      *
      * @param dto
-     * @param roomId
+     * @param memberId
 
      *
      * @author jyson
      * @since 25. 3. 25.
      */
-    public void send(MessageDTO dto, long roomId) {
-        ChatRoom chatRoom = chatroomService.getChatRoom(roomId);
+    public void send(MessageDTO dto, Long memberId) {
+        ChatRoom chatRoom = chatroomService.getChatRoom(dto.getRoomId());
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        ChatMessage chatMessage = new ChatMessage(new Member(), dto.getContent(), chatRoom);
+        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom, LocalDateTime.now());
+
 
         chatMessageRepository.save(chatMessage);
+        //LocalDateTime json 직렬화 해줘야함 지금은 직렬화가 안되어 에러
+        redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
     }
 
     /**

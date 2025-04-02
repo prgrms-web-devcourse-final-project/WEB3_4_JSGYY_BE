@@ -20,7 +20,7 @@ class Member(
 
 
     @Column(nullable = false,unique=true)
-    val userName: String,
+    val username: String,
 
     @Column(nullable = false)
     val name: String,
@@ -44,12 +44,12 @@ class Member(
     val role: String = "ROLE_ADMIN",
 
     @Column(nullable = false)
-    val address: String
+    val address: String =""
 ):BaseEntity(){
    constructor(dto: MemberDTO):this(
        id=null,
        name= dto.name,
-       userName=dto.username,
+       username=dto.username,
        password=dto.password,
        nickname=dto.nickname,
        email=dto.email,
@@ -61,7 +61,7 @@ class Member(
 
     constructor() : this(
         id = null,
-        userName = "",
+        username = "",
         name = "",
         password = "",
         nickname = "",

@@ -39,17 +39,16 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository.findByUserName(username);
+
+        Member member = memberRepository.findByUsername(username);
 
         if(member==null){
-            System.out.println("member is null");
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
-
         }
 
 
-        System.out.println("loadUserByUsername : "+member.getId()+" "+ member.getUserName()+" "+member.getRole()+" "+member.getPassword());
-        CustomUserData customUserData = new CustomUserData(member.getId(), member.getUserName(), member.getRole(), member.getPassword());
+        CustomUserData customUserData = new CustomUserData(member.getId(), member.getUsername(), member.getRole(), member.getPassword());
+
 
         return new CustomUserDetails(customUserData);
     }

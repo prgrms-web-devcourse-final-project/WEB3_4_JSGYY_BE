@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @since 25.03.25
  */
 public interface MemberRepository extends JpaRepository<Member,Long> {
-    Member findByUserName(String username);
+
+    Member findByUsername(String username);
 
 }

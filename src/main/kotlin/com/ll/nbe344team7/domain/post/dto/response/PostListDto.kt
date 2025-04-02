@@ -10,6 +10,7 @@ data class PostListDto(
     val price: Long,
     val saleStatus: Boolean,
     val auctionStatus: Boolean,
+    val thumbnail: String?,
     val createdAt: LocalDateTime?
 ) {
     companion object {
@@ -21,6 +22,7 @@ data class PostListDto(
                 price = post.price,
                 saleStatus = post.saleStatus,
                 auctionStatus = post.auctionStatus,
+                thumbnail = post.images.firstOrNull()?.url,
                 createdAt = post.createdAt
             )
         }

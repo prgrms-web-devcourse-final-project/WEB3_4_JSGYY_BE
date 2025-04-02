@@ -1,7 +1,13 @@
 package com.ll.nbe344team7.global.security.jwt;
 
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import com.ll.nbe344team7.global.security.exception.SecurityException;
+import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -13,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -24,9 +32,11 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     final private JWTUtil jwtUtil;
+    final private RedisRepository redisRepository;
 
-    public JWTFilter(JWTUtil jwtUtil) {
+    public JWTFilter(JWTUtil jwtUtil,RedisRepository redisRepository) {
         this.jwtUtil = jwtUtil;
+        this.redisRepository = redisRepository;
     }
 
     /**
@@ -43,37 +53,54 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-      //로그인 시에는 검증할 필요 없음
-       if("/api/auth/login".equals(request.getServletPath())){
+        List<String> noCertifiedUrls = new ArrayList<>();
+        noCertifiedUrls.add("/api/auth/login");
+        noCertifiedUrls.add("/h2-console");
+        noCertifiedUrls.add("/api/auth/register");
+
+        for (String noCertifiedUrl : noCertifiedUrls){
+            if(request.getServletPath().contains(noCertifiedUrl)){
+                filterChain.doFilter(request,response);
+                return;
+            }
+        }
+
+
+       String accessToken = request.getHeader("access");
+
+       String refreshToken = getRefreshToken(request.getCookies());
+
+
+
+       //토큰 존재 확인
+       if(accessToken==null){
            filterChain.doFilter(request,response);
            return;
        }
 
-        Cookie[] cookies = request.getCookies();
+       // 토큰 만료 확인
+       try{
+           jwtUtil.isExpired(accessToken);
+       }catch (ExpiredJwtException e){
+           throw new SecurityException(SecurityExceptionCode.ACCESSTOKEN_IS_EXPIRED);
+       }
 
-        if(cookies==null){
-            filterChain.doFilter(request, response);
-            return;
-        }
+       // 토큰 종류 확인
+       if(!jwtUtil.getCategory(accessToken).equals("access")){
+           throw new SecurityException(SecurityExceptionCode.NOT_ACCESSTOKEN);
+       }
 
-        String Token="";
+       //Db와 비교
+       if(!accessToken.equals(redisRepository.get(refreshToken))){
+           redisRepository.delete(refreshToken);
+           throw new SecurityException(SecurityExceptionCode.TOKEN_MISMATCH);
+       }
 
-        //Cookie 중 accesToken을 찾음
-        for(Cookie cookie : cookies){
-            if("accessToken".equals(cookie.getName())){
-                Token = cookie.getValue();
-                break;
-            }
-        }
+        String username = jwtUtil.getUsername(accessToken);
+        Long memberId= jwtUtil.getMemberId(accessToken);
+        String role = jwtUtil.getRole(accessToken);
 
-        if(Token.isEmpty() || jwtUtil.isExpired(Token)){
-            filterChain.doFilter(request,response);
-            return;
-        }
 
-        String username = jwtUtil.getUsername(Token);
-        Long memberId= jwtUtil.getMemberId(Token);
-        String role = jwtUtil.getRole(Token);
 
 
         CustomUserData customUserData = new CustomUserData(memberId,username,role,"tmp");
@@ -87,4 +114,25 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request,response);
 
     }
+
+
+    /**
+     * refresh 토큰 추출 메소드
+     * @param cookies
+     * @return
+     * @author 이광석
+     * @since 2025-03-28
+     */
+    private String getRefreshToken(Cookie[] cookies){
+
+        for(Cookie cookie: cookies){
+            if(cookie.getName().equals("refresh")){
+                return cookie.getValue();
+            }
+        }
+
+        throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
+    }
+
+
 }

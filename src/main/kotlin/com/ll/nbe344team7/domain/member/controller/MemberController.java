@@ -93,36 +93,22 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
-    @PostMapping("/member/withdrawal")
+
+    @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OneData data
     ){
-        Map<String,Object> response = new HashMap<>();
+        memberService.withdrawal(data,userDetails.getMemberId());
+        Map<String,Object> result = new HashMap<>();
+        result.put("message","회원탈퇴 성공");
 
-        boolean result =memberService.withdrawal(data,userDetails.getMemberId());
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 로그인후 CustomUserDetails 를 테스트하기위한 메소드
-     * @param customUserDetails
-     * @return ResponseEntity<Map<String,Object>>
-     * @author 이광석
-     * @since 2025-03-26
-     */
-    @GetMapping("/")
-    public ResponseEntity<Map<String,Object>> userDetailTest(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails){
-        Map<String,Object> test = new HashMap<>();
-        test.put("이름",customUserDetails.getUsername());
-        test.put("권한",customUserDetails.getRole());
-        test.put("아이디", customUserDetails.getMemberId());
-
-        return ResponseEntity.ok(test);
+        return ResponseEntity.ok(result);
 
     }
+
+
+
 
     @PutMapping("/member/modify/{category}")
     public ResponseEntity<Map<String,Object>> modifyMyDetails(
@@ -135,5 +121,6 @@ public class MemberController {
         request.put("message","수정 성공");
         return ResponseEntity.ok(request);
     }
+
 
 }

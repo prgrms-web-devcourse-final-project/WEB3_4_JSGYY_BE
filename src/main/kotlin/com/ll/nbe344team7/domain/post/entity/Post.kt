@@ -1,13 +1,15 @@
 package com.ll.nbe344team7.domain.post.entity
 
 import com.ll.nbe344team7.domain.auction.entity.Auction
+import com.ll.nbe344team7.domain.member.entity.Member
 import com.ll.nbe344team7.global.base.BaseEntity
+import com.ll.nbe344team7.global.imageFIle.entity.ImageFile
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
 class Post (
-    memberId: Long,
+    member: Member,
     title: String,
     content: String,
     price: Long,
@@ -19,8 +21,9 @@ class Post (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
 
-    @Column(nullable = false)
-    var memberId: Long = memberId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    var member: Member = member
         protected set
 
     @Column(nullable = false)
@@ -53,6 +56,10 @@ class Post (
     var reports: Int = 0
         protected set
 
+    @OneToMany(mappedBy = "post", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
+    var images: MutableList<ImageFile> = mutableListOf()
+        protected set
+
     fun update(title: String, content: String, price: Long, place: String, saleStatus: Boolean, auctionStatus: Boolean) {
         this.title = title
         this.content = content
@@ -79,5 +86,13 @@ class Post (
         ).apply {
             this.post = this@Post  // Post와 Auction 관계 설정
         }
+    }
+
+    fun like() {
+        this.likes++ // 좋아요 수 증가
+    }
+
+    fun unlike() {
+        this.likes-- // 좋아요 수 감소
     }
 }

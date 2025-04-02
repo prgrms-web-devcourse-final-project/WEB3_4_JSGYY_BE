@@ -4,11 +4,13 @@ import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom
 import com.ll.nbe344team7.domain.member.entity.Member
 
 import com.ll.nbe344team7.global.base.BaseEntity
+
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "chat_message")
-class ChatMessage : BaseEntity {
+class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -22,9 +24,14 @@ class ChatMessage : BaseEntity {
     @Column(columnDefinition = "TEXT")
     lateinit var content: String
 
-    constructor(member: Member, content: String, chatRoom: ChatRoom) {
+
+    lateinit var createdAt: LocalDateTime
+
+    constructor(member: Member, content: String, chatRoom: ChatRoom, createdAt: LocalDateTime) {
+
         this.member = member
         this.content = content
         this.chatRoom = chatRoom
+        this.createdAt = createdAt
     }
 }

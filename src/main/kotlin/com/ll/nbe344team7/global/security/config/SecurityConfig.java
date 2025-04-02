@@ -1,12 +1,15 @@
 package com.ll.nbe344team7.global.security.config;
 
 
+import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.jwt.JWTFilter;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import com.ll.nbe344team7.global.security.jwt.LoginFilter;
+import com.ll.nbe344team7.global.security.jwt.LogoutFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,7 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.util.Collection;
 import java.util.Collections;
 
 
@@ -34,13 +36,16 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final RedisRepository redisRepository;
 
     public SecurityConfig(
             AuthenticationConfiguration authenticationConfiguration,
-            JWTUtil jwtUtil) {
+            JWTUtil jwtUtil,
+            RedisRepository redisRepository) {
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
+        this.redisRepository = redisRepository;
     }
 
     /**
@@ -82,7 +87,7 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil, redisRepository);
         loginFilter.setFilterProcessesUrl("/api/auth/login");
 
 
@@ -114,7 +119,7 @@ public class SecurityConfig {
 
 
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/api/auth/register","/h2-console/**").permitAll()  //인증없이 접속가능
+                        .requestMatchers("/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**").permitAll()  //인증없이 접속가능
                         .anyRequest().authenticated()) // 인증 필요
 
                 .headers(headers -> headers
@@ -122,9 +127,11 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin())
                 )
 
-                .addFilterBefore(new JWTFilter(jwtUtil),LoginFilter.class)  // jwt 유효성 검사
+                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),LoginFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
+
+                .addFilterBefore(new LogoutFilter(jwtUtil, redisRepository), UsernamePasswordAuthenticationFilter.class)
 
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));  //세션 stateless 상태 설정
