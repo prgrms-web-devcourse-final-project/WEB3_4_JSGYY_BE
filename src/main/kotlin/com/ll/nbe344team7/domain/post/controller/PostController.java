@@ -6,7 +6,6 @@ import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,8 +40,8 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<?> createPost(
-            @Valid @RequestBody PostRequest request,
-            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestPart(value = "post") PostRequest request,
+            @RequestPart(value = "images") MultipartFile[] images,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
         return ResponseEntity.ok(postService.createPost(request, images, userDetails.getMemberId()));
@@ -82,7 +81,7 @@ public class PostController {
     @PutMapping("/{postId}")
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
-            @RequestBody PostRequest request,
+            @RequestPart(value = "post") PostRequest request,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
