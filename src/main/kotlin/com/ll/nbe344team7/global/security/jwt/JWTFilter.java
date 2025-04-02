@@ -100,6 +100,8 @@ public class JWTFilter extends OncePerRequestFilter {
         String role = jwtUtil.getRole(accessToken);
 
 
+
+
         CustomUserData customUserData = new CustomUserData(memberId,username,role,"tmp");
 
         CustomUserDetails customUserDetails = new CustomUserDetails(customUserData);

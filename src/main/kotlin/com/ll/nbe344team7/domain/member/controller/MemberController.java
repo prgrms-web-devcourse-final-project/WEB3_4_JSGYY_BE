@@ -2,6 +2,7 @@ package com.ll.nbe344team7.domain.member.controller;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
+import com.ll.nbe344team7.domain.member.dto.OneData;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -92,15 +93,33 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
+
     @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OneData data
     ){
-        memberService.withdrawal(userDetails.getMemberId());
+        memberService.withdrawal(data,userDetails.getMemberId());
         Map<String,Object> result = new HashMap<>();
         result.put("message","회원탈퇴 성공");
 
         return ResponseEntity.ok(result);
+
+    }
+
+
+
+
+    @PutMapping("/member/modify/{category}")
+    public ResponseEntity<Map<String,Object>> modifyMyDetails(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody OneData data,
+            @PathVariable(value = "category") String category
+    ){
+        Map<String,Object> request = new HashMap<>();
+        memberService.modifyMyDetails(category,data,customUserDetails.getMemberId());
+        request.put("message","수정 성공");
+        return ResponseEntity.ok(request);
     }
 
 

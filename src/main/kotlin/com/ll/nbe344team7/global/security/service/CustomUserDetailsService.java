@@ -39,6 +39,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
         Member member = memberRepository.findByUsername(username);
 
         if(member==null){
@@ -47,6 +48,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 
         CustomUserData customUserData = new CustomUserData(member.getId(), member.getUsername(), member.getRole(), member.getPassword());
+
 
         return new CustomUserDetails(customUserData);
     }

@@ -30,6 +30,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable
     );
 
+
     Optional<Post> findById(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

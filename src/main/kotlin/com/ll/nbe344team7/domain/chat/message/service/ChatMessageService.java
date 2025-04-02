@@ -9,6 +9,7 @@ import com.ll.nbe344team7.domain.chat.participant.service.ChatParticipantService
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.domain.member.entity.Member;
+
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
@@ -64,6 +65,7 @@ public class ChatMessageService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
+
 
         chatMessageRepository.save(chatMessage);
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
