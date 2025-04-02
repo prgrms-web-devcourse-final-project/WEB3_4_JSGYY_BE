@@ -43,8 +43,8 @@ public class ChatRoomRedisService {
      * @author kjm72
      * @since 2025-04-02
      */
-    public void saveLastMessage(MessageDTO messageDTO) {
-        chatRoomRedisRepository.saveLastMessage(messageDTO);
+    public void saveLastMessage(MessageDTO messageDTO, Long memberId) {
+        chatRoomRedisRepository.saveLastMessage(messageDTO,memberId);
     }
 
     /**

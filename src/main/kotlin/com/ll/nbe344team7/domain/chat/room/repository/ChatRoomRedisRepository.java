@@ -35,8 +35,8 @@ public class ChatRoomRedisRepository {
      * @author kjm72
      * @since 2025-04-02
      */
-    public void saveLastMessage(MessageDTO messageDTO){
-        String value = messageDTO.getRoomId() + "|" + messageDTO.getContent() + "|" + LocalDateTime.now();
+    public void saveLastMessage(MessageDTO messageDTO, Long memberId) {
+        String value = messageDTO.getRoomId() + "|" +memberId + "|" + messageDTO.getContent() + "|" + LocalDateTime.now();
         getZSetOperations().add("chatroom:"+messageDTO.getRoomId()+":lastMessage", value, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
     }
 }
