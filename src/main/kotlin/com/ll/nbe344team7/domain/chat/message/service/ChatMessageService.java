@@ -28,10 +28,10 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatroomService chatroomService;
-    private final RedisTemplate<String, MessageDTO> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final MemberRepository memberRepository;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, RedisTemplate<String, MessageDTO> redisTemplate, MemberRepository memberRepository) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
         this.redisTemplate = redisTemplate;

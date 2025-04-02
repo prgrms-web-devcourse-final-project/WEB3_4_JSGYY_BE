@@ -7,7 +7,7 @@ package com.ll.nbe344team7.domain.member.dto
  * @since 25.03.25
  */
 data class MemberDTO(
-    val id : Long? ,
+    val id : Long?=null ,
     val name: String="",
     val username: String="",
     val password:String="",
@@ -16,4 +16,6 @@ data class MemberDTO(
     val email:String="",
     val phoneNum: String="",
     val role:String="ROLE_ADMIN"
-)
+){
+
+}

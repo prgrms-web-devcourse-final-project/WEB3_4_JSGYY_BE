@@ -11,17 +11,19 @@ import java.time.LocalDateTime
  * @since 25. 3. 24.
  */
 data class ChatMessageDTO(
-    val id: Long,
-    var memberId: Long,
-    var chatroomId: Long,
+    val id: Long?,
+    var memberId: Long?,
+    var chatroomId: Long?,
     var content: String,
-    var createdAt: LocalDateTime,
+    var createdAt: LocalDateTime?,
 ) {
-    constructor(chatMessage: ChatMessage) : this(
-        chatMessage.id,
-        chatMessage.member.id!!,
+    constructor() : this(null, null, null, "", null)
+
+    constructor(chatMessage: ChatMessage?) : this(
+        chatMessage?.id,
+        chatMessage?.member?.id!!,
         chatMessage.chatRoom.id!!,
         chatMessage.content,
-        chatMessage.createdAt!!
+        chatMessage.createdAt
     )
 }
