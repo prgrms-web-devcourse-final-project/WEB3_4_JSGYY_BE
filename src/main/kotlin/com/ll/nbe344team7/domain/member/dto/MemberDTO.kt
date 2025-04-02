@@ -16,4 +16,6 @@ data class MemberDTO(
     val email:String="",
     val phoneNum: String="",
     val role:String="ROLE_ADMIN"
-)
+) {
+    constructor() : this(null, "", "", "", "","","","")
+}

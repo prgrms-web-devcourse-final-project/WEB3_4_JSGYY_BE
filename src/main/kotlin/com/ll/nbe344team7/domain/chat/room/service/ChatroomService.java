@@ -107,7 +107,7 @@ public class ChatroomService {
     }
 
     @Transactional(readOnly = true)
-    public ChatRoom getChatRoom(long roomId) {
+    public ChatRoom getChatRoom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
         return chatRoom;
     }

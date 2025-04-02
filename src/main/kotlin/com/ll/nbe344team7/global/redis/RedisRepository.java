@@ -3,6 +3,7 @@ package com.ll.nbe344team7.global.redis;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,4 +65,28 @@ public class RedisRepository {
         save(key,newValue,limit);
     }
 
+
+    public void saveChatroom(String roomKey, String userId){
+        redisTemplate.opsForSet().add(roomKey, userId);
+    }
+
+    public void saveSubscription(String subKey, String userId, String roomId) {
+        redisTemplate.opsForHash().put(subKey, userId, roomId);
+    }
+
+    public String getRoomId(String subKey, String userId) {
+        return redisTemplate.opsForHash().get(subKey, userId).toString();
+    }
+
+    public void deleteChatroom(String roomKey, String userId) {
+        redisTemplate.opsForSet().remove(roomKey, userId);
+    }
+
+    public void deleteSubscription(String subKey, String userId) {
+        redisTemplate.opsForHash().delete(subKey, userId);
+    }
+
+    public Set<String> getChatroomUsers(String key) {
+        return redisTemplate.opsForSet().members(key);
+    }
 }

@@ -91,35 +91,8 @@ public class HomeController {
                                        inputField.prop('disabled', true); // 입력 필드 비활성화
                                        $(this).prop('disabled', true).hide(); // 구독 버튼 비활성화 및 숨김
                                        $(this).siblings('.unsubscribeBtn').show(); // 구독 해제 버튼 표시
-                                       var response = fetch('/api/chat/rooms/1', {
-                                           method: 'GET',
-                                           headers: {
-                                               'Content-Type': 'application/json'
-                                           },
-                                       });
-                                       console.log(response);
                                    });
                                    
-                                   async function fetchChatData() {
-                                       try {
-                                           const response = await fetch('/api/chat/rooms/1', {
-                                               method: 'GET',
-                                               headers: {
-                                                   'Content-Type': 'application/json'
-                                               }
-                                           });
-                                   
-                                           if (!response.ok) {
-                                               throw new Error(`HTTP error! status: ${response.status}`);
-                                           }
-                                   
-                                           const data = await response.json(); // JSON 데이터를 가져옴
-                                           console.log(data); // 가져온 데이터를 출력
-                                       } catch (error) {
-                                           console.error('Error fetching chat data:', error);
-                                       }
-                                   }
-                       
                                    // 구독 해제 버튼 클릭 시
                                    $(document).on('click', '.unsubscribeBtn', function () {
                                        const inputField = $(this).siblings('input');
