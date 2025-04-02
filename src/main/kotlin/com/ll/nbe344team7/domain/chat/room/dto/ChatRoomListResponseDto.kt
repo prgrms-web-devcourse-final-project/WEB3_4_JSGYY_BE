@@ -9,5 +9,6 @@ package com.ll.nbe344team7.domain.chat.room.dto
 data class ChatRoomListResponseDto(
     val id : Long,
     val title : String,
+    val nickname : String,
     val lastMessage : String
 )

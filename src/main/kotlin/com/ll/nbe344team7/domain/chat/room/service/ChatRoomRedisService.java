@@ -65,9 +65,10 @@ public class ChatRoomRedisService {
         for (ChatParticipant participant : participants) {
             Long roomId = participant.getChatroom().getId();
             String title = participant.getChatroom().getTitle();
+            String nickname = participant.getMember().getNickname();
             String lastMessage = getLastMessageFromRedis(roomId);
 
-            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, lastMessage));
+            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage));
         }
 
         chatRoomList.sort((a, b) -> {
