@@ -1,10 +1,14 @@
 package com.ll.nbe344team7.domain.pay.controller;
 
 import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
+import com.ll.nbe344team7.domain.pay.dto.PaymentDTO;
 import com.ll.nbe344team7.domain.pay.dto.WithdrawDTO;
 import com.ll.nbe344team7.domain.pay.service.PayService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -56,5 +60,35 @@ public class PayController {
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawAccount(@RequestBody WithdrawDTO withdrawDTO){
         return ResponseEntity.ok(this.payService.withdrawAccount(withdrawDTO));
+    }
+
+    /**
+     *
+     * 물품 결제 기능
+     *
+     * @param paymentDTO
+     * @return
+     *
+     * @author shjung
+     * @since 25. 4. 2.
+     */
+    @PostMapping
+    public ResponseEntity<?> paymentsGood(@RequestBody PaymentDTO paymentDTO){
+        return ResponseEntity.ok(this.payService.payExchange(paymentDTO));
+    }
+
+    /**
+     *
+     * 물품 구매 확정 기능
+     *
+     * @param paymentDTO
+     * @return
+     *
+     * @author shjung
+     * @since 25. 4. 2.
+     */
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirmExchange(@RequestBody PaymentDTO paymentDTO){
+        return ResponseEntity.ok(this.payService.confirmExchange(paymentDTO));
     }
 }

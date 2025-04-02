@@ -95,4 +95,8 @@ class Post (
     fun unlike() {
         this.likes-- // 좋아요 수 감소
     }
+
+    fun updateSaleStatus(status: Boolean) {
+        this.saleStatus = status
+    }
 }
