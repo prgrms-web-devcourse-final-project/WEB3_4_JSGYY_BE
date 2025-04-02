@@ -34,6 +34,6 @@ data class MemberDTO(
         role = member.role,
         address = member.address
     )
-
-
+    
+    constructor() : this(null, "", "", "", "","","","")
 }

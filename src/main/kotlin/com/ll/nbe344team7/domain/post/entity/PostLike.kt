@@ -8,6 +8,7 @@ class PostLike (
     member: Member,
     post: Post
 ) {
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     var member: Member = member
