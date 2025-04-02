@@ -22,7 +22,8 @@ data class Exchange(
     val price: Long?,
     var status: Int,
     val exchangeType: Int,
-    val impUid: String
+    val impUid: String? = null,
+    val postId: Long? = null,
 ){
     constructor(dto: DepositDTO, status: Int) : this(
         id = null,

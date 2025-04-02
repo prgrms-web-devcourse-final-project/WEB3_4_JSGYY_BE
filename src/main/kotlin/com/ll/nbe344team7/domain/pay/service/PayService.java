@@ -7,6 +7,7 @@ import com.ll.nbe344team7.domain.account.repository.AccountRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
+import com.ll.nbe344team7.domain.pay.dto.PaymentDTO;
 import com.ll.nbe344team7.domain.pay.dto.WithdrawDTO;
 import com.ll.nbe344team7.domain.pay.entity.Exchange;
 import com.ll.nbe344team7.domain.pay.entity.Withdraw;
@@ -14,6 +15,8 @@ import com.ll.nbe344team7.domain.pay.exception.PayExceptionCode;
 import com.ll.nbe344team7.domain.pay.exception.PaymentException;
 import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
 import com.ll.nbe344team7.domain.pay.repository.WithdrawRepository;
+import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.siot.IamportRestClient.IamportClient;
@@ -40,6 +43,7 @@ public class PayService {
     private final WithdrawRepository withdrawRepository;
     private final MemberRepository memberRepository;
     private final AccountRepository accountRepository;
+    private final PostRepository postRepository;
 
     @Value("${iamport.REST_API_KEY}")
     private String REST_API_KEY;
@@ -47,12 +51,14 @@ public class PayService {
     private String REST_API_SECRET;
 
     public PayService(PaymentRepository paymentRepository, WithdrawRepository withdrawRepository,
-                      MemberRepository memberRepository, AccountRepository accountRepository) {
+                      MemberRepository memberRepository, AccountRepository accountRepository,
+                      PostRepository postRepository) {
         this.paymentRepository = paymentRepository;
         this.iamportClient = new IamportClient(REST_API_KEY, REST_API_SECRET);
         this.withdrawRepository = withdrawRepository;
         this.memberRepository = memberRepository;
         this.accountRepository = accountRepository;
+        this.postRepository = postRepository;
     }
 
     /**
@@ -123,7 +129,94 @@ public class PayService {
         // 3. 출금 요청 저장
         Withdraw withdraw = new Withdraw(null, member.getName(), dto.getPrice(), account.getBankName(), account.getAccountNumber(), LocalDateTime.now());
 
+        // 4. 거래 내역에 출금 저장
+        Exchange exchange = new Exchange(null, dto.getMemberId(), dto.getMemberId(),
+                LocalDateTime.now(), dto.getPrice(), 0, 1, null, null);
+        account.setMoney(account.getMoney() - dto.getPrice());
+
         this.withdrawRepository.save(withdraw);
+        this.accountRepository.save(account);
+        this.paymentRepository.save(exchange);
         return Map.of("message", "출금 요청이 확인되었습니다.");
+    }
+
+    /**
+     *
+     * 결제 함수
+     * - 현재 결제만 하고 구매확정은 안한 상태로 저장
+     *
+     * @param dto
+     * @return
+     *
+     * @author shjung
+     * @since 25. 4. 2.
+     */
+    public Map<Object, Object> payExchange(PaymentDTO dto){
+        // 1. 멤버 조회 및 게시글, 계좌 조회
+        Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Post post = this.postRepository.findById(dto.getPostId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_POST));
+
+        Account account = this.accountRepository.findByMemberId(dto.getMemberId());
+        if(account == null){
+            throw new AccountException(AccountExceptionCode.NOT_FOUND_ACCOUNT);
+        }
+        // 2. 보유금보다 결제 금액이 높을 경우 에러
+        if(post.getPrice() > account.getMoney()){
+            throw new PaymentException(PayExceptionCode.PAYMENT_ERROR);
+        }
+        // 3. 송금 기록 저장
+        //  - 구매 확정이 아니라서 결제 상태를 미 결제로 저장
+        Exchange sendExchange = new Exchange(null, dto.getMemberId(), post.getMember().getId(),
+                LocalDateTime.now(), post.getPrice(), 0, 1, null, dto.getPostId());
+        post.updateSaleStatus(false);
+
+        // 4. 보유금를 결제 금액을 제외하고 저장하고 송금 기록 및 보유금 수정
+        account.setMoney(account.getMoney() - post.getPrice());
+        accountRepository.save(account);
+        paymentRepository.save(sendExchange);
+        postRepository.save(post);
+
+        return Map.of("message", post.getTitle() + " 결제가 완료되었습니다.");
+    }
+
+    /**
+     *
+     * 구매 확정 함수
+     *
+     * @param dto
+     * @return
+     *
+     * @author shjung
+     * @since 25. 4. 2.
+     */
+    public Map<Object, Object> confirmExchange(PaymentDTO dto){
+        // 1. 멤버 조회 및 게시글, 계좌 조회
+        Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Post post = this.postRepository.findById(dto.getPostId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_POST));
+
+        // 2. 구매한 물품 조회
+        Exchange sendExchange = this.paymentRepository.findByMyIdAndPostId(dto.getMemberId(), dto.getPostId());
+        if(sendExchange == null){
+            throw new PaymentException(PayExceptionCode.PAYMENT_ERROR);
+        }
+        // 3. 구매 확정이 난 경우
+        // - 이미 결제 상태가 완료된 경우 에러 발생
+        if(sendExchange.getStatus() == 1){
+            throw new PaymentException(PayExceptionCode.PAYMENT_STATUS_ERROR);
+        }
+        // 4. 결제 상태 완료로 변경 및 판매자는 입금 내역 추가
+        sendExchange.setStatus(1);
+        Exchange receiveExchange = new Exchange(null, post.getMember().getId(), dto.getMemberId(),
+                LocalDateTime.now(), post.getPrice(), 1, 0, null, dto.getPostId());
+        // 5. 판매자의 보유금 증가
+        Account account = this.accountRepository.findByMemberId(post.getMember().getId());
+        account.setMoney(account.getMoney() + post.getPrice());
+
+        // 6. 변경된 거래 사항 및 보유금 저장
+        this.paymentRepository.save(sendExchange);
+        this.paymentRepository.save(receiveExchange);
+        this.accountRepository.save(account);
+
+        return Map.of("message", post.getTitle() + " 구매 확정이 완료되었습니다.");
     }
 }
