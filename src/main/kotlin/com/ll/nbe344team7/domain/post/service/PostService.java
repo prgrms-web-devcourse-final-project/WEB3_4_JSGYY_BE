@@ -426,6 +426,7 @@ public class PostService {
      * @author GAEUN220
      * @since 2025-03-31
      */
+    @Transactional
     public Map<String, String> likePost(Long postId, Long memberId) {
         Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -449,6 +450,7 @@ public class PostService {
      *
      * @since 2025-03-31
      */
+    @Transactional
     public Map<String, String> unlikePost(Long postId, Long memberId) {
         Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
