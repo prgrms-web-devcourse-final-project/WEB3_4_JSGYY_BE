@@ -58,7 +58,7 @@ public class PostService {
 
     /**
      *
-     * 입력값 검증
+     * PostRequest 입력값 검증
      *
      * @param request
      *
@@ -83,9 +83,33 @@ public class PostService {
         }
     }
 
+    /**
+     *
+     * AucftionRequest 입력값 검증
+     *
+     * @param auctionRequest
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
     private void validateAuctionRequest(AuctionRequest auctionRequest) {
         if (auctionRequest.getStartedAt().isAfter(auctionRequest.getClosedAt())) {
             throw new PostException(PostErrorCode.INVALID_AUCTION_DATE);
+        }
+    }
+
+    /**
+     *
+     * 이미지 수 검증 (최대 10개)
+     *
+     * @param images
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
+    private void validateImageRequest(MultipartFile[] images) {
+        if (images.length > 10) {
+            throw new PostException(PostErrorCode.INVALID_IMAGE_COUNT);
         }
     }
 
@@ -108,6 +132,7 @@ public class PostService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         validatePostRequest(request);
+        validateImageRequest(images);
 
         Post post = new Post(
                 member,
@@ -120,21 +145,7 @@ public class PostService {
 
         final Post savedPost = postRepository.save(post);
 
-
-        // 이미지 업로드
-        if (images != null && images.length > 0) {
-            List<ImageFile> imageFiles = Arrays.stream(images)
-                    .map(image -> {
-                        String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl);
-                        imageFile.setPost(savedPost); // Post와 연관 설정
-                        return imageFile;
-                    })
-                    .collect(Collectors.toList());
-
-            imageFileRepository.saveAll(imageFiles);
-            post.getImages().addAll(imageFiles);
-        }
+        saveFiles(images, savedPost);
 
         // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
         if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
@@ -241,6 +252,7 @@ public class PostService {
     public void modifyPost(Long postId, PostRequest request, MultipartFile[] images, Long memberId) {
 
         validatePostRequest(request);
+        validateImageRequest(images);
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
@@ -257,30 +269,9 @@ public class PostService {
                 request.getAuctionStatus()
         );
 
-        if (images != null && images.length > 0) {
-            // 기존 이미지 삭제 (S3 + DB)
-            List<ImageFile> existingImages = post.getImages();
-            existingImages.forEach(image -> {
-                s3ImageService.deleteImageFromS3(image.getUrl());
-                imageFileRepository.delete(image);
-            });
-            post.getImages().clear();
-
-            // 새 이미지 업로드
-            List<ImageFile> newImages = Arrays.stream(images)
-                    .map(image -> {
-                        String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl);
-                        imageFile.setPost(post); // 게시글과 연관 설정
-                        return imageFile;
-                    })
-                    .collect(Collectors.toList());
-
-            imageFileRepository.saveAll(newImages);
-            post.getImages().addAll(newImages);
-        }
-
         postRepository.save(post);
+
+        updateFile(images, post);
     }
 
     /**
@@ -435,6 +426,7 @@ public class PostService {
      * @author GAEUN220
      * @since 2025-03-31
      */
+    @Transactional
     public Map<String, String> likePost(Long postId, Long memberId) {
         Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -458,6 +450,7 @@ public class PostService {
      *
      * @since 2025-03-31
      */
+    @Transactional
     public Map<String, String> unlikePost(Long postId, Long memberId) {
         Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -469,5 +462,65 @@ public class PostService {
         postRepository.save(post);
 
         return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
+    }
+
+    /**
+     *
+     * 파일 업로도 + POST 연결
+     *
+     * @param images
+     * @param post
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
+    private void saveFiles(final MultipartFile[] images, final Post post) {
+        if (images != null && images.length > 0) {
+            List<ImageFile> imageFiles = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl, post);
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(imageFiles);
+            post.getImages().addAll(imageFiles);
+        }
+    }
+
+    /**
+     *
+     * 기존 이미지 삭제 후 새 이미지 업로드 + POST 연결
+     *
+     * @param images
+     * @param post
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
+    private void updateFile(MultipartFile[] images, final Post post) {
+        if (images != null && images.length > 0) {
+            // 기존 이미지 삭제 (S3 + DB)
+            List<ImageFile> existingImages = post.getImages();
+            existingImages.forEach(image -> {
+                s3ImageService.deleteImageFromS3(image.getUrl());
+                imageFileRepository.delete(image);
+            });
+            post.getImages().clear();
+
+            // 새 이미지 업로드
+            List<ImageFile> newImages = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl, post);
+                        imageFile.setPost(post); // 게시글과 연관 설정
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(newImages);
+            post.getImages().addAll(newImages);
+        }
     }
 }
