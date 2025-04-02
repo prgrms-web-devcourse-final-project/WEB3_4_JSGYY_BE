@@ -81,7 +81,8 @@ public class ChatroomService {
                     ChatRoom chatroom = cp.getChatroom();
                     return new ChatRoomListResponseDto(
                             chatroom.getId(),
-                            chatroom.getTitle()
+                            chatroom.getTitle(),
+                            ""
                     );
                 })
                 .toList();

@@ -3,6 +3,7 @@ package com.ll.nbe344team7.domain.chat.room.controller;
 
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomRequestDto;
+import com.ll.nbe344team7.domain.chat.room.service.ChatRoomRedisService;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,10 @@ import java.util.Map;
 public class ChatroomController {
 
     private final ChatroomService chatroomService;
-    public ChatroomController(ChatroomService chatroomService) {
+    private final ChatRoomRedisService chatRoomRedisService;
+    public ChatroomController(ChatroomService chatroomService, ChatRoomRedisService chatRoomRedisService) {
         this.chatroomService = chatroomService;
+        this.chatRoomRedisService = chatRoomRedisService;
     }
 
     @PostMapping
@@ -35,7 +38,7 @@ public class ChatroomController {
 
     @GetMapping("/user")
     public ResponseEntity<?> getChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<ChatRoomListResponseDto> response = chatroomService.listChatRoom(userDetails.getMemberId());
+        List<ChatRoomListResponseDto> response = chatRoomRedisService.getChatRooms(userDetails.getMemberId());
         return ResponseEntity.ok(Map.of("rooms", response));
     }
 
