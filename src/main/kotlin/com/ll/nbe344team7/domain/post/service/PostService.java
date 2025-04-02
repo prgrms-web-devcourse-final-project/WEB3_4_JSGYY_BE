@@ -98,6 +98,15 @@ public class PostService {
         }
     }
 
+    /**
+     *
+     * 이미지 수 검증 (최대 10개)
+     *
+     * @param images
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
     private void validateImageRequest(MultipartFile[] images) {
         if (images.length > 10) {
             throw new PostException(PostErrorCode.INVALID_IMAGE_COUNT);
@@ -260,30 +269,9 @@ public class PostService {
                 request.getAuctionStatus()
         );
 
-        if (images != null && images.length > 0) {
-            // 기존 이미지 삭제 (S3 + DB)
-            List<ImageFile> existingImages = post.getImages();
-            existingImages.forEach(image -> {
-                s3ImageService.deleteImageFromS3(image.getUrl());
-                imageFileRepository.delete(image);
-            });
-            post.getImages().clear();
-
-            // 새 이미지 업로드
-            List<ImageFile> newImages = Arrays.stream(images)
-                    .map(image -> {
-                        String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl, post);
-                        imageFile.setPost(post); // 게시글과 연관 설정
-                        return imageFile;
-                    })
-                    .collect(Collectors.toList());
-
-            imageFileRepository.saveAll(newImages);
-            post.getImages().addAll(newImages);
-        }
-
         postRepository.save(post);
+
+        updateFile(images, post);
     }
 
     /**
@@ -474,6 +462,16 @@ public class PostService {
         return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
     }
 
+    /**
+     *
+     * 파일 업로도 + POST 연결
+     *
+     * @param images
+     * @param post
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
     private void saveFiles(final MultipartFile[] images, final Post post) {
         if (images != null && images.length > 0) {
             List<ImageFile> imageFiles = Arrays.stream(images)
@@ -486,6 +484,41 @@ public class PostService {
 
             imageFileRepository.saveAll(imageFiles);
             post.getImages().addAll(imageFiles);
+        }
+    }
+
+    /**
+     *
+     * 기존 이미지 삭제 후 새 이미지 업로드 + POST 연결
+     *
+     * @param images
+     * @param post
+     *
+     * @author GAEUN220
+     * @since 2025-04-02
+     */
+    private void updateFile(MultipartFile[] images, final Post post) {
+        if (images != null && images.length > 0) {
+            // 기존 이미지 삭제 (S3 + DB)
+            List<ImageFile> existingImages = post.getImages();
+            existingImages.forEach(image -> {
+                s3ImageService.deleteImageFromS3(image.getUrl());
+                imageFileRepository.delete(image);
+            });
+            post.getImages().clear();
+
+            // 새 이미지 업로드
+            List<ImageFile> newImages = Arrays.stream(images)
+                    .map(image -> {
+                        String imageUrl = s3ImageService.upload(image); // S3 업로드
+                        ImageFile imageFile = new ImageFile(imageUrl, post);
+                        imageFile.setPost(post); // 게시글과 연관 설정
+                        return imageFile;
+                    })
+                    .collect(Collectors.toList());
+
+            imageFileRepository.saveAll(newImages);
+            post.getImages().addAll(newImages);
         }
     }
 }
