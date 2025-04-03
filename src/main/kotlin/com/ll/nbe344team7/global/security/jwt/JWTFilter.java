@@ -70,6 +70,10 @@ public class JWTFilter extends OncePerRequestFilter {
        String refreshToken = getRefreshToken(request.getCookies());
 
 
+      if(refreshToken==null){
+          throw new SecurityException(SecurityExceptionCode.TOKEN_NOT_EFFECTIVE);
+      }
+
 
        //토큰 존재 확인
        if(accessToken==null){
@@ -95,9 +99,16 @@ public class JWTFilter extends OncePerRequestFilter {
            throw new SecurityException(SecurityExceptionCode.TOKEN_MISMATCH);
        }
 
-        String username = jwtUtil.getUsername(accessToken);
-        Long memberId= jwtUtil.getMemberId(accessToken);
-        String role = jwtUtil.getRole(accessToken);
+
+           String username = jwtUtil.getUsername(accessToken);
+           Long memberId = jwtUtil.getMemberId(accessToken);
+           String role = jwtUtil.getRole(accessToken);
+
+
+        if(username==null || memberId == null || role ==null){
+            throw new SecurityException(SecurityExceptionCode.TOKEN_NOT_EFFECTIVE);
+        }
+
 
 
 
@@ -132,6 +143,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
         throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
     }
+
+
 
 
 }
