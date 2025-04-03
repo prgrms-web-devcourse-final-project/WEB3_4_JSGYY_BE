@@ -13,7 +13,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -40,11 +39,10 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<?> createPost(
-            @RequestPart(value = "post") PostRequest request,
-            @RequestPart(value = "images") MultipartFile[] images,
+            @RequestBody PostRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.createPost(request, images, userDetails.getMemberId()));
+        return ResponseEntity.ok(postService.createPost(request, userDetails.getMemberId()));
     }
 
     /**
@@ -81,11 +79,10 @@ public class PostController {
     @PutMapping("/{postId}")
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
-            @RequestPart(value = "post") PostRequest request,
-            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestBody PostRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        postService.modifyPost(postId, request, images, userDetails.getMemberId());
+        postService.modifyPost(postId, request, userDetails.getMemberId());
 
         if (request.getAuctionRequest() != null) {
             postService.changeToAuction(postId, request.getAuctionRequest(), userDetails.getMemberId());
