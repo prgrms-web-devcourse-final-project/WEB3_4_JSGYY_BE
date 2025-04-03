@@ -11,6 +11,7 @@ import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
+import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
@@ -50,6 +51,9 @@ public class PostServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private PostLikeRepository postLikeRepository;
+
     @MockitoBean
     private S3ImageService s3ImageService;
 
@@ -78,6 +82,7 @@ public class PostServiceTest {
 
     @AfterEach
     public void tearDown() {
+        postLikeRepository.deleteAll();
         postRepository.deleteAll();
         auctionRepository.deleteAll();
         memberRepository.deleteAll();
@@ -572,5 +577,118 @@ public class PostServiceTest {
         // then
         assertThat(result.getTotalElements()).isEqualTo(5L);
         assertThat(result.getContent()).hasSize(5);
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 - 성공")
+    @Transactional
+    void t17() throws Exception {
+        // given
+        PostRequest postRequest = new PostRequest(
+                "testTitle",
+                "testContent",
+                1000,
+                "testPlace",
+                true,
+                false,
+                null);
+
+        postService.createPost(postRequest, member.getId());
+
+        Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+        // when
+        postService.likePost(post.getId(), member.getId());
+
+        // then
+        assertThat(post.getLikes()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 - 이미 좋아요를 누른 경우")
+    void t18() throws Exception {
+        // given
+        PostRequest postRequest = new PostRequest(
+                "testTitle",
+                "testContent",
+                1000,
+                "testPlace",
+                true,
+                false,
+                null);
+
+        postService.createPost(postRequest, member.getId());
+
+        Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+        // when
+        postService.likePost(post.getId(), member.getId());
+
+        // then
+        assertThatThrownBy(() -> postService.likePost(post.getId(), member.getId()))
+                .isInstanceOf(PostException.class)
+                .hasMessageContaining(PostErrorCode.ALREADY_LIKED.getMessage());
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 - 게시글이 존재하지 않는 경우")
+    void t19() throws Exception {
+        // given
+        Long nonExistentPostId = 999L;
+
+        // when
+        // then
+        assertThatThrownBy(() -> postService.likePost(nonExistentPostId, member.getId()))
+                .isInstanceOf(PostException.class)
+                .hasMessageContaining(PostErrorCode.POST_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 취소 - 성공")
+    void t20() throws Exception {
+        // given
+        PostRequest postRequest = new PostRequest(
+                "testTitle",
+                "testContent",
+                1000,
+                "testPlace",
+                true,
+                false,
+                null);
+
+        postService.createPost(postRequest, member.getId());
+
+        Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+        // when
+        postService.likePost(post.getId(), member.getId());
+        postService.unlikePost(post.getId(), member.getId());
+
+        // then
+        assertThat(post.getLikes()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 취소 - 좋아요가 없는 경우")
+    void t21() throws Exception {
+        // given
+        PostRequest postRequest = new PostRequest(
+                "testTitle",
+                "testContent",
+                1000,
+                "testPlace",
+                true,
+                false,
+                null);
+
+        postService.createPost(postRequest, member.getId());
+
+        Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+        // when
+        // then
+        assertThatThrownBy(() -> postService.unlikePost(post.getId(), member.getId()))
+                .isInstanceOf(PostException.class)
+                .hasMessageContaining(PostErrorCode.POST_LIKE_NOT_FOUND.getMessage());
     }
 }
