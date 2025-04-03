@@ -56,7 +56,7 @@ class Post (
     var reports: Int = 0
         protected set
 
-    @OneToMany(mappedBy = "post", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", cascade = [CascadeType.PERSIST, CascadeType.REMOVE], fetch = FetchType.LAZY)
     var images: MutableList<ImageFile> = mutableListOf()
         protected set
 
@@ -94,5 +94,9 @@ class Post (
 
     fun unlike() {
         this.likes-- // 좋아요 수 감소
+    }
+
+    fun updateSaleStatus(status: Boolean) {
+        this.saleStatus = status
     }
 }

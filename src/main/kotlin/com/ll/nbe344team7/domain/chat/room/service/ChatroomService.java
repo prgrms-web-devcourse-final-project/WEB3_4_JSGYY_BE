@@ -48,6 +48,7 @@ public class ChatroomService {
      * @since 2025-03-26
      */
     @Transactional
+
     public CreateResponseDto createRoom(ChatRoomRequestDto requestDto,Long memberId) {
         Member seller = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member user = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -81,7 +82,8 @@ public class ChatroomService {
                     ChatRoom chatroom = cp.getChatroom();
                     return new ChatRoomListResponseDto(
                             chatroom.getId(),
-                            chatroom.getTitle()
+                            chatroom.getTitle(),
+                            ""
                     );
                 })
                 .toList();
@@ -107,7 +109,7 @@ public class ChatroomService {
     }
 
     @Transactional(readOnly = true)
-    public ChatRoom getChatRoom(long roomId) {
+    public ChatRoom getChatRoom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
         return chatRoom;
     }

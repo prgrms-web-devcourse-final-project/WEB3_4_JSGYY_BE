@@ -2,6 +2,8 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
+import com.ll.nbe344team7.domain.member.dto.OneData;
+
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -9,6 +11,7 @@ import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import retrofit2.http.HEAD;
 
 
 /**
@@ -47,7 +50,8 @@ public class MemberService {
                 memberDTO.getEmail(),
                 memberDTO.getPhoneNum(),
                 false,
-                "ROLE_ADMIN"
+                "ROLE_ADMIN",
+                memberDTO.getAddress()
         );
 
         try {
@@ -66,17 +70,50 @@ public class MemberService {
      * @since 2025-03-26
      */
     public MemberDTO myDetails(Long memberId) {
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         return new MemberDTO(member.getId(),
                 member.getName(),
                 member.getUsername(),
+
                 "","",
                 member.getNickname(),
                 member.getEmail(),
                 member.getPhoneNum(),
-                member.getRole());
+
+                member.getRole(),
+                member.getAddress());
+    }
+
+    /**
+     * member 데이터 수정 메소드
+     * @param category
+     * @param data
+     * @param memberId
+     * @author 이광석
+     * @since 2025-04-01
+     */
+    public void modifyMyDetails(String category, OneData data, Long memberId) {
+        Member preMember = findMember(memberId);
+        MemberDTO preMemberDTO = new MemberDTO(preMember);
+
+        switch(category){
+            case "phoneNum":
+                preMemberDTO.setPhoneNum(data.getData());
+                break;
+            case "nickname" :
+                preMemberDTO.setNickname(data.getData());
+                break;
+            case "address" :
+                preMemberDTO.setAddress(data.getData());
+                break;
+        }
+
+        Member newMember = new Member(preMemberDTO);
+        memberRepository.save(newMember);
+
     }
 
     public Member getMember(Long memberId){
@@ -85,14 +122,35 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
-     * @param memberId
-     * @author 이광석
-     * @since 2025-03-27
-     */
-    public void withdrawal(Long memberId) {
-            Member member = memberRepository.findById(memberId)
-                    .orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-            memberRepository.delete(member);
+     * @param data
+     * @param memberId
+     * @return boolean
+     * @author 이광석
+     * @since 2025-04-01
+     */
+    public boolean withdrawal(OneData data, Long memberId) {
+        Member member = findMember(memberId);
+
+        if(!member.getPassword().equals(bCryptPasswordEncoder.encode(data.getData()))){
+            return false;
+        }
+        memberRepository.delete(member);
+        return true;
+    }
+
+
+    /**
+     * 회원 조회 메소드
+     *
+     * @param id
+     * @return Member
+     * @author 이광석
+     * @since 2025-04-01
+     */
+    private Member findMember(Long id){
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
     }
 }

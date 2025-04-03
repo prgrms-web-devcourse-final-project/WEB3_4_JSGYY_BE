@@ -1,7 +1,5 @@
 package com.ll.nbe344team7.global.security.jwt;
 
-import com.ll.nbe344team7.global.exception.GlobalException;
-import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
@@ -57,6 +55,7 @@ public class JWTFilter extends OncePerRequestFilter {
         noCertifiedUrls.add("/api/auth/login");
         noCertifiedUrls.add("/h2-console");
         noCertifiedUrls.add("/api/auth/register");
+//        noCertifiedUrls.add("/");
 
         for (String noCertifiedUrl : noCertifiedUrls){
             if(request.getServletPath().contains(noCertifiedUrl)){
@@ -102,6 +101,8 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(accessToken);
         Long memberId= jwtUtil.getMemberId(accessToken);
         String role = jwtUtil.getRole(accessToken);
+
+
 
 
         CustomUserData customUserData = new CustomUserData(memberId,username,role,"tmp");
