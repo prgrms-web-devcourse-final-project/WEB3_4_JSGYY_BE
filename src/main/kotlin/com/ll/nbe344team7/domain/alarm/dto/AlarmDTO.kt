@@ -11,9 +11,12 @@ import java.time.LocalDateTime
  * @since 25. 3. 24.
  */
 data class AlarmDTO(
-    val memberId: Long,
+    val id : Long?,
     val username: String,
+    val nickname : String,
     val content: String,
     val type: Int,
-    val isCheck: Boolean,
-    val createdAt: LocalDateTime)
+    val isCheck: Boolean?,
+    val createdAt: LocalDateTime?){
+
+}

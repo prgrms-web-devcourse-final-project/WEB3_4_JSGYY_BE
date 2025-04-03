@@ -5,6 +5,7 @@ import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.alarm.exception.AlarmException;
 import com.ll.nbe344team7.domain.alarm.exception.AlarmExceptionCode;
 import com.ll.nbe344team7.domain.alarm.repository.AlarmRepository;
+import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import org.springframework.data.domain.Page;
@@ -25,9 +26,11 @@ import java.util.Map;
 @Service
 public class AlarmService {
     private final AlarmRepository alarmRepository;
+    private final MemberService memberService;
 
     public AlarmService(AlarmRepository alarmRepository, MemberService memberService){
         this.alarmRepository = alarmRepository;
+        this.memberService = memberService;
     }
 
     /**
@@ -44,8 +47,18 @@ public class AlarmService {
      */
     public Page<AlarmDTO> findAll(int page,int size,Long memberId) {
         Pageable pageable = PageRequest.of(page-1,size, Sort.by("createdAt").descending());
-        Page<AlarmDTO> alarmDTOS = alarmRepository.findByMemberId(pageable,memberId);
-        return alarmDTOS;
+        Page<Alarm> alarms = alarmRepository.findByMemberId(pageable,memberId);
+
+
+        return alarms.map(alarm -> new AlarmDTO(
+                alarm.getId(),
+                alarm.getMember().getUsername(),
+                alarm.getMember().getNickname(),
+                alarm.getContent(),
+                alarm.getType(),
+                alarm.isCheck(),
+                alarm.getCreatedAt()
+        ));
     }
 
     /**
@@ -59,6 +72,23 @@ public class AlarmService {
     public void delete(Long alarmId) {
         Alarm alarm = findById(alarmId);
         alarmRepository.delete(alarm);
+    }
+
+    /**
+     * 알람 생성 메소드
+     *
+     * @param content
+     * @param memberId
+     * @param type
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
+    public void createAlarm(String content,Long memberId,int type){
+
+        Member member = memberService.getMember(memberId);
+        Alarm newAlarm = new Alarm(member,content,type);
+        alarmRepository.save(newAlarm);
     }
 
     /**

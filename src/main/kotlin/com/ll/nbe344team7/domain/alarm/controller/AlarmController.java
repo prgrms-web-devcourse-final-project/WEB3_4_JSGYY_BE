@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.alarm.controller;
 
 import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
+import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.alarm.service.AlarmService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.data.domain.Page;

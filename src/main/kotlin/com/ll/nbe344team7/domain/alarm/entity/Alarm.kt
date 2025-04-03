@@ -29,8 +29,15 @@ class Alarm(
 
     val isCheck : Boolean?= false,
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     val createdAt : LocalDateTime?=LocalDateTime.now(),
 ) {
-
+    constructor(member: Member,content: String,type: Int) :this(
+        id=null,
+        member=member,
+        content = content,
+        type=type,
+        isCheck=null,
+        createdAt = null
+    )
 }

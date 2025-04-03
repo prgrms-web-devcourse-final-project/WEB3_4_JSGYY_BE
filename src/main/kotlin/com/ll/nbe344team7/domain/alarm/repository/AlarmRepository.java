@@ -14,5 +14,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @since 2025-04-03
  */
 public interface AlarmRepository extends JpaRepository<Alarm,Long> {
-    Page<AlarmDTO> findByMemberId(Pageable pageable, Long memberId);
+    Page<Alarm> findByMemberId(Pageable pageable, Long memberId);
+
 }

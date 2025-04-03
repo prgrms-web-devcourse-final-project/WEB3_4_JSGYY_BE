@@ -3,6 +3,7 @@ package com.ll.nbe344team7.domain.member.entity
 import com.ll.nbe344team7.domain.member.dto.MemberDTO
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
+import kotlin.text.Typography.tm
 
 /**
  * 멤버 entity
@@ -65,5 +66,17 @@ class Member(
         phoneNum = "",
         blocked = false,
         role = "ROLE_ADMIN"
+    )
+
+    constructor(username: String,nickname: String,password: String):this(
+        id=null,
+        username = username,
+        name="tmp",
+        password = password,
+        nickname=nickname,
+        email="email",
+        phoneNum="phoneNum",
+        blocked=false,
+        role="ROLE_ADMIN"
     )
 }
