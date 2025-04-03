@@ -437,6 +437,10 @@ public class PostService {
         Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
+        if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
+            throw new PostException(PostErrorCode.ALREADY_LIKED);
+        }
+
         PostLike postLike = new PostLike(member, post);
         postLikeRepository.save(postLike);
 
