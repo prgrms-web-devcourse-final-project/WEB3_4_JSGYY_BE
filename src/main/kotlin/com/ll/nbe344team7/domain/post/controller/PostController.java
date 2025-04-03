@@ -178,17 +178,18 @@ public class PostController {
      *
      * @param reportDTO
      * @param postId
-     * @param loggedInMemberId
+     * @param userDetails
      * @return
      *
-     * @author shjung
-     * @since 25. 3. 24.
+     * @author GAEUN220
+     * @since 2025-04-03
      */
     @PostMapping("/{postId}/reports")
-    public ResponseEntity<?> reportPost(@RequestBody ReportDTO reportDTO, @PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
-        if(postId == 10000){
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(Map.of("message", "게시글 신고가 완료되었습니다."));
+    public ResponseEntity<?> reportPost(
+            @RequestBody ReportDTO reportDTO,
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        return ResponseEntity.ok(postService.reportPost(reportDTO, postId, userDetails.getMemberId()));
     }
 }
