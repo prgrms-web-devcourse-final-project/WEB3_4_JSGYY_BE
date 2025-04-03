@@ -1,10 +1,12 @@
 package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.service.PostImageService;
+import com.ll.nbe344team7.global.imageFIle.ImageFileDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -31,9 +33,14 @@ public class PostImageController {
             @PathVariable Long postId,
             @RequestPart(value = "images") MultipartFile[] images
     ) {
-        postImageService.uploadImages(postId, images);
+        List<ImageFileDto> uploadedImages = postImageService.uploadImages(postId, images);
 
-        return ResponseEntity.ok(Map.of("message", postId + "번 게시글 이미지 업로드 완료"));
+        Map<String, Object> response = Map.of(
+                "message", postId + "번 게시글 이미지 업로드 완료",
+                "uploadedImages", uploadedImages
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     /**
