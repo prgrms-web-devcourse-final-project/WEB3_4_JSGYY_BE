@@ -43,6 +43,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if(member==null){
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
+
         }
 
 
