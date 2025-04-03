@@ -16,9 +16,6 @@ spring:
   output:
     ansi:
       enabled: always
-  config:
-    import: application-secret.yml
-
 
 logging:
   level:
