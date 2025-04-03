@@ -13,4 +13,5 @@ enum class PostErrorCode(val status: HttpStatus, val code: String, val message: 
     POST_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_LIKE_NOT_FOUND", "존재하지 않는 좋아요입니다."),
     INVALID_IMAGE_COUNT(HttpStatus.BAD_REQUEST, "INVALID_IMAGE_COUNT", "이미지는 최대 10개까지 업로드 가능합니다."),
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "ALREADY_LIKED", "이미 좋아요를 눌렀습니다."),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "존재하지 않는 이미지입니다."),
 }

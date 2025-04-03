@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ll.nbe344team7.global.config.redis.subscriber.RedisChatSubscriber;
+import com.ll.nbe344team7.global.config.redis.subscriber.RedisNotificationSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -59,29 +61,41 @@ public class RedisConfig {
         return objectMapper;
     }
 
-    @Bean
-    public MessageListenerAdapter messageListener(RedisSubscriber redisSubscriber) {
-        return new MessageListenerAdapter(redisSubscriber, "onMessage");
+    @Bean(name = "chatMessageListener")
+    public MessageListenerAdapter chatMessageListener(RedisChatSubscriber chatSubscriber) {
+        return new MessageListenerAdapter(chatSubscriber, "onMessage");
+    }
+
+    @Bean(name = "notificationListener")
+    public MessageListenerAdapter notificationListener(RedisNotificationSubscriber notificationSubscriber) {
+        return new MessageListenerAdapter(notificationSubscriber, "onMessage");
     }
 
     @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory connectionFactory,
-            MessageListenerAdapter listenerAdapter,
-            ChannelTopic channelTopic) {
+            @Qualifier("chatMessageListener") MessageListenerAdapter chatListener,
+            @Qualifier("notificationListener") MessageListenerAdapter notificationListener,
+            @Qualifier("chatChannel") ChannelTopic chatChannel,
+            @Qualifier("notificationChannel") ChannelTopic notificationChannel
+    ) {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(listenerAdapter, channelTopic); // ChannelTopic 'chatroom' 사용
+        container.addMessageListener(chatListener, chatChannel); // ChannelTopic 'chatroom' 사용
+        container.addMessageListener(notificationListener, notificationChannel); // ChannelTopic 'notification' 사용
         return container;
     }
 
-    @Bean
+    // 메세지 전송 채널
+    @Bean(name = "chatChannel")
     public ChannelTopic channelTopic() {
-        return new ChannelTopic("chatroom"); // 'chatroom' 사용
+        return new ChannelTopic("chatroom");
+    }
+
+    // 알림용 채널
+    @Bean(name = "notificationChannel")
+    public ChannelTopic notificationChannel() {
+        return new ChannelTopic("notification");
     }
 }
-// 웹소켓 -> 스프링간 연결 생성되고 connection or session / instance
-// 스프링 -> 레디스로 연결이생성됨
-// 클라이언트 - 웹소캣 - 스프링 -> 섭 -> 레디스
-// publish 클라이언트 - 웹소캣 - 스프링 -> 펍-> 레디스 -> 섭 -> 스프링 -> 웹소캣 -> 클라이언트

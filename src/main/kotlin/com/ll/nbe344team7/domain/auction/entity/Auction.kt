@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 @Entity
 data class Auction (
     @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: Long? = null,
-    var maxPrice: Long? = null,
+    var maxPrice: Long = 0,
     var startedAt: LocalDateTime,
     var closedAt: LocalDateTime,
     var startPrice: Long,

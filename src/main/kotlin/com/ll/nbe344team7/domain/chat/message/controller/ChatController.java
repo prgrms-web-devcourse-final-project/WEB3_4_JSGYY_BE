@@ -35,7 +35,7 @@ public class ChatController {
                 if (principal instanceof UsernamePasswordAuthenticationToken auth){
                     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
                     chatMessageService.send(messageDTO, userDetails.getMemberId());
-                    chatRoomRedisService.saveLastMessage(messageDTO);
+                    chatRoomRedisService.saveLastMessage(messageDTO,userDetails.getMemberId());
                 }
             } catch (Exception e) {
                 log.error("Chat Publish Error: ", e);

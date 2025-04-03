@@ -76,11 +76,14 @@ public class StompHandler implements ChannelInterceptor {
                 }
 
                 if (destination != null && !destination.isEmpty()) {
-                    String[] path = destination.split("/");
-                    String roomId = path[4];
+                    if (destination.startsWith("/sub/chat/room/")) {
+                        // websocket 채팅방 구독
+                        String[] path = destination.split("/");
+                        String roomId = path[4];
 
-                    redisRepository.saveChatroom("chatroom:" + roomId + ":users", userId);
-                    redisRepository.saveSubscription("subscription:room", userId, roomId);
+                        redisRepository.saveChatroom("chatroom:" + roomId + ":users", userId);
+                        redisRepository.saveSubscription("subscription:room", userId, roomId);
+                    }
                 }
             }
         } else if (StompCommand.UNSUBSCRIBE.equals(accessor.getCommand())) {
@@ -96,11 +99,14 @@ public class StompHandler implements ChannelInterceptor {
 
                 String roomId = redisRepository.getRoomId("subscription:room", userId);
 
-                if (roomId != null) {
+                if (!roomId.isBlank()) {
                     redisRepository.deleteChatroom("chatroom:" + roomId + ":users", userId);
                     redisRepository.deleteSubscription("subscription:room", userId);
                 }
             }
+        } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+
+            accessor.setUser(null);
         }
         return message;
     }

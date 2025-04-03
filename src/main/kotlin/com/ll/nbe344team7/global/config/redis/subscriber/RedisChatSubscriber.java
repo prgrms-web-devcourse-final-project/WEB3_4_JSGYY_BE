@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.global.config.redis;
+package com.ll.nbe344team7.global.config.redis.subscriber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-public class RedisSubscriber implements MessageListener {
+public class RedisChatSubscriber implements MessageListener {
 
-    private static final Logger log = LoggerFactory.getLogger(RedisSubscriber.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisChatSubscriber.class);
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper objectMapper;
 
-    public RedisSubscriber(SimpMessagingTemplate messagingTemplate, ObjectMapper objectMapper) {
+    public RedisChatSubscriber(SimpMessagingTemplate messagingTemplate, ObjectMapper objectMapper) {
         this.messagingTemplate = messagingTemplate;
         this.objectMapper = objectMapper;
     }

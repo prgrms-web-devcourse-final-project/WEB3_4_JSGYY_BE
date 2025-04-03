@@ -2,8 +2,8 @@ package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
-import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -13,7 +13,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -40,11 +39,10 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<?> createPost(
-            @RequestPart(value = "post") PostRequest request,
-            @RequestPart(value = "images") MultipartFile[] images,
+            @RequestBody PostRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return ResponseEntity.ok(postService.createPost(request, images, userDetails.getMemberId()));
+        return ResponseEntity.ok(postService.createPost(request, userDetails.getMemberId()));
     }
 
     /**
@@ -81,11 +79,10 @@ public class PostController {
     @PutMapping("/{postId}")
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
-            @RequestPart(value = "post") PostRequest request,
-            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestBody PostRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        postService.modifyPost(postId, request, images, userDetails.getMemberId());
+        postService.modifyPost(postId, request, userDetails.getMemberId());
 
         if (request.getAuctionRequest() != null) {
             postService.changeToAuction(postId, request.getAuctionRequest(), userDetails.getMemberId());
@@ -176,19 +173,20 @@ public class PostController {
      *
      * 게시글 신고
      *
-     * @param reportDTO
+     * @param reportRequest
      * @param postId
-     * @param loggedInMemberId
+     * @param userDetails
      * @return
      *
-     * @author shjung
-     * @since 25. 3. 24.
+     * @author GAEUN220
+     * @since 2025-04-03
      */
     @PostMapping("/{postId}/reports")
-    public ResponseEntity<?> reportPost(@RequestBody ReportDTO reportDTO, @PathVariable Long postId, @RequestHeader(value = "memberId") Long loggedInMemberId){
-        if(postId == 10000){
-            return ResponseEntity.status(404).body(Map.of("message", "해당 게시물을 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(Map.of("message", "게시글 신고가 완료되었습니다."));
+    public ResponseEntity<?> reportPost(
+            @RequestBody ReportRequest reportRequest,
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        return ResponseEntity.ok(postService.reportPost(reportRequest, postId, userDetails.getMemberId()));
     }
 }

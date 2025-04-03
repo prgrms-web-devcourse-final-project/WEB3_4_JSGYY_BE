@@ -116,6 +116,9 @@ public class MemberService {
 
     }
 
+    public Member getMember(Long memberId){
+        return memberRepository.findById(memberId).orElseThrow(()->new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+    }
     /**
      * 회원 탈퇴 메소드
      *
