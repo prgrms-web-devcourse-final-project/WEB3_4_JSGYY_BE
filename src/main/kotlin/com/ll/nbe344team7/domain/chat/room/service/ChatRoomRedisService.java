@@ -12,6 +12,7 @@ import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,7 @@ public class ChatRoomRedisService {
      * @author kjm72
      * @since 2025-04-02
      */
+    @Transactional(readOnly = true)
     public List<ChatRoomListResponseDto> getChatRooms(Long memberId) {
         List<ChatParticipant> participants = chatParticipantRepository.findByMemberId(memberId);
         List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
@@ -77,7 +79,7 @@ public class ChatRoomRedisService {
             String nickname = participant.getMember().getNickname();
             String lastMessage = getLastMessageFromRedis(roomId);
 
-            if (lastMessage.isEmpty()){
+            if (lastMessage.isBlank()){
                 ChatMessage LastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
                 lastMessage = LastMessage.content;
             }
@@ -91,6 +93,7 @@ public class ChatRoomRedisService {
             return Long.compare(timeB, timeA); // 최신순 정렬 (내림차순)
         });
 
+        chatRoomRedisRepository.saveChatRoomList(memberId,chatRoomList);
         return chatRoomList;
     }
 
