@@ -93,8 +93,10 @@ public class JWTFilter extends OncePerRequestFilter {
            throw new SecurityException(SecurityExceptionCode.NOT_ACCESSTOKEN);
        }
 
+       String redisAccessToken = redisRepository.get(refreshToken);
+
        //Db와 비교
-       if(!accessToken.equals(redisRepository.get(refreshToken))){
+       if(!accessToken.equals(redisAccessToken)){
            redisRepository.delete(refreshToken);
            throw new SecurityException(SecurityExceptionCode.TOKEN_MISMATCH);
        }
