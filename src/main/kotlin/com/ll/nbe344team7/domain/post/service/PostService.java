@@ -181,6 +181,7 @@ public class PostService {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
+        postLikeRepository.deleteByPostId(postId);
         postRepository.delete(post);
 
         return Map.of("message", postId + "번 게시글이 삭제되었습니다.");
