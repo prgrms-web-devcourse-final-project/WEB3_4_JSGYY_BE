@@ -4,6 +4,7 @@ import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
 import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
+import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -176,7 +177,7 @@ public class PostController {
      *
      * 게시글 신고
      *
-     * @param reportDTO
+     * @param reportRequest
      * @param postId
      * @param userDetails
      * @return
