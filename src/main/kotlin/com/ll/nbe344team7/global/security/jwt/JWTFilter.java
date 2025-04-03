@@ -90,8 +90,7 @@ public class JWTFilter extends OncePerRequestFilter {
        }
 
        String redisAccessToken = redisRepository.get(refreshToken);
-       System.out.println(redisAccessToken);
-       System.out.println(accessToken);
+
        //Db와 비교
        if(!accessToken.equals(redisAccessToken)){
            redisRepository.delete(refreshToken);
