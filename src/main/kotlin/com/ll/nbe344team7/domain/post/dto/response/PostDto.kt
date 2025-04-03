@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.post.dto.response
 
 import com.ll.nbe344team7.domain.post.entity.Post
+import com.ll.nbe344team7.global.imageFIle.ImageFileDto
 import java.time.LocalDateTime
 
 data class PostDto(
@@ -20,7 +21,7 @@ data class PostDto(
     val modifiedAt: LocalDateTime?,
     val isAuthor: Boolean,
     val isLiked: Boolean = false,
-    val images: List<String>
+    val images: List<ImageFileDto>
 ) {
     companion object {
         fun from(post: Post, memberId: Long, isLiked: Boolean): PostDto {
@@ -43,7 +44,7 @@ data class PostDto(
                 modifiedAt = post.modifiedAt,
                 isAuthor = isAuthor, // 작성자 여부 설정
                 isLiked = isLiked,
-                images = post.images.map { it.url }
+                images = post.images.map { ImageFileDto.from(it) }
             )
         }
     }

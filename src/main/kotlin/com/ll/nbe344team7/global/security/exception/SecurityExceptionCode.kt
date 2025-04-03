@@ -12,6 +12,9 @@ enum class SecurityExceptionCode (
     val code:  String,
     val message: String
 ){
+    //jwt 전체
+    TOKEN_NOT_EFFECTIVE(HttpStatus.UNAUTHORIZED,"TOKEN_NOT_EFFECTIVE","해당 토큰은 유효하지 않습니다"),
+
     //access 토큰 관련
     ACCESSTOKEN_IS_EXPIRED(HttpStatus.UNAUTHORIZED, "ACCESSTOKEN_IS_EXPIRED","ACCESSTOKEN이 만료되었습니다"),
     NOT_ACCESSTOKEN(HttpStatus.UNAUTHORIZED,"NOT_ACCESSTOKEN","해당 토큰은 ACCESSTOKEN이 아닙니다"),

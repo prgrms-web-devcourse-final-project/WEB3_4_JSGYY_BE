@@ -1,10 +1,19 @@
 package com.ll.nbe344team7.domain.alarm.controller;
 
+import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
+import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.alarm.service.AlarmService;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,35 +30,68 @@ public class AlarmController {
         this.alarmService = alarmService;
     }
 
+    /**
+     * 알람 목록조회
+     * @param userDetails
+     * @param page
+     * @param size
+     * @return ResponseEntity<Map<String,Object>>
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
     @GetMapping
-    public ResponseEntity<?> items(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "ALL") String status
-    ){
+    public ResponseEntity<Map<String,Object>> getAlarms(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "page",defaultValue = "1") int page,
+            @RequestParam(value ="size" , defaultValue = "10" ) int size
+            ){
+        Page<AlarmDTO>  alarms = alarmService.findAll(page,size,userDetails.getMemberId());
 
-        return ResponseEntity.ok(this.alarmService.getItems(status, page, size));
+        return ResponseEntity.ok(buildResponse("알람 전달 성공",alarms));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteItem(
-            @PathVariable long id
-    ){
-        if (id == 10000)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "알람을 찾을 수 없습니다."));
 
-        return ResponseEntity.ok(this.alarmService.delete(id));
+    /**
+     * 알람 삭제
+     *
+     * @param userDetails
+     * @param id
+     * @return ResponseEntity<Map<String,Object>>
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
+    @DeleteMapping("{id}")
+    public ResponseEntity<Map<String,Object>> deleteAlarm(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable(value = "id")Long id
+    ){
+        Map<String,Object> result = new HashMap<>();
+
+        if(!alarmService.checkAuthority(id,userDetails.getMemberId())){
+            return ResponseEntity.status(403).body(buildResponse("권한이 없습니다" , null));
+        }else {
+            alarmService.delete(id);
+            return  ResponseEntity.ok(buildResponse("알람 삭제 성공",null));
+        }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> item(
-            @PathVariable long id
-    ){
-        if (id == 10000)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "알람을 찾을 수 없습니다."));
 
-        return ResponseEntity.ok(this.alarmService.getItem(id));
+    /**
+     * repose 빌드 메소드
+     *
+     * @param message
+     * @param data
+     * @return Map<String,Object>
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
+    private Map<String,Object> buildResponse(String message,Object data){
+        Map<String,Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("data" , data);
+        return response;
     }
 }

@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.global.globalExceptionHandler
 
 
+import com.ll.nbe344team7.domain.alarm.exception.AlarmException
 import com.ll.nbe344team7.domain.member.exception.MemberException
 import com.ll.nbe344team7.domain.post.exception.PostException
 import com.ll.nbe344team7.global.exception.GlobalException
@@ -61,5 +62,18 @@ class GlobalExceptionHandler {
         return ResponseEntity
         .status(ex.status)
         .body(responseBody)
+    }
+
+    @ExceptionHandler(AlarmException::class)
+    fun handleAlarmException(ex : AlarmException) : ResponseEntity<Map<String,Any?>>{
+        val responseBody = mapOf(
+            "status" to ex.status.value(),
+            "code" to ex.code,
+            "message" to ex.message
+        )
+
+        return ResponseEntity
+            .status(ex.status)
+            .body(responseBody)
     }
 }
