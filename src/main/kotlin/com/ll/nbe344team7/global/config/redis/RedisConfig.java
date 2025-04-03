@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ll.nbe344team7.global.config.redis.subscriber.RedisChatRoomListSubscriber;
 import com.ll.nbe344team7.global.config.redis.subscriber.RedisChatSubscriber;
 import com.ll.nbe344team7.global.config.redis.subscriber.RedisNotificationSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -71,19 +72,27 @@ public class RedisConfig {
         return new MessageListenerAdapter(notificationSubscriber, "onMessage");
     }
 
+    @Bean(name = "ChatRoomListListener")
+    public MessageListenerAdapter ChatRoomListListener(RedisChatRoomListSubscriber chatRoomListSubscriber) {
+        return new MessageListenerAdapter(chatRoomListSubscriber, "onMessage");
+    }
+
     @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory connectionFactory,
             @Qualifier("chatMessageListener") MessageListenerAdapter chatListener,
             @Qualifier("notificationListener") MessageListenerAdapter notificationListener,
             @Qualifier("chatChannel") ChannelTopic chatChannel,
-            @Qualifier("notificationChannel") ChannelTopic notificationChannel
+            @Qualifier("notificationChannel") ChannelTopic notificationChannel,
+            @Qualifier("ChatRoomListListener") MessageListenerAdapter ChatRoomListListener,
+            @Qualifier("chatRoomListChannel") ChannelTopic ChatRoomListChannel
     ) {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(chatListener, chatChannel); // ChannelTopic 'chatroom' 사용
         container.addMessageListener(notificationListener, notificationChannel); // ChannelTopic 'notification' 사용
+        container.addMessageListener(ChatRoomListListener, ChatRoomListChannel);
         return container;
     }
 
@@ -97,5 +106,10 @@ public class RedisConfig {
     @Bean(name = "notificationChannel")
     public ChannelTopic notificationChannel() {
         return new ChannelTopic("notification");
+    }
+
+    @Bean(name = "chatRoomListChannel")
+    public ChannelTopic ChatRoomListChannel() {
+        return new ChannelTopic("chatroomList"); // 'chatroomList' 사용
     }
 }

@@ -11,4 +11,6 @@ data class ChatRoomListResponseDto(
     val title : String,
     val nickname : String,
     val lastMessage : String
-)
+){
+    constructor():this(0,"","","")
+}
