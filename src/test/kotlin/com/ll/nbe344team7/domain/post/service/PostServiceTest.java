@@ -6,6 +6,7 @@ import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostDto;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
@@ -690,5 +691,31 @@ public class PostServiceTest {
         assertThatThrownBy(() -> postService.unlikePost(post.getId(), member.getId()))
                 .isInstanceOf(PostException.class)
                 .hasMessageContaining(PostErrorCode.POST_LIKE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("게시글 신고 작성")
+    void t22() throws Exception {
+        // given
+        PostRequest postRequest = new PostRequest(
+                "testTitle",
+                "testContent",
+                1000,
+                "testPlace",
+                true,
+                false,
+                null);
+
+        postService.createPost(postRequest, member.getId());
+
+        Post post = postRepository.findFirstByOrderByIdDesc().get();
+
+        ReportRequest reportRequest = new ReportRequest("신고 제목", "신고 내용", 1);
+
+        // when
+        postService.reportPost(reportRequest, post.getId(), member.getId());
+
+        // then
+        assertThat(post.getReports()).isEqualTo(1);
     }
 }
