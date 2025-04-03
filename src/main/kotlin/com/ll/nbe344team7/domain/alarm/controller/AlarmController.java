@@ -29,7 +29,16 @@ public class AlarmController {
         this.alarmService = alarmService;
     }
 
-    // 전체 알람 페이징
+    /**
+     * 알람 목록조회
+     * @param userDetails
+     * @param page
+     * @param size
+     * @return ResponseEntity<Map<String,Object>>
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
     @GetMapping
     public ResponseEntity<Map<String,Object>> getAlarms(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -38,14 +47,20 @@ public class AlarmController {
             ){
         Page<AlarmDTO>  alarms = alarmService.findAll(page,size,userDetails.getMemberId());
 
-        Map<String,Object> result = new HashMap<>();
-        result.put("message","알람 전달 성공");
-        result.put("data",alarms);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(buildResponse("알람 전달 성공",alarms));
     }
 
 
-    // 알람 삭제
+    /**
+     * 알람 삭제
+     *
+     * @param userDetails
+     * @param id
+     * @return ResponseEntity<Map<String,Object>>
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
     @DeleteMapping("{id}")
     public ResponseEntity<Map<String,Object>> deleteAlarm(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -54,14 +69,28 @@ public class AlarmController {
         Map<String,Object> result = new HashMap<>();
 
         if(!alarmService.checkAuthority(id,userDetails.getMemberId())){
-            result.put("message","권한이 없습니다.");
-            return ResponseEntity.status(403).body(result);
+            return ResponseEntity.status(403).body(buildResponse("권한이 없습니다" , null));
         }else {
             alarmService.delete(id);
-            result.put("message","알람 삭제 성공");
-            return  ResponseEntity.ok(result);
+            return  ResponseEntity.ok(buildResponse("알람 삭제 성공",null));
         }
     }
 
 
+    /**
+     * repose 빌드 메소드
+     *
+     * @param message
+     * @param data
+     * @return Map<String,Object>
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
+    private Map<String,Object> buildResponse(String message,Object data){
+        Map<String,Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("data" , data);
+        return response;
+    }
 }

@@ -25,41 +25,72 @@ import java.util.Map;
 @Service
 public class AlarmService {
     private final AlarmRepository alarmRepository;
-    private final MemberService memberService;
 
     public AlarmService(AlarmRepository alarmRepository, MemberService memberService){
         this.alarmRepository = alarmRepository;
-        this.memberService = memberService;
     }
 
+    /**
+     * 알람 조회 메소드
+     * 페이징
+     * 최근 생성 순
+     *
+     * @param page
+     * @param size
+     * @param memberId
+     * @return Page<AlarmDTO>
+     * @author 이광석
+     * @since 2025-04-03
+     */
     public Page<AlarmDTO> findAll(int page,int size,Long memberId) {
-        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by("createdAt").descending());
         Page<AlarmDTO> alarmDTOS = alarmRepository.findByMemberId(pageable,memberId);
         return alarmDTOS;
     }
 
+    /**
+     * 알람 삭제 메소드
+     *
+     * @param alarmId
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
     public void delete(Long alarmId) {
         Alarm alarm = findById(alarmId);
-
-
         alarmRepository.delete(alarm);
     }
 
+    /**
+     * 특정 알람 조회 메소드
+     *
+     * @param id
+     * @return Alarm
+     *
+     * @author 이광석
+     * @since 2025-04-03
+     */
     private Alarm findById(Long id){
-        Alarm alarm = alarmRepository.findById(id)
+        return alarmRepository.findById(id)
                 .orElseThrow(()->new  AlarmException(AlarmExceptionCode.NOT_FOUND_ALARM));
-        return alarm;
+
     }
 
+    /**
+     * 권환 확인 메소드
+     * 알람의 memberid 와 현제 사용자의 memberid 비교
+     *
+     * @param alarmId
+     * @param memberId
+     * @return boolean
+     * @author 이광석
+     * @since 2025-04-03
+     */
     public boolean checkAuthority(Long alarmId, Long memberId){
         Alarm alarm = findById(alarmId);
-        Member member = alarm.getMember();
-
-        if(member.getId().equals(memberId)){
-            return false;
-        }else{
-            return true;
-        }
+        return alarm.getMember().getId().equals(memberId);
     }
+
+
 
 }

@@ -6,6 +6,13 @@ import jakarta.annotation.Generated
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
+
+/**
+ * 알람 엔티티
+ *
+ * @author 이광석
+ * @since 2025-04-03
+ */
 @Entity
 class Alarm(
     @Id
