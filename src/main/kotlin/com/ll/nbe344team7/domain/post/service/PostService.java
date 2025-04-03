@@ -7,14 +7,17 @@ import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostDto;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.entity.PostLike;
+import com.ll.nbe344team7.domain.post.entity.Report;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.domain.post.repository.ReportRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
@@ -40,13 +43,15 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final S3ImageService s3ImageService;
     private final ImageFileRepository imageFileRepository;
+    private final ReportRepository reportRepository;
 
     public PostService(PostRepository postRepository,
                        AuctionRepository auctionRepository,
                        MemberRepository memberRepository,
                        PostLikeRepository postLikeRepository,
                        S3ImageService s3ImageService,
-                       ImageFileRepository imageFileRepository
+                       ImageFileRepository imageFileRepository,
+                          ReportRepository reportRepository
     ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
@@ -54,6 +59,7 @@ public class PostService {
         this.postLikeRepository = postLikeRepository;
         this.s3ImageService = s3ImageService;
         this.imageFileRepository = imageFileRepository;
+        this.reportRepository = reportRepository;
     }
 
     /**
@@ -522,5 +528,23 @@ public class PostService {
             imageFileRepository.saveAll(newImages);
             post.getImages().addAll(newImages);
         }
+    }
+
+    @Transactional
+    public Map<String, String> reportPost(ReportRequest reportRequest, Long postId, Long memberId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        Report report = new Report(
+                member,
+                post,
+                reportRequest.getTitle(),
+                reportRequest.getContent(),
+                reportRequest.getType());
+
+        reportRepository.save(report);
+        post.report();
+
+        return Map.of("message", postId + "번 게시글 신고가 완료되었습니다.");
     }
 }

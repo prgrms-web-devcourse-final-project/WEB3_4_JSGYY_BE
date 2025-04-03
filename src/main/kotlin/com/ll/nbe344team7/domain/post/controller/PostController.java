@@ -2,8 +2,8 @@ package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
-import com.ll.nbe344team7.domain.post.dto.response.ReportDTO;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -186,10 +186,10 @@ public class PostController {
      */
     @PostMapping("/{postId}/reports")
     public ResponseEntity<?> reportPost(
-            @RequestBody ReportDTO reportDTO,
+            @RequestBody ReportRequest reportRequest,
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        return ResponseEntity.ok(postService.reportPost(reportDTO, postId, userDetails.getMemberId()));
+        return ResponseEntity.ok(postService.reportPost(reportRequest, postId, userDetails.getMemberId()));
     }
 }
