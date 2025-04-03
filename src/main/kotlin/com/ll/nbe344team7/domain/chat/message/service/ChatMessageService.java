@@ -6,10 +6,12 @@ import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.service.ChatParticipantService;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListDto;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
+import com.ll.nbe344team7.domain.chat.room.service.ChatRoomRedisService;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.domain.member.entity.Member;
-
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
@@ -37,14 +39,16 @@ public class ChatMessageService {
     private final RedisRepository redisRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MemberRepository memberRepository;
+    private final ChatRoomRedisService chatRoomRedisService;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatParticipantService chatParticipantService, RedisRepository redisRepository, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatParticipantService chatParticipantService, RedisRepository redisRepository, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository, ChatRoomRedisService chatRoomRedisService) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
         this.chatParticipantService = chatParticipantService;
         this.redisRepository = redisRepository;
         this.redisTemplate = redisTemplate;
         this.memberRepository = memberRepository;
+        this.chatRoomRedisService = chatRoomRedisService;
     }
 
     /**
@@ -69,6 +73,10 @@ public class ChatMessageService {
 
         chatMessageRepository.save(chatMessage);
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
+        chatRoomRedisService.saveLastMessage(dto,memberId);
+        List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(memberId);
+        ChatRoomListDto chatRoomListDto = new ChatRoomListDto(memberId, chatRoomList);
+        redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
 
         Long roomId = chatRoom.getId();
         Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
