@@ -104,9 +104,9 @@ public class StompHandler implements ChannelInterceptor {
                     redisRepository.deleteSubscription("subscription:room", userId);
                 }
             }
-        } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-
-            accessor.setUser(null);
+        }
+        if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            accessor.getSessionAttributes().clear();
         }
         return message;
     }
