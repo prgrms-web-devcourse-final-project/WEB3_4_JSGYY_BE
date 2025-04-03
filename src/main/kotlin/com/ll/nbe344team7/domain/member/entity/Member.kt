@@ -71,4 +71,8 @@ class Member(
         role = "ROLE_ADMIN",
         address= ""
     )
+
+    constructor(o: Any, testUsername: String, testName: String, testPassword: String, testNickname: String, mail: String, s: String, b: Boolean, ROLE_ADMIN: String) : this() {
+
+    }
 }

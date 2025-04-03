@@ -55,9 +55,19 @@ public class AuctionService {
         // 3. 보유금이 입찰한 가격보다 높은지 확인
         if(account.getMoney() >= dto.getPrice()){
             if(auction.getMaxPrice() < dto.getPrice()){
+                // 4. 그 전에 입찰한 유저가 존재할 경우
+                Account beforeAccount = accountRepository.findByMemberId(auction.getWinnerId());
+                if(beforeAccount != null){
+                    // 4-1. 보유금 수정
+                    beforeAccount.setMoney(beforeAccount.getMoney() + auction.getMaxPrice());
+                    this.accountRepository.save(beforeAccount);
+                }
+                // 5. 경매 최대값, 보유금 수정 및 저장
                 auction.setMaxPrice(dto.getPrice());
                 auction.setWinnerId(dto.getMemberId());
-                auction = auctionRepository.save(auction);
+                account.setMoney(account.getMoney() - dto.getPrice());
+                this.auctionRepository.save(auction);
+                this.accountRepository.save(account);
             }
         } else if(account.getMoney() < dto.getPrice()){
             throw new AuctionException(AuctionError.NOT_OVER_ACCOUNT);
