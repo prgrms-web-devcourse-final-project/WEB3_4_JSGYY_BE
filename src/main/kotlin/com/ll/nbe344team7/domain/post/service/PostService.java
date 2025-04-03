@@ -20,7 +20,6 @@ import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.domain.post.repository.ReportRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
-import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
@@ -29,10 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -382,31 +378,6 @@ public class PostService {
         postRepository.save(post);
 
         return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
-    }
-
-    /**
-     *
-     * 파일 업로도 + POST 연결
-     *
-     * @param images
-     * @param post
-     *
-     * @author GAEUN220
-     * @since 2025-04-02
-     */
-    private void saveFiles(final MultipartFile[] images, final Post post) {
-        if (images != null && images.length > 0) {
-            List<ImageFile> imageFiles = Arrays.stream(images)
-                    .map(image -> {
-                        String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl, post);
-                        return imageFile;
-                    })
-                    .collect(Collectors.toList());
-
-            imageFileRepository.saveAll(imageFiles);
-            post.getImages().addAll(imageFiles);
-        }
     }
 
     @Transactional
