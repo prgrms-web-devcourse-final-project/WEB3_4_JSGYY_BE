@@ -11,5 +11,5 @@ import org.springframework.http.HttpStatus
  */
 class AlarmException(exceptionCode: AlarmExceptionCode):RuntimeException(exceptionCode.message)  {
     val status : HttpStatus  = exceptionCode.status
-    val cod : String =exceptionCode.code
+    val code : String =exceptionCode.code
 }
