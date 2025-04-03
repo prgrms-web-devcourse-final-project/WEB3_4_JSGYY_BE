@@ -7,17 +7,19 @@ import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostRequest;
 import com.ll.nbe344team7.domain.post.dto.request.PostSearchRequest;
+import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostDto;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.entity.PostLike;
+import com.ll.nbe344team7.domain.post.entity.Report;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.domain.post.repository.ReportRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
-import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
@@ -26,10 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -40,13 +39,15 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final S3ImageService s3ImageService;
     private final ImageFileRepository imageFileRepository;
+    private final ReportRepository reportRepository;
 
     public PostService(PostRepository postRepository,
                        AuctionRepository auctionRepository,
                        MemberRepository memberRepository,
                        PostLikeRepository postLikeRepository,
                        S3ImageService s3ImageService,
-                       ImageFileRepository imageFileRepository
+                       ImageFileRepository imageFileRepository,
+                          ReportRepository reportRepository
     ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
@@ -54,6 +55,7 @@ public class PostService {
         this.postLikeRepository = postLikeRepository;
         this.s3ImageService = s3ImageService;
         this.imageFileRepository = imageFileRepository;
+        this.reportRepository = reportRepository;
     }
 
     /**
@@ -113,61 +115,9 @@ public class PostService {
         }
     }
 
-
     /**
      *
-     * 게시글 작성 - 이미지 파일 O
-     *
-     * @param request
-     * @param images
-     * @param memberId
-     * @return
-     *
-     * @author GAEUN220
-     * @since 2025-04-01
-     */
-    @Transactional
-    public Map<String, String> createPost(PostRequest request, MultipartFile[] images, Long memberId) {
-
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
-        validatePostRequest(request);
-        validateImageRequest(images);
-
-        Post post = new Post(
-                member,
-                request.getTitle(),
-                request.getContent(),
-                request.getPrice(),
-                request.getPlace(),
-                request.getAuctionStatus()
-        );
-
-        final Post savedPost = postRepository.save(post);
-
-        saveFiles(images, savedPost);
-
-        // 경매 상태가 true, AuctionRequest가 null이 아닐 경우
-        if (request.getAuctionStatus() && request.getAuctionRequest() != null) {
-            AuctionRequest auctionRequest = request.getAuctionRequest();
-
-            validateAuctionRequest(auctionRequest);
-
-            Auction auction = post.createAuction(
-                    auctionRequest.getStartedAt(),
-                    auctionRequest.getClosedAt()
-            );
-
-            auctionRepository.save(auction);
-        }
-
-        // 반환 메시지
-        return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
-    }
-
-    /**
-     *
-     * 게시글 작성 - 이미지 파일 X (테스트 코드용)
+     * 게시글 작성 - 이미지 파일 X
      *
      * @param request
      * @param memberId
@@ -238,45 +188,7 @@ public class PostService {
 
     /**
      *
-     * 게시글 수정 - 이미지 O
-     *
-     * @param postId
-     * @param request
-     * @param images
-     * @param memberId
-     *
-     * @author GAEUN220
-     * @since 2025-04-01
-     */
-    @Transactional
-    public void modifyPost(Long postId, PostRequest request, MultipartFile[] images, Long memberId) {
-
-        validatePostRequest(request);
-        validateImageRequest(images);
-
-        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-
-        if (!post.getMember().getId().equals(memberId)) {
-            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
-        }
-
-        post.update(
-                request.getTitle(),
-                request.getContent(),
-                request.getPrice(),
-                request.getPlace(),
-                request.getSaleStatus(),
-                request.getAuctionStatus()
-        );
-
-        postRepository.save(post);
-
-        updateFile(images, post);
-    }
-
-    /**
-     *
-     * 게시글 수정 - 이미지 X (테스트 코드 용)
+     * 게시글 수정 - 이미지 X
      *
      * @param postId
      * @param request
@@ -431,6 +343,10 @@ public class PostService {
         Post post = postRepository.findByIdWithLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
+        if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
+            throw new PostException(PostErrorCode.ALREADY_LIKED);
+        }
+
         PostLike postLike = new PostLike(member, post);
         postLikeRepository.save(postLike);
 
@@ -464,63 +380,21 @@ public class PostService {
         return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
     }
 
-    /**
-     *
-     * 파일 업로도 + POST 연결
-     *
-     * @param images
-     * @param post
-     *
-     * @author GAEUN220
-     * @since 2025-04-02
-     */
-    private void saveFiles(final MultipartFile[] images, final Post post) {
-        if (images != null && images.length > 0) {
-            List<ImageFile> imageFiles = Arrays.stream(images)
-                    .map(image -> {
-                        String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl, post);
-                        return imageFile;
-                    })
-                    .collect(Collectors.toList());
+    @Transactional
+    public Map<String, String> reportPost(ReportRequest reportRequest, Long postId, Long memberId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-            imageFileRepository.saveAll(imageFiles);
-            post.getImages().addAll(imageFiles);
-        }
-    }
+        Report report = new Report(
+                member,
+                post,
+                reportRequest.getTitle(),
+                reportRequest.getContent(),
+                reportRequest.getType());
 
-    /**
-     *
-     * 기존 이미지 삭제 후 새 이미지 업로드 + POST 연결
-     *
-     * @param images
-     * @param post
-     *
-     * @author GAEUN220
-     * @since 2025-04-02
-     */
-    private void updateFile(MultipartFile[] images, final Post post) {
-        if (images != null && images.length > 0) {
-            // 기존 이미지 삭제 (S3 + DB)
-            List<ImageFile> existingImages = post.getImages();
-            existingImages.forEach(image -> {
-                s3ImageService.deleteImageFromS3(image.getUrl());
-                imageFileRepository.delete(image);
-            });
-            post.getImages().clear();
+        reportRepository.save(report);
+        post.report();
 
-            // 새 이미지 업로드
-            List<ImageFile> newImages = Arrays.stream(images)
-                    .map(image -> {
-                        String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl, post);
-                        imageFile.setPost(post); // 게시글과 연관 설정
-                        return imageFile;
-                    })
-                    .collect(Collectors.toList());
-
-            imageFileRepository.saveAll(newImages);
-            post.getImages().addAll(newImages);
-        }
+        return Map.of("message", postId + "번 게시글 신고가 완료되었습니다.");
     }
 }

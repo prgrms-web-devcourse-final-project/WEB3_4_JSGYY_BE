@@ -99,4 +99,8 @@ class Post (
     fun updateSaleStatus(status: Boolean) {
         this.saleStatus = status
     }
+
+    fun report() {
+        this.reports++ // 신고 수 증가
+    }
 }
