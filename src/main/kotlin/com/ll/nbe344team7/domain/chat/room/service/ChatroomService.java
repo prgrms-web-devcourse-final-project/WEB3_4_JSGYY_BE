@@ -83,6 +83,7 @@ public class ChatroomService {
                     return new ChatRoomListResponseDto(
                             chatroom.getId(),
                             chatroom.getTitle(),
+                            member.getNickname(),
                             ""
                     );
                 })

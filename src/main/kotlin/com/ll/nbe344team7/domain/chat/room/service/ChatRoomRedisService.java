@@ -1,10 +1,14 @@
 package com.ll.nbe344team7.domain.chat.room.service;
 
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
+import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
+import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
+import com.ll.nbe344team7.global.exception.ChatRoomException;
+import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -24,11 +28,13 @@ public class ChatRoomRedisService {
 
     private final ChatRoomRedisRepository chatRoomRedisRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, RedisTemplate<String, String> redisTemplate) {
+    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, RedisTemplate<String, String> redisTemplate) {
         this.chatRoomRedisRepository = chatRoomRedisRepository;
         this.chatParticipantRepository = chatParticipantRepository;
+        this.chatMessageRepository = chatMessageRepository;
         this.redisTemplate = redisTemplate;
     }
 
@@ -43,8 +49,8 @@ public class ChatRoomRedisService {
      * @author kjm72
      * @since 2025-04-02
      */
-    public void saveLastMessage(MessageDTO messageDTO) {
-        chatRoomRedisRepository.saveLastMessage(messageDTO);
+    public void saveLastMessage(MessageDTO messageDTO, Long memberId) {
+        chatRoomRedisRepository.saveLastMessage(messageDTO,memberId);
     }
 
     /**
@@ -61,13 +67,22 @@ public class ChatRoomRedisService {
     public List<ChatRoomListResponseDto> getChatRooms(Long memberId) {
         List<ChatParticipant> participants = chatParticipantRepository.findByMemberId(memberId);
         List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
+        if (participants.isEmpty()){
+            throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_LIST);
+        }
 
         for (ChatParticipant participant : participants) {
             Long roomId = participant.getChatroom().getId();
             String title = participant.getChatroom().getTitle();
+            String nickname = participant.getMember().getNickname();
             String lastMessage = getLastMessageFromRedis(roomId);
 
-            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, lastMessage));
+            if (lastMessage.isEmpty()){
+                ChatMessage LastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
+                lastMessage = LastMessage.content;
+            }
+
+            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage));
         }
 
         chatRoomList.sort((a, b) -> {
