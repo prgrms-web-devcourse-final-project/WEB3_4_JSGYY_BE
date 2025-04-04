@@ -1,9 +1,13 @@
 package com.ll.nbe344team7.domain.post.service;
 
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.imageFIle.ImageFileDto;
 import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
@@ -22,14 +26,17 @@ public class PostImageService {
     private final S3ImageService s3ImageService;
     private final ImageFileRepository imageFileRepository;
     private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
 
     public PostImageService(S3ImageService s3ImageService,
                             ImageFileRepository imageFileRepository,
-                            PostRepository postRepository)
+                            PostRepository postRepository,
+                            MemberRepository memberRepository)
     {
         this.s3ImageService = s3ImageService;
         this.imageFileRepository = imageFileRepository;
         this.postRepository = postRepository;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -45,9 +52,16 @@ public class PostImageService {
      * @since 2025-04-04
      */
     @Transactional
-    public List<ImageFileDto> updateImages(Long postId, MultipartFile[] images, List<Long> deleteImageIds) {
+    public List<ImageFileDto> updateImages(Long postId, MultipartFile[] images, List<Long> deleteImageIds, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        if (!member.getId().equals(post.getMember().getId())) {
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         List<ImageFile> uploadedImages = uploadImages(post, images);
         deleteImages(deleteImageIds);
