@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.domain.post.service;
 
+import com.ll.nbe344team7.domain.alarm.repository.AlarmRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
@@ -15,6 +16,7 @@ import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
+import com.ll.nbe344team7.domain.post.repository.ReportRepository;
 import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
@@ -56,6 +58,12 @@ public class PostServiceTest {
     @Autowired
     private PostLikeRepository postLikeRepository;
 
+    @Autowired
+    private ReportRepository reportRepository;
+
+    @Autowired
+    private AlarmRepository alarmRepository;
+
     @MockitoBean
     private S3ImageService s3ImageService;
 
@@ -77,14 +85,17 @@ public class PostServiceTest {
                 "test@email.com",
                 "010-1234-5678",
                 false,
-                "ROLE_ADMIN"
+                "ROLE_ADMIN",
+                "주소"
         );
         memberRepository.save(member);
     }
 
     @AfterEach
     public void tearDown() {
+        alarmRepository.deleteAll();
         postLikeRepository.deleteAll();
+        reportRepository.deleteAll();
         postRepository.deleteAll();
         auctionRepository.deleteAll();
         memberRepository.deleteAll();
@@ -696,6 +707,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("게시글 신고 작성")
+    @Transactional
     void t22() throws Exception {
         // given
         PostRequest postRequest = new PostRequest(
@@ -711,9 +723,13 @@ public class PostServiceTest {
 
         Post post = postRepository.findFirstByOrderByIdDesc().get();
 
-        ReportRequest reportRequest = new ReportRequest("신고 제목", "신고 내용", ReportType.FRAUD);
-
         // when
+        ReportRequest reportRequest = new ReportRequest(
+                "testReason",
+                "testContent",
+                ReportType.ETC
+        );
+
         postService.reportPost(reportRequest, post.getId(), member.getId());
 
         // then
