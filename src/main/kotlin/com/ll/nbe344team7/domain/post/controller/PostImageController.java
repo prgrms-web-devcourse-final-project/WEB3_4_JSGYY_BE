@@ -8,8 +8,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -45,11 +45,10 @@ public class PostImageController {
 
         List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
 
-        Map<String, Object> response = Map.of(
-                "message", postId + "번 게시글 이미지 업로드 및 삭제 완료",
-                "uploadedImages", uploadedImages,
-                "deleteImageIds", deleteImageIds
-        );
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
+        response.put("uploadedImages", uploadedImages);
+        response.put("deleteImageIds", deleteImageIds);
 
         return ResponseEntity.ok(response);
     }
