@@ -4,7 +4,7 @@ spring:
       host: redis_1
       password: ${custom.redis.password}
   datasource:
-    url: jdbc:mysql://mysql_1:3306/team07_prod?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://mysql_1:3306/team07_prod?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
     username: lldjlocal
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
