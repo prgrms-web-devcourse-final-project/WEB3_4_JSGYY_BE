@@ -397,6 +397,7 @@ public class PostService {
 
         reportRepository.save(report);
         post.report();
+        postRepository.save(post);
 
         return Map.of("message", postId + "번 게시글 신고가 완료되었습니다.");
     }
