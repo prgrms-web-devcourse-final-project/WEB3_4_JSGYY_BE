@@ -1,7 +1,9 @@
 package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.auction.entity.Auction;
+import com.ll.nbe344team7.domain.auction.entity.AuctionSchedule;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
+import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
@@ -40,6 +42,7 @@ public class PostService {
     private final S3ImageService s3ImageService;
     private final ImageFileRepository imageFileRepository;
     private final ReportRepository reportRepository;
+    private final AuctionScheduleRepository auctionScheduleRepository;
 
     public PostService(PostRepository postRepository,
                        AuctionRepository auctionRepository,
@@ -47,7 +50,8 @@ public class PostService {
                        PostLikeRepository postLikeRepository,
                        S3ImageService s3ImageService,
                        ImageFileRepository imageFileRepository,
-                          ReportRepository reportRepository
+                          ReportRepository reportRepository,
+                       AuctionScheduleRepository auctionScheduleRepository
     ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
@@ -56,6 +60,7 @@ public class PostService {
         this.s3ImageService = s3ImageService;
         this.imageFileRepository = imageFileRepository;
         this.reportRepository = reportRepository;
+        this.auctionScheduleRepository = auctionScheduleRepository;
     }
 
     /**
@@ -155,7 +160,10 @@ public class PostService {
                     auctionRequest.getClosedAt()
             );
 
-            auctionRepository.save(auction);
+            auction = auctionRepository.save(auction);
+
+            AuctionSchedule auctionSchedule = new AuctionSchedule(auction);
+            this.auctionScheduleRepository.save(auctionSchedule);
         }
 
         // 반환 메시지
@@ -312,7 +320,10 @@ public class PostService {
 
             existingAuction.updateAuction(auctionRequest.getStartedAt(), auctionRequest.getClosedAt());
 
-            auctionRepository.save(existingAuction);
+            existingAuction = auctionRepository.save(existingAuction);
+
+            AuctionSchedule auctionSchedule = new AuctionSchedule(existingAuction);
+            this.auctionScheduleRepository.save(auctionSchedule);
         } else if (post.getAuctionDetails() == null) {
             post.updateAuctionStatus(true);
 
@@ -324,7 +335,9 @@ public class PostService {
             );
 
             postRepository.save(post);
-            auctionRepository.save(auction);
+            auction = auctionRepository.save(auction);
+            AuctionSchedule auctionSchedule = new AuctionSchedule(auction);
+            this.auctionScheduleRepository.save(auctionSchedule);
         }
     }
 
