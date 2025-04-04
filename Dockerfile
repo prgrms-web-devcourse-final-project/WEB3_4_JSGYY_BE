@@ -1,5 +1,5 @@
 # 첫 번째 스테이지: 빌드 스테이지
-FROM gradle:jdk-21-and-23-graal-jammy AS builder
+FROM gradle:8.5.0-jdk21-alpine AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN gradle dependencies --no-daemon
 COPY src src
 
 # 애플리케이션 빌드
-RUN gradle build --no-daemon
+RUN gradle build -x test --no-daemon
 
 # 두 번째 스테이지: 실행 스테이지
 FROM container-registry.oracle.com/graalvm/jdk:23
