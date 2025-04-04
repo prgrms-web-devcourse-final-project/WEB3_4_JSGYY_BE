@@ -21,42 +21,30 @@ public class PostImageController {
 
     /**
      *
+     * 게시글 사진 업로드&삭제
+     *
      * @param postId
      * @param images
+     * @param deleteImageIds
      * @return
      *
      * @author GAEUN220
-     * @since 2025-04-03
+     * @since 2025-04-04
      */
     @PostMapping("/{postId}/images")
-    public ResponseEntity<?> uploadImages(
+    public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
-            @RequestPart(value = "images") MultipartFile[] images
+            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds
     ) {
-        List<ImageFileDto> uploadedImages = postImageService.uploadImages(postId, images);
+        List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds);
 
         Map<String, Object> response = Map.of(
-                "message", postId + "번 게시글 이미지 업로드 완료",
-                "uploadedImages", uploadedImages
+                "message", postId + "번 게시글 이미지 업로드 및 삭제 완료",
+                "uploadedImages", uploadedImages,
+                "deleteImageIds", deleteImageIds
         );
 
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     *
-     * @param imageId
-     * @return
-     *
-     * @author GAEUN220
-     * @since 2025-04-03
-     */
-    @DeleteMapping("/images/{imageId}")
-    public ResponseEntity<?> deleteImage(
-            @PathVariable Long imageId
-    ) {
-        postImageService.deleteImage(imageId);
-
-        return ResponseEntity.ok(Map.of("message",imageId + "번 이미지 삭제 완료"));
     }
 }

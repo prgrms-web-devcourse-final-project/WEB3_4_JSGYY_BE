@@ -8,6 +8,7 @@ import com.ll.nbe344team7.global.imageFIle.ImageFileDto;
 import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,18 +32,50 @@ public class PostImageService {
         this.postRepository = postRepository;
     }
 
-    public List<ImageFileDto> uploadImages(Long postId, MultipartFile[] images) {
+    /**
+     *
+     * 게시글 사진 업로드&삭제
+     *
+     * @param postId
+     * @param images
+     * @param deleteImageIds
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-04
+     */
+    @Transactional
+    public List<ImageFileDto> updateImages(Long postId, MultipartFile[] images, List<Long> deleteImageIds) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
+        List<ImageFile> uploadedImages = uploadImages(post, images);
+        deleteImages(deleteImageIds);
+
+        return uploadedImages.stream()
+                .map(ImageFileDto.Companion::from)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     *
+     * 사진 업로드
+     *
+     * @param post
+     * @param images
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-04
+     */
+    public List<ImageFile> uploadImages(Post post, MultipartFile[] images) {
         List<ImageFile> imageFiles = new ArrayList<>();
 
         if (images != null && images.length > 0) {
             imageFiles = Arrays.stream(images)
                     .map(image -> {
                         String imageUrl = s3ImageService.upload(image); // S3 업로드
-                        ImageFile imageFile = new ImageFile(imageUrl, post);
-                        return imageFile;
+                        return new ImageFile(imageUrl, post);
                     })
                     .collect(Collectors.toList());
 
@@ -50,18 +83,25 @@ public class PostImageService {
             post.getImages().addAll(imageFiles);
         }
 
-        // **ImageFile 엔티티 리스트를 ImageFileDto 리스트로 변환하여 반환**
-        return imageFiles.stream()
-                .map(ImageFileDto.Companion::from)
-                .collect(Collectors.toList());
+        return imageFiles;
     }
 
+    /**
+     *
+     * 사진 삭제 (S3, DB)
+     *
+     * @param deleteImageIds
+     *
+     * @author GAEUN220
+     * @since 2025-04-04
+     */
+    public void deleteImages(List<Long> deleteImageIds) {
+        for (Long imageId : deleteImageIds) {
+            ImageFile imageFile = imageFileRepository.findById(imageId)
+                    .orElseThrow(() -> new PostException(PostErrorCode.IMAGE_NOT_FOUND));
 
-    public void deleteImage(Long imageId) {
-        ImageFile imageFile = imageFileRepository.findById(imageId)
-                .orElseThrow(() -> new PostException(PostErrorCode.IMAGE_NOT_FOUND));
-
-        s3ImageService.deleteImageFromS3(imageFile.getUrl());
-        imageFileRepository.delete(imageFile);
+            s3ImageService.deleteImageFromS3(imageFile.getUrl());
+            imageFileRepository.delete(imageFile);
+        }
     }
 }
