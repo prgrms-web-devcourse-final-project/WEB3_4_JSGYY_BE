@@ -69,11 +69,12 @@ public class ChatRoomRedisService {
     @Transactional(readOnly = true)
     public List<ChatRoomListResponseDto> getChatRooms(Long memberId) {
         // member가 참여한 채팅방 목록을 가져옴
-
         List<ChatParticipant> participants = chatParticipantRepository.findByMemberId(memberId);
         if (participants.isEmpty()){
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_LIST);
         }
+
+        List<ChatRoomListResponseDto> savedList = chatRoomRedisRepository.getChatRoomList(memberId);
 
         // 채팅방을 담을 목록 생성
         List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
@@ -85,7 +86,6 @@ public class ChatRoomRedisService {
             String title = participant.getChatroom().getTitle();
             String nickname = getLastMessageSenderNicknameFromRedis(roomId);
             String lastMessage = getLastMessageFromRedis(roomId);
-
             // lastMessage가 Redis에 없을 경우 DB에서 가져와 Redis에 저장
             if (lastMessage.isBlank()){
                 ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
@@ -96,8 +96,17 @@ public class ChatRoomRedisService {
                     lastMessage = ""; // 기본값 설정
                 }
             }
+            Long unReadCount = 0L;
+            if (savedList != null) {
+                for (ChatRoomListResponseDto dto : savedList) {
+                    if (dto.getId()==roomId) {
+                        unReadCount = dto.getUnReadCount();
+                        break;
+                    }
+                }
+            }
             // 채팅방 목록에 추가
-            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage, 0));
+            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage, unReadCount));
         }
 
         // 채팅방 최신순으로 정렬(전체를 도는 코드)

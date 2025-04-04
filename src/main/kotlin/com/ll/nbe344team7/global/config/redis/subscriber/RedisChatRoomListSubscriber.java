@@ -38,6 +38,7 @@ public class RedisChatRoomListSubscriber implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         try {
             ChatRoomListDto chatRoomListMessage = objectMapper.readValue(message.getBody(), ChatRoomListDto.class);
+            log.info("ChatRoomList : {}",chatRoomListMessage);
             messagingTemplate.convertAndSend("/sub/chat/roomList/" + chatRoomListMessage.getMemberId(), chatRoomListMessage.getChatRooms());
         } catch (IOException e) {
             log.error("ChatRoomListSubscriber Error: ", e);
