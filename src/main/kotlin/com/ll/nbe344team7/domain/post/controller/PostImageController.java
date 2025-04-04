@@ -2,12 +2,14 @@ package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.service.PostImageService;
 import com.ll.nbe344team7.global.imageFIle.ImageFileDto;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -21,42 +23,33 @@ public class PostImageController {
 
     /**
      *
+     * 게시글 사진 업로드&삭제
+     *
      * @param postId
      * @param images
+     * @param deleteImageIds
      * @return
      *
      * @author GAEUN220
-     * @since 2025-04-03
+     * @since 2025-04-04
      */
     @PostMapping("/{postId}/images")
-    public ResponseEntity<?> uploadImages(
+    public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
-            @RequestPart(value = "images") MultipartFile[] images
-    ) {
-        List<ImageFileDto> uploadedImages = postImageService.uploadImages(postId, images);
+            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ) {
+        if (images == null) images = new MultipartFile[0];
+        if (deleteImageIds == null) deleteImageIds = List.of();
 
-        Map<String, Object> response = Map.of(
-                "message", postId + "번 게시글 이미지 업로드 완료",
-                "uploadedImages", uploadedImages
-        );
+        List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
+
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
+        response.put("uploadedImages", uploadedImages);
+        response.put("deleteImageIds", deleteImageIds);
 
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     *
-     * @param imageId
-     * @return
-     *
-     * @author GAEUN220
-     * @since 2025-04-03
-     */
-    @DeleteMapping("/images/{imageId}")
-    public ResponseEntity<?> deleteImage(
-            @PathVariable Long imageId
-    ) {
-        postImageService.deleteImage(imageId);
-
-        return ResponseEntity.ok(Map.of("message",imageId + "번 이미지 삭제 완료"));
     }
 }
