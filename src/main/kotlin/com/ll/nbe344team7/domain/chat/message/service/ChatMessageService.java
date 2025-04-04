@@ -92,7 +92,6 @@ public class ChatMessageService {
         ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
         System.out.println(chatMessage.getChatRoom()+chatMessage.getContent()+chatMessage.getMember());
 
-
         chatMessageRepository.save(chatMessage);
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
         chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
@@ -112,10 +111,14 @@ public class ChatMessageService {
             List<ChatParticipant> offlineUsers = chatParticipants.stream()
                     .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
                     .toList();
+            chatMessage.setRead(false);
 
-                    chatMessage.setRead(false);
+            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
 
-                    // 알림 전송 로직
+            // count update
+
+            chatRoomRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
+            // 알림 전송 로직
                 }
             }
         } catch (InterruptedException e) {
