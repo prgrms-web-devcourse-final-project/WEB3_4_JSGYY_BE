@@ -386,6 +386,8 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
+        validateReportRequest(reportRequest);
+
         Report report = new Report(
                 member,
                 post,
@@ -397,5 +399,15 @@ public class PostService {
         post.report();
 
         return Map.of("message", postId + "번 게시글 신고가 완료되었습니다.");
+    }
+
+    public void validateReportRequest(ReportRequest reportRequest) {
+        if (reportRequest.getTitle().isBlank() || reportRequest.getTitle().length() > 30) {
+            throw new PostException(PostErrorCode.INVALID_REPORT_TITLE);
+        }
+
+        if (reportRequest.getContent().isBlank() || reportRequest.getContent().length() > 100) {
+            throw new PostException(PostErrorCode.INVALID_REPORT_CONTENT);
+        }
     }
 }
