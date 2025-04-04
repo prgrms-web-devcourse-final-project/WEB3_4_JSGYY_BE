@@ -9,7 +9,7 @@ class Report(
     post: Post,
     title: String,
     content: String,
-    type: Int // 1: 사기 , 2: 욕설
+    type: ReportType
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +33,8 @@ class Report(
     var content: String = content
         protected set
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var type: Int = type
+    var type: ReportType = type
         protected set
 }
