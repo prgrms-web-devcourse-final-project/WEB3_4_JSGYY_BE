@@ -40,6 +40,9 @@ public class PostImageController {
             @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
+        if (images == null) images = new MultipartFile[0];
+        if (deleteImageIds == null) deleteImageIds = List.of();
+
         List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
 
         Map<String, Object> response = Map.of(
