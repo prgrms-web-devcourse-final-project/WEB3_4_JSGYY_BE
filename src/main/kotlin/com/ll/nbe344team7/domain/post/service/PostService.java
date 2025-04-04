@@ -381,6 +381,18 @@ public class PostService {
         return Map.of("message", postId + "번 게시글 좋아요 취소 성공");
     }
 
+    /**
+     *
+     * 게시글 신고
+     *
+     * @param reportRequest
+     * @param postId
+     * @param memberId
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-04
+     */
     @Transactional
     public Map<String, String> reportPost(ReportRequest reportRequest, Long postId, Long memberId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
@@ -402,6 +414,15 @@ public class PostService {
         return Map.of("message", postId + "번 게시글 신고가 완료되었습니다.");
     }
 
+    /**
+     *
+     * 게시글 신고 입력값 검증
+     *
+     * @param reportRequest
+     *
+     * @author GAEUN220
+     * @since 2025-04-04
+     */
     public void validateReportRequest(ReportRequest reportRequest) {
         if (reportRequest.getTitle().isBlank() || reportRequest.getTitle().length() > 30) {
             throw new PostException(PostErrorCode.INVALID_REPORT_TITLE);
