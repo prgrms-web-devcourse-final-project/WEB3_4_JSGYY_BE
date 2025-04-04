@@ -7,6 +7,7 @@ import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,9 +15,10 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 채팅 Redis 서비스
@@ -30,12 +32,14 @@ public class ChatRoomRedisService {
     private final ChatRoomRedisRepository chatRoomRedisRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final MemberRepository memberRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, RedisTemplate<String, String> redisTemplate) {
+    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, MemberRepository memberRepository, RedisTemplate<String, String> redisTemplate) {
         this.chatRoomRedisRepository = chatRoomRedisRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatMessageRepository = chatMessageRepository;
+        this.memberRepository = memberRepository;
         this.redisTemplate = redisTemplate;
     }
 
@@ -80,8 +84,9 @@ public class ChatRoomRedisService {
             String lastMessage = getLastMessageFromRedis(roomId);
 
             if (lastMessage.isBlank()){
-                ChatMessage LastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
-                lastMessage = LastMessage.content;
+                ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
+                lastMessage = chatRoomLastMessage.getContent();
+                updateLastMessageInRedis(roomId, chatRoomLastMessage.getContent(), chatRoomLastMessage.getCreatedAt());
             }
 
             chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage));
@@ -107,12 +112,17 @@ public class ChatRoomRedisService {
      */
     private String getLastMessageFromRedis(Long roomId) {
         String key = "chatroom:" + roomId + ":lastMessage";
+        Object lastMessage = redisTemplate.opsForHash().get(key, "content");
 
-        // 💡 ZSet에서 가장 최신(last) 메시지를 가져옴
-        Set<String> messages = getZSetOperations().reverseRange(key, 0, 0);
-
-        if (messages == null || messages.isEmpty()) return "";
-        return messages.iterator().next(); // 가장 최신 메시지 반환
+        if (lastMessage == null) {
+            ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
+            if (chatRoomLastMessage != null) {
+                updateLastMessageInRedis(roomId, chatRoomLastMessage.getContent(), chatRoomLastMessage.getCreatedAt());
+                return chatRoomLastMessage.getContent();
+            }
+            return "";
+        }
+        return lastMessage.toString();
     }
 
     /**
@@ -125,11 +135,14 @@ public class ChatRoomRedisService {
      */
     private Long getLastMessageTimestamp(Long roomId) {
         String key = "chatroom:" + roomId + ":lastMessage";
+        Object timestamp = redisTemplate.opsForHash().get(key, "timestamp");
+        return timestamp != null ? Long.parseLong(timestamp.toString()) : 0L;
+    }
 
-        // 💡 ZSet에서 가장 최신 메시지의 점수(타임스탬프)를 가져옴
-        Set<ZSetOperations.TypedTuple<String>> messages = redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, 0);
-
-        if (messages == null || messages.isEmpty()) return 0L;
-        return messages.iterator().next().getScore().longValue(); // 가장 최신 메시지의 타임스탬프 반환
+    private void updateLastMessageInRedis(Long roomId, String content, LocalDateTime createdAt) {
+        String key = "chatroom:" + roomId + ":lastMessage";
+        Long timestamp = createdAt.toEpochSecond(ZoneOffset.UTC);
+        redisTemplate.opsForHash().put(key, "content", content);
+        redisTemplate.opsForHash().put(key, "timestamp", timestamp.toString());
     }
 }
