@@ -80,7 +80,7 @@ public class ChatRoomRedisService {
         for (ChatParticipant participant : participants) {
             Long roomId = participant.getChatroom().getId();
             String title = participant.getChatroom().getTitle();
-            String nickname = participant.getMember().getNickname();
+            String nickname = getLastMessageSenderNicknameFromRedis(roomId);
             String lastMessage = getLastMessageFromRedis(roomId);
 
             if (lastMessage.isBlank()){
@@ -139,6 +139,29 @@ public class ChatRoomRedisService {
         return timestamp != null ? Long.parseLong(timestamp.toString()) : 0L;
     }
 
+    /**
+     * Redis에서 마지막 메시지 전송자 닉네임을 호출
+     * @param roomId
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-04
+     */
+    private String getLastMessageSenderNicknameFromRedis(Long roomId) {
+        String key = "chatroom:" + roomId + ":lastMessage";
+        Object nickname = redisTemplate.opsForHash().get(key, "nickname");
+        return nickname != null ? nickname.toString() : "알 수 없음";
+    }
+
+    /**
+     * 마지막 메시지 업데이트
+     * @param roomId
+     * @param content
+     * @param createdAt
+     *
+     * @author kjm72
+     * @since 2025-04-04
+     */
     private void updateLastMessageInRedis(Long roomId, String content, LocalDateTime createdAt) {
         String key = "chatroom:" + roomId + ":lastMessage";
         Long timestamp = createdAt.toEpochSecond(ZoneOffset.UTC);
