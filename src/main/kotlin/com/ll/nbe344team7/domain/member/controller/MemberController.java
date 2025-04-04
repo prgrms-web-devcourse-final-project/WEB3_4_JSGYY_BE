@@ -82,6 +82,7 @@ public class MemberController {
     @GetMapping("/member/mydetails")
     public ResponseEntity<Map<String, Object>> myDetails(
         @AuthenticationPrincipal    CustomUserDetails customUserDetails
+
     ){
         MemberDTO memberDTOS= memberService.myDetails(customUserDetails.getMemberId());
 
