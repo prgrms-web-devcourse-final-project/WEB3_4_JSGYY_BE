@@ -52,6 +52,11 @@ public class PostImageService {
         List<ImageFile> uploadedImages = uploadImages(post, images);
         deleteImages(deleteImageIds);
 
+        List<ImageFile> finalImages = imageFileRepository.findByPostId(postId);
+        if (finalImages.isEmpty()) {
+            throw new PostException(PostErrorCode.IMAGE_REQUIRED); // 새로 정의한 예외 코드
+        }
+
         return uploadedImages.stream()
                 .map(ImageFileDto.Companion::from)
                 .collect(Collectors.toList());
