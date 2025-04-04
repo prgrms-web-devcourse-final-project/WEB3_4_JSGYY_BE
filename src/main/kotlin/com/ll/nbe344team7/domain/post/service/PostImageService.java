@@ -67,8 +67,13 @@ public class PostImageService {
         deleteImages(deleteImageIds);
 
         List<ImageFile> finalImages = imageFileRepository.findByPostId(postId);
+
         if (finalImages.isEmpty()) {
-            throw new PostException(PostErrorCode.IMAGE_REQUIRED); // 새로 정의한 예외 코드
+            throw new PostException(PostErrorCode.IMAGE_REQUIRED);
+        }
+
+        if(finalImages.size() > 10) {
+            throw new PostException(PostErrorCode.INVALID_IMAGE_COUNT);
         }
 
         return uploadedImages.stream()
