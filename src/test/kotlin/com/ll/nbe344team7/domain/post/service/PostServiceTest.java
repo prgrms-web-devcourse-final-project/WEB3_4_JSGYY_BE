@@ -10,6 +10,7 @@ import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostDto;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.entity.ReportType;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
 import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
@@ -710,7 +711,7 @@ public class PostServiceTest {
 
         Post post = postRepository.findFirstByOrderByIdDesc().get();
 
-        ReportRequest reportRequest = new ReportRequest("신고 제목", "신고 내용", 1);
+        ReportRequest reportRequest = new ReportRequest("신고 제목", "신고 내용", ReportType.FRAUD);
 
         // when
         postService.reportPost(reportRequest, post.getId(), member.getId());

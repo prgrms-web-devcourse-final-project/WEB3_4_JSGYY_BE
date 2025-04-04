@@ -410,22 +410,4 @@ public class PostService {
             throw new PostException(PostErrorCode.INVALID_REPORT_CONTENT);
         }
     }
-
-    @Transactional
-    public Map<String, String> reportPost(ReportRequest reportRequest, Long postId, Long memberId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
-        Report report = new Report(
-                member,
-                post,
-                reportRequest.getTitle(),
-                reportRequest.getContent(),
-                reportRequest.getType());
-
-        reportRepository.save(report);
-        post.report();
-
-        return Map.of("message", postId + "번 게시글 신고가 완료되었습니다.");
-    }
 }
