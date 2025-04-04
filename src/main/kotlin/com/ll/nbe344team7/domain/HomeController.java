@@ -82,8 +82,6 @@ public class HomeController {
                                $(function () {
                                    // 연결 버튼 클릭 시 웹소켓 연결
                                    $('#connectBtn').click(connectWebSocket);
-                
-                                   $('#disconnectBtn').click(disconnectWebSocket);
                                     
                                    // 구독 추가 버튼 클릭 시
                                    $('#addSubscriptionBtn').click(function () {
@@ -162,7 +160,7 @@ public class HomeController {
                                <div class="mb-3 input-group" style="width: 500px;">
                                    <input type="text" id="websocketUrl" class="form-control" value="ws://localhost:8080/ws"/>
                                    <button id="connectBtn" class="btn btn-primary">CONN</button>
-                                   <button id="disconnectBtn" class="btn btn-primary">DISCONN</button>
+                                   <button id="disconnectBtn" onclick="disconnectWebSocket()" class="btn btn-primary">DISCONN</button>
                                </div>
                 
                                <h2>SUBSCRIBE</h2>
