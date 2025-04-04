@@ -7,7 +7,6 @@ import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
-import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,14 +31,12 @@ public class ChatRoomRedisService {
     private final ChatRoomRedisRepository chatRoomRedisRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final MemberRepository memberRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, MemberRepository memberRepository, RedisTemplate<String, String> redisTemplate) {
+    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, RedisTemplate<String, String> redisTemplate) {
         this.chatRoomRedisRepository = chatRoomRedisRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatMessageRepository = chatMessageRepository;
-        this.memberRepository = memberRepository;
         this.redisTemplate = redisTemplate;
     }
 
@@ -71,33 +68,40 @@ public class ChatRoomRedisService {
      */
     @Transactional(readOnly = true)
     public List<ChatRoomListResponseDto> getChatRooms(Long memberId) {
+        // member가 참여한 채팅방 목록을 가져옴
         List<ChatParticipant> participants = chatParticipantRepository.findByMemberId(memberId);
-        List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
         if (participants.isEmpty()){
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_LIST);
         }
 
+        // 채팅방을 담을 목록 생성
+        List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
+
+        // 사용자가 참여한 채팅방들을 조회하면서 정보를 가져옴
         for (ChatParticipant participant : participants) {
             Long roomId = participant.getChatroom().getId();
             String title = participant.getChatroom().getTitle();
             String nickname = getLastMessageSenderNicknameFromRedis(roomId);
             String lastMessage = getLastMessageFromRedis(roomId);
 
+            // lastMessage가 Redis에 없을 경우 DB에서 가져와 Redis에 저장
             if (lastMessage.isBlank()){
                 ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
                 lastMessage = chatRoomLastMessage.getContent();
                 updateLastMessageInRedis(roomId, chatRoomLastMessage.getContent(), chatRoomLastMessage.getCreatedAt());
             }
-
+            // 채팅방 목록에 추가
             chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage));
         }
 
+        // 채팅방 최신순으로 정렬(전체를 도는 코드)
         chatRoomList.sort((a, b) -> {
             Long timeA = getLastMessageTimestamp(a.getId());
             Long timeB = getLastMessageTimestamp(b.getId());
             return Long.compare(timeB, timeA); // 최신순 정렬 (내림차순)
         });
 
+        // Redis에 저장
         chatRoomRedisRepository.saveChatRoomList(memberId,chatRoomList);
         return chatRoomList;
     }
