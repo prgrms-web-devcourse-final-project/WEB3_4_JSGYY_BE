@@ -19,16 +19,16 @@ data class AuctionSchedule(
     val id: Long? = null,
     val auctionId: Long?,
     val closedTime: LocalDateTime,
-    var isExecuted: Boolean = false
+    var executed: Boolean = false
     ){
     constructor(auction: Auction) : this(
         id = null,
         auctionId = auction.id,
         closedTime = auction.closedAt,
-        isExecuted = false
+        executed = false
     )
 
-    fun updateIsExecuted(isExecuted: Boolean) {
-        this.isExecuted = isExecuted
+    fun updateExecuted(isExecuted: Boolean) {
+        this.executed = isExecuted
     }
 }
