@@ -1,10 +1,11 @@
 package com.ll.nbe344team7.domain.follow.dto
 
 /**
- * Follow request dto
  *
- * @property userId
- * @property followingId
- * @constructor Create empty Follow request dto
+ *
+ * @author kjm72
+ * @since 2025-03-24
  */
-data class FollowRequestDto(val userId : Long, val followingId : Long)
+data class FollowRequestDto(val followingId : Long){
+    constructor() : this(0)
+}
