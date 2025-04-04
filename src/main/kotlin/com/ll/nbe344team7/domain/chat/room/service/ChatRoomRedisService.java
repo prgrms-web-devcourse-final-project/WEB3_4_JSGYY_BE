@@ -87,8 +87,12 @@ public class ChatRoomRedisService {
             // lastMessage가 Redis에 없을 경우 DB에서 가져와 Redis에 저장
             if (lastMessage.isBlank()){
                 ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
-                lastMessage = chatRoomLastMessage.getContent();
-                updateLastMessageInRedis(roomId, chatRoomLastMessage.getContent(), chatRoomLastMessage.getCreatedAt());
+                if (chatRoomLastMessage != null) {
+                    lastMessage = chatRoomLastMessage.getContent();
+                    updateLastMessageInRedis(roomId, lastMessage, chatRoomLastMessage.getCreatedAt());
+                } else {
+                    lastMessage = ""; // 기본값 설정
+                }
             }
             // 채팅방 목록에 추가
             chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage));
