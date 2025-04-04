@@ -69,18 +69,15 @@ public class ChatRoomRedisService {
     @Transactional(readOnly = true)
     public List<ChatRoomListResponseDto> getChatRooms(Long memberId) {
         // member가 참여한 채팅방 목록을 가져옴
-        List<ChatParticipant> participants = chatParticipantRepository.findByMemberId(memberId);
-        List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
-        List<ChatRoomListResponseDto> cachedRoomList = chatRoomRedisRepository.getChatRoomList(memberId);
-        if (cachedRoomList != null && !cachedRoomList.isEmpty()) {
-            return cachedRoomList;
-        }
 
+        List<ChatParticipant> participants = chatParticipantRepository.findByMemberId(memberId);
         if (participants.isEmpty()){
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_LIST);
         }
 
         // 채팅방을 담을 목록 생성
+        List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
+
 
         // 사용자가 참여한 채팅방들을 조회하면서 정보를 가져옴
         for (ChatParticipant participant : participants) {
