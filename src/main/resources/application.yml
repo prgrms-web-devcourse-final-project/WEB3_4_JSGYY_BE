@@ -2,7 +2,7 @@ spring:
   application:
     name: NBE3-4-4-team7
   profiles:
-    active: dev
+    active: prod
     include: secret
   jpa:
     hibernate:
