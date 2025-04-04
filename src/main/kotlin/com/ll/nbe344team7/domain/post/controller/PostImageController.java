@@ -2,7 +2,9 @@ package com.ll.nbe344team7.domain.post.controller;
 
 import com.ll.nbe344team7.domain.post.service.PostImageService;
 import com.ll.nbe344team7.global.imageFIle.ImageFileDto;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,9 +37,10 @@ public class PostImageController {
     public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
-            @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds
-    ) {
-        List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds);
+            @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ) {
+        List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
 
         Map<String, Object> response = Map.of(
                 "message", postId + "번 게시글 이미지 업로드 및 삭제 완료",
