@@ -99,7 +99,7 @@ public class ChatMessageService {
 
         for (ChatParticipant chatParticipant : chatParticipants) {
             Long participantId = chatParticipant.getMember().getId();
-            chatRoomRedisRepository.deleteChatRoomList(participantId);
+//            chatRoomRedisRepository.deleteChatRoomList(participantId);
             List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
             ChatRoomListDto chatRoomListDto = new ChatRoomListDto(memberId, chatRoomList);
             redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
@@ -111,11 +111,19 @@ public class ChatMessageService {
             List<ChatParticipant> offlineUsers = chatParticipants.stream()
                     .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
                     .toList();
+
             chatMessage.setRead(false);
 
             List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
 
-            // count update
+            for (int i = 0; i < chatRoomList.size(); i++) {
+                ChatRoomListResponseDto chatRoomListResponseDto = chatRoomList.get(i);
+                if (chatRoomListResponseDto.getId() == roomId) {
+                    chatRoomListResponseDto.plusCount();
+                    chatRoomList.set(i, chatRoomListResponseDto);
+                    break;
+                }
+            }
 
             chatRoomRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
             // 알림 전송 로직

@@ -83,8 +83,9 @@ public class ChatroomService {
                             chatroom.getId(),
                             chatroom.getTitle(),
                             member.getNickname(),
-                            ""
-                    );
+                            "",
+                            0
+                            );
                 })
                 .toList();
         if (list.isEmpty()) {

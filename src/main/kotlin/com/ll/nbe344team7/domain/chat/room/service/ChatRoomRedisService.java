@@ -100,7 +100,7 @@ public class ChatRoomRedisService {
                 }
             }
             // 채팅방 목록에 추가
-            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage));
+            chatRoomList.add(new ChatRoomListResponseDto(roomId, title, nickname, lastMessage, 0));
         }
 
         // 채팅방 최신순으로 정렬(전체를 도는 코드)
