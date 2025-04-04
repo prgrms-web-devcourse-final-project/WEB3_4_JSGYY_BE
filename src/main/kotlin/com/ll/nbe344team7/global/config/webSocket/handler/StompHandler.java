@@ -1,13 +1,16 @@
 package com.ll.nbe344team7.global.config.webSocket.handler;
 
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import com.ll.nbe344team7.global.security.exception.SecurityException;
+import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;

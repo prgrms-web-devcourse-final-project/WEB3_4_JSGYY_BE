@@ -6,23 +6,30 @@ import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.service.ChatParticipantService;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListDto;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
+import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
+import com.ll.nbe344team7.domain.chat.room.service.ChatRoomRedisService;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.domain.member.entity.Member;
-
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.redis.RedisRepository;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jyson
@@ -41,13 +48,14 @@ public class ChatMessageService {
     private final ChatRoomRedisService chatRoomRedisService;
     private final ChatRoomRedisRepository chatRoomRedisRepository;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatParticipantService chatParticipantService, RedisRepository redisRepository, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository, ChatRoomRedisService chatRoomRedisService, ChatRoomRedisRepository chatRoomRedisRepository) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatParticipantService chatParticipantService, RedisRepository redisRepository, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository, RedissonClient redissonClient, ChatRoomRedisService chatRoomRedisService, ChatRoomRedisRepository chatRoomRedisRepository) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
         this.chatParticipantService = chatParticipantService;
         this.redisRepository = redisRepository;
         this.redisTemplate = redisTemplate;
         this.memberRepository = memberRepository;
+        this.redissonClient = redissonClient;
         this.chatRoomRedisService = chatRoomRedisService;
         this.chatRoomRedisRepository = chatRoomRedisRepository;
     }
@@ -89,6 +97,7 @@ public class ChatMessageService {
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
         chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
         List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(dto.getRoomId());
+
         for (ChatParticipant chatParticipant : chatParticipants) {
             Long participantId = chatParticipant.getMember().getId();
             chatRoomRedisRepository.deleteChatRoomList(participantId);
@@ -97,7 +106,6 @@ public class ChatMessageService {
             redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
         }
 
-        Long roomId = chatRoom.getId();
         Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
 
         if (chatroomUsers.size() < 2) {
