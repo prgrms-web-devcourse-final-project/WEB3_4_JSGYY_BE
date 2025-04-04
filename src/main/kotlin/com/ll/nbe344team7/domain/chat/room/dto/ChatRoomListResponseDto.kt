@@ -11,8 +11,11 @@ data class ChatRoomListResponseDto(
     val title : String,
     val nickname : String,
     val lastMessage : String,
-    var unReadCount: Int
+    var unReadCount: Long
 ){
+    fun plusCount() {
+        unReadCount++
+    }
 
     constructor():this(0,"","","", 0)
 }
