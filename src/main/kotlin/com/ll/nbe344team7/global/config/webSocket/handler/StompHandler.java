@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.global.config.webSocket.handler;
 
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
+import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.ll.nbe344team7.global.redis.RedisRepository;
@@ -19,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -26,10 +29,12 @@ public class StompHandler implements ChannelInterceptor {
 
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
+    private final ChatRoomRedisRepository chatRoomRedisRepository;
 
-    public StompHandler(JWTUtil jwtUtil, RedisRepository redisRepository) {
+    public StompHandler(JWTUtil jwtUtil, RedisRepository redisRepository, ChatRoomRedisRepository chatRoomRedisRepository) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
+        this.chatRoomRedisRepository = chatRoomRedisRepository;
     }
 
     @Override
@@ -83,15 +88,30 @@ public class StompHandler implements ChannelInterceptor {
 
         if (principal != null) {
             String userId = getUser(principal);
+            Long memberId = Long.valueOf(userId);
 
             if (destination != null && !destination.isEmpty()) {
                 if (destination.startsWith("/sub/chat/room/")) {
                     // websocket 채팅방 구독
                     String[] path = destination.split("/");
-                    String roomId = path[4];
+                    String roomIdStr = path[4];
+                    Long roomId = Long.valueOf(roomIdStr);
+
+                    List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(memberId);
+                    if (chatRoomList != null) {
+                        for (int i = 0; i < chatRoomList.size(); i++) {
+                            ChatRoomListResponseDto dto = chatRoomList.get(i);
+                            if (dto.getId() == roomId) {
+                                dto.setUnReadCount(0);
+                                chatRoomList.set(i, dto);
+                                break;
+                            }
+                        }
+                        chatRoomRedisRepository.saveChatRoomList(memberId, chatRoomList); // 📦 다시 저장
+                    }
 
                     redisRepository.saveChatroom("chatroom:" + roomId + ":users", userId);
-                    redisRepository.saveSubscription("subscription:room", userId, roomId);
+                    redisRepository.saveSubscription("subscription:room", userId, roomIdStr);
                 }
             }
         } else {
