@@ -21,6 +21,8 @@ class ChatMessage : BaseEntity{
     @Column(columnDefinition = "TEXT")
     lateinit var content: String
 
+    var isRead: Boolean = true
+
     constructor(member: Member, content: String, chatRoom: ChatRoom) {
         this.member = member
         this.content = content
