@@ -89,38 +89,48 @@ public class ChatMessageService {
                 Member member = memberRepository.findById(memberId)
                         .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
-        System.out.println(chatMessage.getChatRoom()+chatMessage.getContent()+chatMessage.getMember());
+            ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
 
-        chatMessageRepository.save(chatMessage);
-        redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
-        chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
-        List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(dto.getRoomId());
+            chatMessageRepository.save(chatMessage);
+            redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
 
-        for (ChatParticipant chatParticipant : chatParticipants) {
-            Long participantId = chatParticipant.getMember().getId();
-            chatRoomRedisRepository.deleteChatRoomList(participantId);
-            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
-            ChatRoomListDto chatRoomListDto = new ChatRoomListDto(memberId, chatRoomList);
-            redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
-        }
+            chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
+            List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(dto.getRoomId());
+            ChatRoomListDto chatRoomListDto = new ChatRoomListDto();
+            for (ChatParticipant chatParticipant : chatParticipants) {
+                Long participantId = chatParticipant.getMember().getId();
 
-        Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
-
-        if (chatroomUsers.size() < 2) {
-            List<ChatParticipant> offlineUsers = chatParticipants.stream()
-                    .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
-                    .toList();
-            chatMessage.setRead(false);
-
-            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
-
-            // count update
-
-            chatRoomRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
-            // 알림 전송 로직
+                if (!participantId.equals(memberId)) {
+                    List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
+                    chatRoomListDto = new ChatRoomListDto(participantId, chatRoomList);
                 }
             }
+            redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
+
+            Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
+
+            if (chatroomUsers.size() < 2) {
+                List<ChatParticipant> offlineUsers = chatParticipants.stream()
+                        .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
+                        .toList();
+                chatMessage.setRead(false);
+
+                List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
+                // count update
+                for (ChatRoomListResponseDto chatRoomListResponseDto : chatRoomList) {
+                    if (chatRoomListResponseDto.getId()==roomId) {
+                        chatRoomListResponseDto.plusCount();
+
+                        break;
+                    }
+
+                    chatRoomList.add(chatRoomListResponseDto);
+                }
+
+                chatRoomRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
+                // 알림 전송 로직
+                    }
+                }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("락 획득 중단", e);
