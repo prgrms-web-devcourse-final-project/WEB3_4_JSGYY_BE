@@ -7,6 +7,6 @@ spring:
   datasource:
     url: jdbc:mysql://mysql_1/team07_prod?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
     username: lldjlocal
-    password: dev_team07_3434
+    password: ${custom.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
