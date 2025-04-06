@@ -1,7 +1,7 @@
 package com.ll.nbe344team7.domain.post.controller;
 
+import com.ll.nbe344team7.domain.post.dto.response.UpdateImageResult;
 import com.ll.nbe344team7.domain.post.service.PostImageService;
-import com.ll.nbe344team7.global.imageFIle.ImageFileDto;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,12 +43,12 @@ public class PostImageController {
         if (images == null) images = new MultipartFile[0];
         if (deleteImageIds == null) deleteImageIds = List.of();
 
-        List<ImageFileDto> uploadedImages = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
+        UpdateImageResult result = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
 
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
         response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
-        response.put("uploadedImages", uploadedImages);
-        response.put("deleteImageIds", deleteImageIds);
+        response.put("uploadedImages", result.getUploadedImages());
+        response.put("deletedImageIds", result.getDeletedImageIds());
 
         return ResponseEntity.ok(response);
     }
