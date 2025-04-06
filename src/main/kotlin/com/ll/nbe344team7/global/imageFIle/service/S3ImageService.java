@@ -82,10 +82,6 @@ public class S3ImageService {
         metadata.setContentLength(bytes.length);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
 
-        System.out.println("파일 이름: " + s3FileName);
-        System.out.println("파일 크기: " + metadata.getContentLength());
-        System.out.println("파일 타입: " + metadata.getContentType());
-
         try{
             PutObjectRequest putObjectRequest =
                     new PutObjectRequest(bucketName, s3FileName, byteArrayInputStream, metadata);
