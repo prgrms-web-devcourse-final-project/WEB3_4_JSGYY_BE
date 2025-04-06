@@ -65,21 +65,6 @@ public class PostServiceTest {
             new MockMultipartFile("file2", "test2.jpg", "image/jpeg", "file2-content".getBytes())
     };
 
-    @BeforeEach
-    public void setUp() {
-        member = new Member(
-                null,
-                "testUsername",
-                "testName",
-                "testPassword",
-                "testNickname",
-                "test@email.com",
-                "010-1234-5678",
-                false,
-                "ROLE_ADMIN"
-        );
-        memberRepository.save(member);
-    }
 
     @AfterEach
     public void tearDown() {
