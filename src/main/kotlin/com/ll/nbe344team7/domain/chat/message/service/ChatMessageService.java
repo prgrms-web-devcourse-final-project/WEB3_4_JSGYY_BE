@@ -155,6 +155,7 @@ public class ChatMessageService {
      * @since 25. 3. 25.
      * */
     public Page<ChatMessageDTO> getChatMessages(long roomId, String message, int page, int size) {
+
         chatroomService.getChatRoom(roomId);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
@@ -162,4 +163,18 @@ public class ChatMessageService {
         return chatMessageRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
     }
 
+    /**
+     * 채팅방 구독 시 메세지 읽음 처리
+     *
+     * @param roomId
+     * @param memberId
+
+     *
+     * @author jyson
+     * @since 25. 4. 6.
+     * */
+    @Transactional
+    public void updateRead(Long roomId, Long memberId) {
+        chatMessageRepository.updateRead(roomId, memberId);
+    }
 }

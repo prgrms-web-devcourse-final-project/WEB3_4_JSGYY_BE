@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.global.config.webSocket.handler;
 
+import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -30,11 +31,13 @@ public class StompHandler implements ChannelInterceptor {
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
     private final ChatRoomRedisRepository chatRoomRedisRepository;
+    private final ChatMessageService chatMessageService;
 
-    public StompHandler(JWTUtil jwtUtil, RedisRepository redisRepository, ChatRoomRedisRepository chatRoomRedisRepository) {
+    public StompHandler(JWTUtil jwtUtil, RedisRepository redisRepository, ChatRoomRedisRepository chatRoomRedisRepository, ChatMessageService chatMessageService) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
         this.chatRoomRedisRepository = chatRoomRedisRepository;
+        this.chatMessageService = chatMessageService;
     }
 
     @Override
@@ -95,7 +98,8 @@ public class StompHandler implements ChannelInterceptor {
                     // websocket 채팅방 구독
                     String[] path = destination.split("/");
                     String roomIdStr = path[4];
-                    Long roomId = Long.valueOf(roomIdStr);
+                    Long roomId = Long.parseLong(roomIdStr);
+                    chatMessageService.updateRead(roomId, memberId);
 
                     List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(memberId);
                     if (chatRoomList != null) {
