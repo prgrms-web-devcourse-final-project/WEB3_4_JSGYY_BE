@@ -7,5 +7,5 @@ spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/team07_prod?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
     username: lldjlocal
-    password: 1234
+    password: dev_team07_3434
     driver-class-name: com.mysql.cj.jdbc.Driver
