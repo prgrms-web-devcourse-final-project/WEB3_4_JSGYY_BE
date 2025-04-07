@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.global.config;
+package com.ll.nbe344team7.global.config.reddison;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
