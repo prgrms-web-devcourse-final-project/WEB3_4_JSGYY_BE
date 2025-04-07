@@ -89,36 +89,46 @@ public class ChatMessageService {
                 Member member = memberRepository.findById(memberId)
                         .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
-        System.out.println(chatMessage.getChatRoom()+chatMessage.getContent()+chatMessage.getMember());
+                ChatMessage chatMessage = new ChatMessage(member,dto.getContent(), chatRoom);
 
-        chatMessageRepository.save(chatMessage);
-        redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
-        chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
-        List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(dto.getRoomId());
+                chatMessageRepository.save(chatMessage);
+                redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
+                chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
+                List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(dto.getRoomId());
 
-        for (ChatParticipant chatParticipant : chatParticipants) {
-            Long participantId = chatParticipant.getMember().getId();
-            chatRoomRedisRepository.deleteChatRoomList(participantId);
-            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
-            ChatRoomListDto chatRoomListDto = new ChatRoomListDto(memberId, chatRoomList);
-            redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
-        }
+                ChatRoomListDto chatRoomListDto = new ChatRoomListDto();
+                for (ChatParticipant chatParticipant : chatParticipants) {
+                    Long participantId = chatParticipant.getMember().getId();
 
-        Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
+                    if (!participantId.equals(memberId)) {
+                        List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
+                        chatRoomListDto = new ChatRoomListDto(participantId, chatRoomList);
+                    }
+                }
+                redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
 
-        if (chatroomUsers.size() < 2) {
-            List<ChatParticipant> offlineUsers = chatParticipants.stream()
-                    .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
-                    .toList();
-            chatMessage.setRead(false);
+                Set<String> chatroomUsers = redisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
 
-            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
+                if (chatroomUsers.size() < 2) {
+                    List<ChatParticipant> offlineUsers = chatParticipants.stream()
+                            .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
+                            .toList();
 
-            // count update
+                    chatMessage.setRead(false);
 
-            chatRoomRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
-            // 알림 전송 로직
+                    List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
+
+                    for (int i = 0; i < chatRoomList.size(); i++) {
+                        ChatRoomListResponseDto chatRoomListResponseDto = chatRoomList.get(i);
+                        if (chatRoomListResponseDto.getId() == roomId) {
+                            chatRoomListResponseDto.plusCount();
+                            chatRoomList.set(i, chatRoomListResponseDto);
+                            break;
+                        }
+                    }
+
+                    chatRoomRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
+                    // 알림 전송 로직
                 }
             }
         } catch (InterruptedException e) {
@@ -145,6 +155,7 @@ public class ChatMessageService {
      * @since 25. 3. 25.
      * */
     public Page<ChatMessageDTO> getChatMessages(long roomId, String message, int page, int size) {
+
         chatroomService.getChatRoom(roomId);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
@@ -152,4 +163,18 @@ public class ChatMessageService {
         return chatMessageRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
     }
 
+    /**
+     * 채팅방 구독 시 메세지 읽음 처리
+     *
+     * @param roomId
+     * @param memberId
+
+     *
+     * @author jyson
+     * @since 25. 4. 6.
+     * */
+    @Transactional
+    public void updateRead(Long roomId, Long memberId) {
+        chatMessageRepository.updateRead(roomId, memberId);
+    }
 }
