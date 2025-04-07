@@ -2,7 +2,8 @@ spring:
   data:
     redis:
       host: redis_1
-      password: ${CUSTOM_REDIS_PASSWORD}
+      password: dev_team07_3434
+#      password: ${CUSTOM_REDIS_PASSWORD}
 #      password: ${custom.redis.password}
       port: 6379
   datasource:
