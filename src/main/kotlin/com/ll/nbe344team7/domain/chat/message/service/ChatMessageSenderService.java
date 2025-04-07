@@ -27,9 +27,9 @@ import java.util.Set;
  * @since 25. 4. 7.
  */
 @Service
-public class ChatMessageSender {
+public class ChatMessageSenderService {
 
-    private static final Logger log = LoggerFactory.getLogger(ChatMessageSender.class);
+    private static final Logger log = LoggerFactory.getLogger(ChatMessageSenderService.class);
 
     private final ChatParticipantService chatParticipantService;
     private final ChatMessageRepository chatMessageRepository;
@@ -38,7 +38,7 @@ public class ChatMessageSender {
     private final DistributedLock lock;
 
 
-    public ChatMessageSender(ChatParticipantService chatParticipantService, ChatMessageRepository chatMessageRepository, ChatRedisPublisher chatRedisPublisher, ChatRedisRepository chatRedisRepository, DistributedLock lock) {
+    public ChatMessageSenderService(ChatParticipantService chatParticipantService, ChatMessageRepository chatMessageRepository, ChatRedisPublisher chatRedisPublisher, ChatRedisRepository chatRedisRepository, DistributedLock lock) {
         this.chatParticipantService = chatParticipantService;
         this.chatMessageRepository = chatMessageRepository;
         this.chatRedisPublisher = chatRedisPublisher;

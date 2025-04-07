@@ -25,13 +25,13 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatroomService chatroomService;
-    private final ChatMessageSender chatMessageSender;
+    private final ChatMessageSenderService chatMessageSenderService;
     private final MemberRepository memberRepository;
 
-    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatMessageSender chatMessageSender, MemberRepository memberRepository) {
+    public ChatMessageService(ChatMessageRepository chatMessageRepository, ChatroomService chatroomService, ChatMessageSenderService chatMessageSenderService, MemberRepository memberRepository) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatroomService = chatroomService;
-        this.chatMessageSender = chatMessageSender;
+        this.chatMessageSenderService = chatMessageSenderService;
         this.memberRepository = memberRepository;
     }
 
@@ -50,7 +50,7 @@ public class ChatMessageService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         ChatRoom chatRoom = chatroomService.getChatRoom(dto.getRoomId());
-        chatMessageSender.sendMessage(dto, member, chatRoom);
+        chatMessageSenderService.sendMessage(dto, member, chatRoom);
     }
 
     /**
