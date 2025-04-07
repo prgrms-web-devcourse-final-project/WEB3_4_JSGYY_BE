@@ -1,5 +1,12 @@
 package com.ll.nbe344team7.domain.follow.service;
 
+import com.ll.nbe344team7.domain.follow.dto.CreateFollowResponseDto;
+import com.ll.nbe344team7.domain.follow.entity.Follow;
+import com.ll.nbe344team7.domain.follow.repository.FollowRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,8 +21,20 @@ import java.util.Map;
 @Service
 public class FollowService {
 
-    public Map<Object, Object> createFollow(Long userId, Long followingId) {
-        return Map.of("message","팔로우 성공");
+    private final FollowRepository followRepository;
+    private final MemberRepository memberRepository;
+
+    public FollowService(FollowRepository followRepository, MemberRepository memberRepository) {
+        this.followRepository = followRepository;
+        this.memberRepository = memberRepository;
+    }
+
+    public CreateFollowResponseDto createFollow(Long userId, Long followingId) {
+        Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Follow follow = new Follow(user, following);
+        followRepository.save(follow);
+        return new CreateFollowResponseDto("팔로우 성공");
     }
 
     public Map<Object, Object> unFollow(Long id) {
