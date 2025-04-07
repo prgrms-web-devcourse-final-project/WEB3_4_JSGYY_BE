@@ -2,6 +2,7 @@ package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.domain.post.dto.response.UpdateImageResult;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.exception.PostErrorCode;
 import com.ll.nbe344team7.domain.post.exception.PostException;
@@ -13,6 +14,8 @@ import com.ll.nbe344team7.global.imageFIle.entity.ImageFile;
 import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
 import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +30,7 @@ public class PostImageService {
     private final ImageFileRepository imageFileRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private static final Logger log = LoggerFactory.getLogger(PostImageService.class);
 
     public PostImageService(S3ImageService s3ImageService,
                             ImageFileRepository imageFileRepository,
@@ -52,7 +56,7 @@ public class PostImageService {
      * @since 2025-04-04
      */
     @Transactional
-    public List<ImageFileDto> updateImages(Long postId, MultipartFile[] images, List<Long> deleteImageIds, Long memberId) {
+    public UpdateImageResult updateImages(Long postId, MultipartFile[] images, List<Long> deleteImageIds, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
@@ -64,7 +68,7 @@ public class PostImageService {
         }
 
         List<ImageFile> uploadedImages = uploadImages(post, images);
-        deleteImages(deleteImageIds);
+        List<Long> successfullyDeleted = deleteImages(deleteImageIds);
 
         List<ImageFile> finalImages = imageFileRepository.findByPostId(postId);
 
@@ -76,9 +80,11 @@ public class PostImageService {
             throw new PostException(PostErrorCode.INVALID_IMAGE_COUNT);
         }
 
-        return uploadedImages.stream()
+        List<ImageFileDto> uploadedDtos = uploadedImages.stream()
                 .map(ImageFileDto.Companion::from)
                 .collect(Collectors.toList());
+
+        return new UpdateImageResult(uploadedDtos, successfullyDeleted);
     }
 
     /**
@@ -119,13 +125,22 @@ public class PostImageService {
      * @author GAEUN220
      * @since 2025-04-04
      */
-    public void deleteImages(List<Long> deleteImageIds) {
-        for (Long imageId : deleteImageIds) {
-            ImageFile imageFile = imageFileRepository.findById(imageId)
-                    .orElseThrow(() -> new PostException(PostErrorCode.IMAGE_NOT_FOUND));
+    public List<Long> deleteImages(List<Long> deleteImageIds) {
+        List<Long> successfullyDeleted = new ArrayList<>();
 
-            s3ImageService.deleteImageFromS3(imageFile.getUrl());
-            imageFileRepository.delete(imageFile);
+        for (Long imageId : deleteImageIds) {
+            try {
+                ImageFile imageFile = imageFileRepository.findById(imageId)
+                        .orElseThrow(() -> new PostException(PostErrorCode.IMAGE_NOT_FOUND));
+
+                s3ImageService.deleteImageFromS3(imageFile.getUrl());
+                imageFileRepository.delete(imageFile);
+                successfullyDeleted.add(imageId); // 삭제 성공한 것만 추가
+            } catch (PostException e) {
+                log.debug("이미지 삭제 중 오류 발생 (imageId: {}): {}", imageId, e.getMessage());
+            }
         }
+
+        return successfullyDeleted;
     }
 }
