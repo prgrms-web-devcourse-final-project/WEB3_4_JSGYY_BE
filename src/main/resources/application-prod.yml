@@ -2,9 +2,9 @@ spring:
   data:
     redis:
       host: redis_1
-      password: dev_team07_3434
+#      password: dev_team07_3434
 #      password: ${CUSTOM_REDIS_PASSWORD}
-#      password: ${custom.redis.password}
+      password: ${custom.redis.password}
       port: 6379
   datasource:
     url: jdbc:mysql://mysql_1/team07_prod?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
