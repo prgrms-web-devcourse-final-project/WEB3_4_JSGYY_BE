@@ -1,8 +1,11 @@
 package com.ll.nbe344team7.domain.follow.controller;
 
+import com.ll.nbe344team7.domain.follow.dto.FollowListResponseDto;
 import com.ll.nbe344team7.domain.follow.dto.FollowRequestDto;
 import com.ll.nbe344team7.domain.follow.service.FollowService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,11 +40,10 @@ public class FollowController {
         return ResponseEntity.ok(followService.unFollow(userDetails.getMemberId(),requestDto.getFollowingId()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getFollows(@PathVariable Long id){
-        if(id==10000L){
-            return ResponseEntity.status(404).body(Map.of("message","팔로잉 중인 유저를 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(this.followService.listFollows(id));
+    @GetMapping
+    public ResponseEntity<?> getFollows(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        Pageable pageable) {
+        Page<FollowListResponseDto> response = followService.listFollows(userDetails.getMemberId(),pageable);
+        return ResponseEntity.ok(Map.of("following", response));
     }
 }
