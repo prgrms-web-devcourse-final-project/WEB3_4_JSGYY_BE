@@ -122,5 +122,9 @@ public class MemberController {
         return ResponseEntity.ok(request);
     }
 
+    @GetMapping("/member/nickname")
+    public ResponseEntity<?> findMemberByNickname(@RequestParam("nickname") String nickname){
+        return ResponseEntity.ok(this.memberService.findMemberDTOByNickname(nickname));
+    }
 
 }
