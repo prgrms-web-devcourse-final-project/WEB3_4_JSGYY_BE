@@ -1,6 +1,5 @@
 package com.ll.nbe344team7.global.config.reddison.lock;
 
-import org.mockito.internal.util.Supplier;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -22,15 +21,14 @@ public class DistributedLock {
         this.redissonClient = redissonClient;
     }
 
-    public <T> void executeWithLock(Long roomId, Supplier<T> action) {
+    public void executeWithLock(Long roomId, Runnable action) {
         RLock lock = redissonClient.getLock("chat_lock:" + roomId);
         try {
-            boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
-            if (!isLocked) throw new ConcurrentModificationException("락 획득 실패");
-            action.get();
+            if(lock.tryLock(10, 60, TimeUnit.SECONDS))
+                action.run();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Lock acquisition interrupted", e);
+            throw new ConcurrentModificationException("락 획득 실패");
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
