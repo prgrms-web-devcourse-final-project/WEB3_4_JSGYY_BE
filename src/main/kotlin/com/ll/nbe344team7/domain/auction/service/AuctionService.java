@@ -2,6 +2,7 @@ package com.ll.nbe344team7.domain.auction.service;
 
 import com.ll.nbe344team7.domain.account.entity.Account;
 import com.ll.nbe344team7.domain.account.repository.AccountRepository;
+import com.ll.nbe344team7.domain.alarm.service.AlarmService;
 import com.ll.nbe344team7.domain.auction.dto.BidDTO;
 import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.entity.AuctionSchedule;
@@ -9,6 +10,8 @@ import com.ll.nbe344team7.domain.auction.exception.AuctionError;
 import com.ll.nbe344team7.domain.auction.exception.AuctionException;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import jakarta.annotation.PostConstruct;
@@ -29,12 +32,20 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final AccountRepository accountRepository;
     private final AuctionScheduleRepository auctionScheduleRepository;
+    private final AlarmService alarmService;
+    private final MemberRepository memberRepository;
+
+    private static String WIN_BID_STRING = " 경매 물품을 낙찰 받으셨습니다.";
+    private static String SELLER_BID_STRING = "님이 낙찰 받으셨습니다.";
 
     public AuctionService(AuctionRepository auctionRepository, AccountRepository accountRepository,
-                          AuctionScheduleRepository auctionScheduleRepository) {
+                          AuctionScheduleRepository auctionScheduleRepository, AlarmService alarmService,
+                          MemberRepository memberRepository) {
         this.auctionRepository = auctionRepository;
         this.accountRepository = accountRepository;
         this.auctionScheduleRepository = auctionScheduleRepository;
+        this.alarmService = alarmService;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -48,7 +59,7 @@ public class AuctionService {
      * @author shjung
      * @since 25. 3. 25.
      */
-    public Map<Object, Object> bidPrice(BidDTO dto, Long postId){
+    public Map<Object, Object> bidPrice(BidDTO dto, Long postId, Long memberId){
         // 1. 게시글이 존재하는지 요청
         Auction auction = this.auctionRepository.findByPostId(postId);;
         if(auction == null){
@@ -56,7 +67,7 @@ public class AuctionService {
         }
 
         // 2. 멤버가 존재 하는지 확인
-        Account account = accountRepository.findByMemberId(dto.getMemberId());
+        Account account = accountRepository.findByMemberId(memberId);
         if(account == null){
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
         }
@@ -73,7 +84,7 @@ public class AuctionService {
                 }
                 // 5. 경매 최대값, 보유금 수정 및 저장
                 auction.setMaxPrice(dto.getPrice());
-                auction.setWinnerId(dto.getMemberId());
+                auction.setWinnerId(memberId);
                 account.setMoney(account.getMoney() - dto.getPrice());
                 this.auctionRepository.save(auction);
                 this.accountRepository.save(account);
@@ -131,9 +142,18 @@ public class AuctionService {
                 // 5. 만약 null 일 경우 넘어가기
                 if(auction == null) continue;
                 auction.setStatus(1);
+
                 // 6. 변경된 정보를 DB에 저장
                 this.auctionRepository.save(auction);
                 this.auctionScheduleRepository.save(auctionSchedule);
+
+                // 7. 알람 생성
+                Long sellerId = auction.getPost().getMember().getId();
+                alarmService.createAlarm("'" + auction.getPost().getTitle() + "'" + WIN_BID_STRING, auction.getWinnerId(), 0);
+
+                Member winner = this.memberRepository.findById(auction.getWinnerId()).orElse(null);
+                if(winner == null){continue;}
+                alarmService.createAlarm("'" + winner.getNickname() + "'" + SELLER_BID_STRING, sellerId, 0);
             }
         }
     }

@@ -3,7 +3,6 @@ package com.ll.nbe344team7.domain.member.service;
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.dto.OneData;
-
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -11,7 +10,6 @@ import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import retrofit2.http.HEAD;
 
 
 /**
@@ -152,5 +150,13 @@ public class MemberService {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
+    }
+
+    public MemberDTO findMemberDTOByNickname(String nickname) {
+        Member member = this.memberRepository.findByNickname(nickname);
+        if(member == null){
+            throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
+        }
+        return new MemberDTO(member);
     }
 }

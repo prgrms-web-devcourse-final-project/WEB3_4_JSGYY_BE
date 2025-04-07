@@ -1,13 +1,11 @@
 package com.ll.nbe344team7.domain.auction.controller;
 
 import com.ll.nbe344team7.domain.auction.dto.BidDTO;
-import com.ll.nbe344team7.domain.auction.exception.AuctionException;
 import com.ll.nbe344team7.domain.auction.service.AuctionService;
-import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * @author shjung
@@ -35,13 +33,8 @@ public class AuctionController {
      * @since 25. 3. 25.
      */
     @PostMapping("/{postId}/bid")
-    public ResponseEntity<?> bidPrice(@RequestBody BidDTO bidDTO, @PathVariable Long postId) {
-        try{
-            return ResponseEntity.ok(this.auctionService.bidPrice(bidDTO, postId));
-        } catch (GlobalException e) {
-            return ResponseEntity.status(e.getStatus()).body(Map.of("message", e.getMessage()));
-        } catch (AuctionException e) {
-            return ResponseEntity.status(e.getStatus()).body(Map.of("message", e.getMessage()));
-        }
+    public ResponseEntity<?> bidPrice(@RequestBody BidDTO bidDTO, @PathVariable Long postId,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(this.auctionService.bidPrice(bidDTO, postId, userDetails.getMemberId()));
     }
 }
