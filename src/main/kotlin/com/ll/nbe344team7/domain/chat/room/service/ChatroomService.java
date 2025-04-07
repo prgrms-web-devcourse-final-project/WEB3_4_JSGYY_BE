@@ -48,7 +48,6 @@ public class ChatroomService {
      * @since 2025-03-26
      */
     @Transactional
-
     public CreateResponseDto createRoom(ChatRoomRequestDto requestDto,Long memberId) {
         Member seller = memberRepository.findById(requestDto.getUserId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member user = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -84,8 +83,9 @@ public class ChatroomService {
                             chatroom.getId(),
                             chatroom.getTitle(),
                             member.getNickname(),
-                            ""
-                    );
+                            "",
+                            0
+                            );
                 })
                 .toList();
         if (list.isEmpty()) {

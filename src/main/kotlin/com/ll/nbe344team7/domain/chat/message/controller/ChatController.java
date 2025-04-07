@@ -2,7 +2,6 @@ package com.ll.nbe344team7.domain.chat.message.controller;
 
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
-import com.ll.nbe344team7.domain.chat.room.service.ChatRoomRedisService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +17,10 @@ public class ChatController {
 
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
     private final ChatMessageService chatMessageService;
-    private final ChatRoomRedisService chatRoomRedisService;
 
-    public ChatController(ChatMessageService chatMessageService, ChatRoomRedisService chatRoomRedisService) {
+
+    public ChatController(ChatMessageService chatMessageService) {
         this.chatMessageService = chatMessageService;
-        this.chatRoomRedisService = chatRoomRedisService;
     }
 
     @MessageMapping("/chat/message")
@@ -35,7 +33,6 @@ public class ChatController {
                 if (principal instanceof UsernamePasswordAuthenticationToken auth){
                     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
                     chatMessageService.send(messageDTO, userDetails.getMemberId());
-                    chatRoomRedisService.saveLastMessage(messageDTO,userDetails.getMemberId());
                 }
             } catch (Exception e) {
                 log.error("Chat Publish Error: ", e);
