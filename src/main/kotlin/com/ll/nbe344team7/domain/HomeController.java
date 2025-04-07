@@ -117,7 +117,8 @@ public class HomeController {
                 
                                    // 메시지 전송 버튼 클릭 시
                                    $('#sendBtn').click(function () {
-                                       const destinationPath = $('#destinationPath').val(); // 대상 경로 가져오기
+                                        console.log("여기")
+                                       const destinationPath = $('#destinationPath').val(); // 대상 경로 가져오기X
                                        const messageJson = $('#message').val(); // JSON 형태의 메시지 가져오기
                 
                                        try {
@@ -176,7 +177,7 @@ public class HomeController {
                                </div>
                                <div class="mb-3">
                                    <label for="message" class="form-label">MESSAGE(JSON):</label>
-                                   <textarea id="message" class="form-control" placeholder='{"targetUsername": "유저명", "message": "전송할 메시지", "sender": "발신자명"}'></textarea>
+                                   <textarea id="message" class="form-control">{"content": "메세지", "roomId": "1"}</textarea>
                                </div>
                                <button id="sendBtn" class="btn btn-success">SEND</button>
                               \s
