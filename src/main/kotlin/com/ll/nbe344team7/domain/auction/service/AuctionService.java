@@ -59,7 +59,7 @@ public class AuctionService {
      * @author shjung
      * @since 25. 3. 25.
      */
-    public Map<Object, Object> bidPrice(BidDTO dto, Long postId){
+    public Map<Object, Object> bidPrice(BidDTO dto, Long postId, Long memberId){
         // 1. 게시글이 존재하는지 요청
         Auction auction = this.auctionRepository.findByPostId(postId);;
         if(auction == null){
@@ -67,7 +67,7 @@ public class AuctionService {
         }
 
         // 2. 멤버가 존재 하는지 확인
-        Account account = accountRepository.findByMemberId(dto.getMemberId());
+        Account account = accountRepository.findByMemberId(memberId);
         if(account == null){
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
         }
@@ -84,7 +84,7 @@ public class AuctionService {
                 }
                 // 5. 경매 최대값, 보유금 수정 및 저장
                 auction.setMaxPrice(dto.getPrice());
-                auction.setWinnerId(dto.getMemberId());
+                auction.setWinnerId(memberId);
                 account.setMoney(account.getMoney() - dto.getPrice());
                 this.auctionRepository.save(auction);
                 this.accountRepository.save(account);
