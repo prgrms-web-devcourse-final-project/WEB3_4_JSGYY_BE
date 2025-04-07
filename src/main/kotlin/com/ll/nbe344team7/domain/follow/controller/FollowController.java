@@ -31,12 +31,10 @@ public class FollowController {
         return ResponseEntity.ok(followService.createFollow(userDetails.getMemberId(), requestDto.getFollowingId()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> unFollow(@PathVariable Long id){
-        if(id==10000L){
-            return ResponseEntity.status(404).body(Map.of("message","해당 유저가 존재하지 않습니다."));
-        }
-        return ResponseEntity.ok(this.followService.unFollow(id));
+    @DeleteMapping
+    public ResponseEntity<?> unFollow(@RequestBody FollowRequestDto requestDto,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(followService.unFollow(userDetails.getMemberId(),requestDto.getFollowingId()));
     }
 
     @GetMapping("/{id}")

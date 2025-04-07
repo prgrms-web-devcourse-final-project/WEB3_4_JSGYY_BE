@@ -5,6 +5,8 @@ import com.ll.nbe344team7.domain.follow.entity.Follow;
 import com.ll.nbe344team7.domain.follow.repository.FollowRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.global.exception.FollowException;
+import com.ll.nbe344team7.global.exception.FollowExceptionCode;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.stereotype.Service;
@@ -32,12 +34,25 @@ public class FollowService {
     public CreateFollowResponseDto createFollow(Long userId, Long followingId) {
         Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        if (followRepository.existsByUserAndFollowing(user, following)) {
+            throw new FollowException(FollowExceptionCode.ALREADY_FOLLOW);
+        }
+
         Follow follow = new Follow(user, following);
         followRepository.save(follow);
         return new CreateFollowResponseDto("팔로우 성공");
     }
 
-    public Map<Object, Object> unFollow(Long id) {
+    public Map<Object, Object> unFollow(Long userId, Long followingId) {
+        Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        if (!followRepository.existsByUserAndFollowing(user, following)) {
+            throw new FollowException(FollowExceptionCode.NOT_EXIST_FOLLOW);
+        }
+        Follow follow = followRepository.findByUserAndFollowing(user, following);
+        followRepository.delete(follow);
         return Map.of("message","언팔로우 성공");
     }
 
