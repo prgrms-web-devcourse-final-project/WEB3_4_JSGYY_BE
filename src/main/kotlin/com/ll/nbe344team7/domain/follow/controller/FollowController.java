@@ -1,8 +1,13 @@
 package com.ll.nbe344team7.domain.follow.controller;
 
+import com.ll.nbe344team7.domain.follow.dto.FollowListResponseDto;
 import com.ll.nbe344team7.domain.follow.dto.FollowRequestDto;
 import com.ll.nbe344team7.domain.follow.service.FollowService;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -23,29 +28,52 @@ public class FollowController {
         this.followService = followService;
     }
 
+    /**
+     * 팔로우
+     *
+     * @param requestDto
+     * @param userDetails
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     @PostMapping
-    public ResponseEntity<?> createFollow(@RequestBody FollowRequestDto requestDto){
-        if(requestDto.getFollowingId() == 10000L){
-            return ResponseEntity.status(404).body(Map.of("message","해당 유저가 존재하지 않습니다."));
-        } else if (requestDto.getFollowingId() == 10001L) {
-            return ResponseEntity.status(404).body(Map.of("message","이미 팔로우한 유저입니다."));
-        }
-        return ResponseEntity.ok(this.followService.createFollow(requestDto.getUserId(), requestDto.getFollowingId()));
+    public ResponseEntity<?> createFollow(@RequestBody FollowRequestDto requestDto,
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(followService.createFollow(userDetails.getMemberId(), requestDto.getFollowingId()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> unFollow(@PathVariable Long id){
-        if(id==10000L){
-            return ResponseEntity.status(404).body(Map.of("message","해당 유저가 존재하지 않습니다."));
-        }
-        return ResponseEntity.ok(this.followService.unFollow(id));
+    /**
+     * 언팔로우
+     *
+     * @param requestDto
+     * @param userDetails
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
+    @DeleteMapping
+    public ResponseEntity<?> unFollow(@RequestBody FollowRequestDto requestDto,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(followService.unFollow(userDetails.getMemberId(),requestDto.getFollowingId()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getFollows(@PathVariable Long id){
-        if(id==10000L){
-            return ResponseEntity.status(404).body(Map.of("message","팔로잉 중인 유저를 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(this.followService.listFollows(id));
+    /**
+     * 팔로잉 목록 조회
+     *
+     * @param userDetails
+     * @param pageable
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
+    @GetMapping
+    public ResponseEntity<?> getFollows(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        Pageable pageable) {
+        Page<FollowListResponseDto> response = followService.listFollows(userDetails.getMemberId(),pageable);
+        return ResponseEntity.ok(Map.of("following", response));
     }
 }

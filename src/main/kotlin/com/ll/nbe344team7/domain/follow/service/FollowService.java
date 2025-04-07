@@ -1,9 +1,18 @@
 package com.ll.nbe344team7.domain.follow.service;
 
+import com.ll.nbe344team7.domain.follow.dto.FollowListResponseDto;
+import com.ll.nbe344team7.domain.follow.dto.FollowResponseDto;
+import com.ll.nbe344team7.domain.follow.entity.Follow;
+import com.ll.nbe344team7.domain.follow.repository.FollowRepository;
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.global.exception.FollowException;
+import com.ll.nbe344team7.global.exception.FollowExceptionCode;
+import com.ll.nbe344team7.global.exception.GlobalException;
+import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -14,20 +23,74 @@ import java.util.Map;
 @Service
 public class FollowService {
 
-    public Map<Object, Object> createFollow(Long userId, Long followingId) {
-        return Map.of("message","팔로우 성공");
+    private final FollowRepository followRepository;
+    private final MemberRepository memberRepository;
+
+    public FollowService(FollowRepository followRepository, MemberRepository memberRepository) {
+        this.followRepository = followRepository;
+        this.memberRepository = memberRepository;
     }
 
-    public Map<Object, Object> unFollow(Long id) {
-        return Map.of("message","언팔로우 성공");
+    /**
+     * 팔로우
+     *
+     * @param userId
+     * @param followingId
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
+    public FollowResponseDto createFollow(Long userId, Long followingId) {
+        Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        if (followRepository.existsByUserAndFollowing(user, following)) {
+            throw new FollowException(FollowExceptionCode.ALREADY_FOLLOW);
+        }
+
+        Follow follow = new Follow(user, following);
+        followRepository.save(follow);
+        return new FollowResponseDto("팔로우 성공");
     }
 
-    public Object listFollows(Long id) {
-        List<Map<String, Object>> list = List.of(
-                Map.of("followingId",1,"nickname","시계매니아"),
-                Map.of("followingId",2,"nickname","모아신발")
+    /**
+     * 언팔로우
+     *
+     * @param userId
+     * @param followingId
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
+    public FollowResponseDto unFollow(Long userId, Long followingId) {
+        Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        );
-        return Map.of("following",list);
+        if (!followRepository.existsByUserAndFollowing(user, following)) {
+            throw new FollowException(FollowExceptionCode.NOT_EXIST_FOLLOW);
+        }
+        Follow follow = followRepository.findByUserAndFollowing(user, following);
+        followRepository.delete(follow);
+        return new FollowResponseDto("언팔로우 성공");
+    }
+
+    /**
+     * 팔로잉 목록 조회
+     *
+     * @param id
+     * @param pageable
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
+    public Page<FollowListResponseDto> listFollows(Long id, Pageable pageable) {
+        Member user = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        Page<Follow> followPage = followRepository.findByUserId(user.getId(), pageable);
+
+        return followPage.map(follow -> new FollowListResponseDto(follow.getFollowing()));
     }
 }
