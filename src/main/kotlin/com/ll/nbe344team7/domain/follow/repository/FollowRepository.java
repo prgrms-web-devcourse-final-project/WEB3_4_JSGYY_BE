@@ -7,6 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+/**
+ *
+ *
+ * @author kjm72
+ * @since 2025-04-07
+ */
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Long> {
     boolean existsByUserAndFollowing(Member user, Member following);

@@ -28,18 +28,48 @@ public class FollowController {
         this.followService = followService;
     }
 
+    /**
+     * 팔로우
+     *
+     * @param requestDto
+     * @param userDetails
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     @PostMapping
     public ResponseEntity<?> createFollow(@RequestBody FollowRequestDto requestDto,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(followService.createFollow(userDetails.getMemberId(), requestDto.getFollowingId()));
     }
 
+    /**
+     * 언팔로우
+     *
+     * @param requestDto
+     * @param userDetails
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     @DeleteMapping
     public ResponseEntity<?> unFollow(@RequestBody FollowRequestDto requestDto,
                                       @AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok(followService.unFollow(userDetails.getMemberId(),requestDto.getFollowingId()));
     }
 
+    /**
+     * 팔로잉 목록 조회
+     *
+     * @param userDetails
+     * @param pageable
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     @GetMapping
     public ResponseEntity<?> getFollows(@AuthenticationPrincipal CustomUserDetails userDetails,
                                         Pageable pageable) {

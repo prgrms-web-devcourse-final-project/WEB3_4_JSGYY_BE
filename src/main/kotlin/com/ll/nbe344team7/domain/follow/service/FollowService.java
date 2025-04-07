@@ -31,6 +31,16 @@ public class FollowService {
         this.memberRepository = memberRepository;
     }
 
+    /**
+     * 팔로우
+     *
+     * @param userId
+     * @param followingId
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     public FollowResponseDto createFollow(Long userId, Long followingId) {
         Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -44,6 +54,16 @@ public class FollowService {
         return new FollowResponseDto("팔로우 성공");
     }
 
+    /**
+     * 언팔로우
+     *
+     * @param userId
+     * @param followingId
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     public FollowResponseDto unFollow(Long userId, Long followingId) {
         Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -56,6 +76,16 @@ public class FollowService {
         return new FollowResponseDto("언팔로우 성공");
     }
 
+    /**
+     * 팔로잉 목록 조회
+     *
+     * @param id
+     * @param pageable
+     * @return
+     *
+     * @author kjm72
+     * @since 2025-04-07
+     */
     public Page<FollowListResponseDto> listFollows(Long id, Pageable pageable) {
         Member user = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 

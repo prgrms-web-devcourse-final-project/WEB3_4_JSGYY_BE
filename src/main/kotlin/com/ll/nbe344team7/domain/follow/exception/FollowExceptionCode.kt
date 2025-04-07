@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 
 /**
  *
- * 채팅룸 에러 코드
+ * 팔로우 에러 코드
  *
  * @author shjung
  * @since 25. 3. 25.
