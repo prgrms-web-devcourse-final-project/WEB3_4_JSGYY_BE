@@ -2,11 +2,10 @@ spring:
   data:
     redis:
       host: redis_1
-
       password: ${cloud.custom.redis.password}
       port: 6379
   datasource:
     url: jdbc:mysql://mysql_1/team07_prod?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
     username: lldjlocal
-    password: 1234
+    password: ${cloud.custom.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
