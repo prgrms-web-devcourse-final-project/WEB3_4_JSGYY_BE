@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.global.config.redis.publisher;
 
+import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
+import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
@@ -19,11 +21,11 @@ import java.util.List;
  * @since 25. 4. 7.
  */
 @Component
-public class ChatRedisPublisher {
+public class RedisPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChatRoomRedisService chatRoomRedisService;
 
-    public ChatRedisPublisher(RedisTemplate<String, Object> redisTemplate, ChatRoomRedisService chatRoomRedisService) {
+    public RedisPublisher(RedisTemplate<String, Object> redisTemplate, ChatRoomRedisService chatRoomRedisService) {
         this.redisTemplate = redisTemplate;
         this.chatRoomRedisService = chatRoomRedisService;
     }
@@ -40,5 +42,9 @@ public class ChatRedisPublisher {
             ChatRoomListDto chatRoomListDto = new ChatRoomListDto(memberId, chatRoomList);
             redisTemplate.convertAndSend("chatroomList", chatRoomListDto);
         }
+    }
+
+    public void publishAlarm(Alarm alarm) {
+        redisTemplate.convertAndSend("notification", new AlarmDTO(alarm));
     }
 }

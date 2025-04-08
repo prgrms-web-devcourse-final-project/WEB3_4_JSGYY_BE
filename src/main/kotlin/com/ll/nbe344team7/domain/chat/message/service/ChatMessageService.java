@@ -45,7 +45,6 @@ public class ChatMessageService {
      * @author jyson
      * @since 25. 3. 25.
      */
-    @Transactional
     public void send(MessageDTO dto, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
