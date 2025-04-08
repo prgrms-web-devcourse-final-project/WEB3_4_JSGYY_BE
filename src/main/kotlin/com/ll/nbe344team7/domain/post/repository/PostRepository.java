@@ -16,12 +16,14 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT p FROM Post p WHERE " +
+            "(:category IS NULL OR p.category = :category) AND " +
             "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
             "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
             "(:saleStatus IS NULL OR p.saleStatus = :saleStatus) AND " +
-            "(:keyword IS NULL OR p.title LIKE %:keyword%) AND " +
-            "(:place IS NULL OR p.place LIKE %:place%)")
+            "(:keyword IS NULL OR p.title LIKE CONCAT('%', :keyword, '%')) AND " +
+            "(:place IS NULL OR p.place LIKE CONCAT('%', :place, '%'))")
     Page<Post> findBySearchCriteria(
+            @Param("category") String category,
             @Param("minPrice") Long minPrice,
             @Param("maxPrice") Long maxPrice,
             @Param("saleStatus") Boolean saleStatus,
