@@ -4,6 +4,8 @@ import com.ll.nbe344team7.domain.admin.dto.BlockMemberDTO;
 import com.ll.nbe344team7.domain.admin.dto.CategoryDTO;
 import com.ll.nbe344team7.domain.admin.dto.MemberDTO;
 import com.ll.nbe344team7.domain.admin.service.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin")
+@Tag(name = "어드민 API")
 public class AdminController {
 
     private final AdminService adminService;
@@ -33,6 +36,7 @@ public class AdminController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "회원 정보 조회")
     @GetMapping("/members")
     public ResponseEntity<?> getMembers(){
         return ResponseEntity.ok(Map.of("message", "회원 조회 성공",
@@ -51,6 +55,7 @@ public class AdminController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "회원 정보 변경 - 차단")
     @PutMapping("/members/block")
     public ResponseEntity<?> blockMember(@RequestBody BlockMemberDTO block){
         if(block.getMemberId() == null || block.getMemberId() == 10000){
@@ -68,6 +73,7 @@ public class AdminController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "카테고리 정보 조회")
     @GetMapping("/categories")
     public ResponseEntity<?> getCategories(){
         return ResponseEntity.ok(Map.of("message", "데이터 전달 성공", "data", List.of(new CategoryDTO(1L, "의류"))));
@@ -83,6 +89,7 @@ public class AdminController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "카테고리 생성")
     @PostMapping("/categories")
     public ResponseEntity<?> createCategory(@RequestBody CategoryDTO category){
         return ResponseEntity.ok(Map.of("message", "카테고리 생성 성공"));
@@ -99,6 +106,7 @@ public class AdminController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "카테고리 수정")
     @PutMapping("/categories/{categoryId}")
     public ResponseEntity<?> updateCategory(@PathVariable Integer categoryId, @RequestBody CategoryDTO category){
         if(categoryId == null || categoryId == 10000){
@@ -118,6 +126,7 @@ public class AdminController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "카테고리 삭제")
     @DeleteMapping("/categories/{categoryId}")
     public ResponseEntity<?> deleteCategory(@PathVariable Integer categoryId){
         if(categoryId == null || categoryId == 10000){

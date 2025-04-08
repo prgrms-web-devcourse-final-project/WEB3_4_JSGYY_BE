@@ -1,14 +1,14 @@
 package com.ll.nbe344team7.global.security.controller;
 
 
-import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 이광석
  * @since 2025-03-27
  */
+@Tag(name = "토큰 재발급 API")
 @RestController
 public class ReissueController {
     final private JWTUtil jwtUtil;
@@ -40,6 +41,7 @@ public class ReissueController {
      * @author 이광석
      * @since 2025-03-27
      */
+    @Operation(summary = "accessToken 만료 시 refreshToken을 이용하여 accessToken 재발급")
     @PostMapping("/api/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response){
         String refresh = null;

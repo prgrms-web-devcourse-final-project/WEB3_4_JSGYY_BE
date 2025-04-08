@@ -4,6 +4,8 @@ import com.ll.nbe344team7.domain.pay.dto.DepositDTO;
 import com.ll.nbe344team7.domain.pay.dto.PaymentDTO;
 import com.ll.nbe344team7.domain.pay.dto.WithdrawDTO;
 import com.ll.nbe344team7.domain.pay.service.PayService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/pay")
+@Tag(name = "결제 API")
 public class PayController {
 
     private final PayService payService;
@@ -36,6 +39,7 @@ public class PayController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "충전 요청 기능")
     @PostMapping("/deposit")
     public ResponseEntity<?> depositAccount(@RequestBody DepositDTO depositDTO,
                                             @AuthenticationPrincipal CustomUserDetails user) {
@@ -52,6 +56,7 @@ public class PayController {
      * @author shjung
      * @since 25. 3. 24.
      */
+    @Operation(summary = "출금 요청 기능")
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawAccount(@RequestBody WithdrawDTO withdrawDTO,
                                              @AuthenticationPrincipal CustomUserDetails user){
@@ -68,6 +73,7 @@ public class PayController {
      * @author shjung
      * @since 25. 4. 2.
      */
+    @Operation(summary = "물품 결제 기능")
     @PostMapping
     public ResponseEntity<?> paymentsGood(@RequestBody PaymentDTO paymentDTO,
                                           @AuthenticationPrincipal CustomUserDetails user){
@@ -84,6 +90,7 @@ public class PayController {
      * @author shjung
      * @since 25. 4. 2.
      */
+    @Operation(summary = "물품 구매 확정 기능")
     @PostMapping("/confirm")
     public ResponseEntity<?> confirmExchange(@RequestBody PaymentDTO paymentDTO,
                                              @AuthenticationPrincipal CustomUserDetails user){

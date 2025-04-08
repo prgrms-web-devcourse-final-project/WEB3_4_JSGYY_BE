@@ -4,6 +4,8 @@ import com.ll.nbe344team7.domain.follow.dto.FollowListResponseDto;
 import com.ll.nbe344team7.domain.follow.dto.FollowRequestDto;
 import com.ll.nbe344team7.domain.follow.service.FollowService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/follow")
+@Tag(name = "팔로우 API")
 public class FollowController {
 
     private final FollowService followService;
@@ -38,6 +41,7 @@ public class FollowController {
      * @author kjm72
      * @since 2025-04-07
      */
+    @Operation(summary = "팔로우")
     @PostMapping
     public ResponseEntity<?> createFollow(@RequestBody FollowRequestDto requestDto,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -54,6 +58,7 @@ public class FollowController {
      * @author kjm72
      * @since 2025-04-07
      */
+    @Operation(summary = "언팔로우")
     @DeleteMapping
     public ResponseEntity<?> unFollow(@RequestBody FollowRequestDto requestDto,
                                       @AuthenticationPrincipal CustomUserDetails userDetails){
@@ -70,6 +75,7 @@ public class FollowController {
      * @author kjm72
      * @since 2025-04-07
      */
+    @Operation(summary = "팔로잉 목록 조회")
     @GetMapping
     public ResponseEntity<?> getFollows(@AuthenticationPrincipal CustomUserDetails userDetails,
                                         Pageable pageable) {

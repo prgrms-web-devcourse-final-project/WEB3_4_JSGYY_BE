@@ -5,6 +5,8 @@ import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.dto.OneData;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("api")
+@Tag(name = "맴버 API")
 public class MemberController {
 
 
@@ -39,6 +42,7 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
+    @Operation(summary = "회원가입")
     @PostMapping("/auth/register")
     public ResponseEntity<String> register(@RequestBody() MemberDTO memberDTO){
 
@@ -59,6 +63,7 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
+    @Operation(summary = "로그아웃")
     @GetMapping("/auth/logout")
     public ResponseEntity<Map<String,String>> logout(){
         Map<String,String> mockResponseMap = new HashMap<>();
@@ -73,6 +78,7 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
+    @Operation(summary = "내 상세 정보 조회")
     @GetMapping("/member/mydetails")
     public ResponseEntity<Map<String, Object>> myDetails(
         @AuthenticationPrincipal    CustomUserDetails customUserDetails
@@ -93,7 +99,7 @@ public class MemberController {
      * @author 이광석
      * @since 25.03.25
      */
-
+    @Operation(summary = "회원 탈퇴")
     @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -109,7 +115,7 @@ public class MemberController {
 
 
 
-
+    @Operation(summary = "내 정보 수정")
     @PutMapping("/member/modify/{category}")
     public ResponseEntity<Map<String,Object>> modifyMyDetails(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
@@ -122,6 +128,7 @@ public class MemberController {
         return ResponseEntity.ok(request);
     }
 
+    @Operation(summary = "닉네임 회원 검색")
     @GetMapping("/member/nickname")
     public ResponseEntity<?> findMemberByNickname(@RequestParam("nickname") String nickname){
         return ResponseEntity.ok(this.memberService.findMemberDTOByNickname(nickname));
