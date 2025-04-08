@@ -65,9 +65,10 @@ class Post (
     var images: MutableList<ImageFile> = mutableListOf()
         protected set
 
-    fun update(title: String, content: String, price: Long, place: String, saleStatus: Boolean, auctionStatus: Boolean) {
+    fun update(title: String, content: String, category: String, price: Long, place: String, saleStatus: Boolean, auctionStatus: Boolean) {
         this.title = title
         this.content = content
+        this.category = category
         this.price = price
         this.place = place
         this.saleStatus = saleStatus

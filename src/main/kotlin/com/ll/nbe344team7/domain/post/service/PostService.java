@@ -213,6 +213,7 @@ public class PostService {
         post.update(
                 request.getTitle(),
                 request.getContent(),
+                request.getCategory(),
                 request.getPrice(),
                 request.getPlace(),
                 request.getSaleStatus(),
