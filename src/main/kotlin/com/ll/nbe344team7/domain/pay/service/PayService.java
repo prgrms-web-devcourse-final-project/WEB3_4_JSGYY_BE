@@ -89,7 +89,7 @@ public class PayService {
                 throw new PaymentException(PayExceptionCode.PAYMENT_STATUS_ERROR);
             }
             // 6. 거래 내역 저장할 entity 생성
-            Exchange exchange = new Exchange(dto, status);
+            Exchange exchange = new Exchange(dto, status, memberId);
 
             // 7. 만약 거래 내역이 저장된 상태면 exception 발생
             if(paymentRepository.countByImpUidContainsIgnoreCase(dto.getImpUid()) > 0){
