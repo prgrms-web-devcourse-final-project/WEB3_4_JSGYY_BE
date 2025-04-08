@@ -27,7 +27,7 @@ class Alarm(
 
     val type : Int,
 
-    val isCheck : Boolean?= false,
+    val checked : Boolean?= false,
 
     @Column(name = "created_at")
     val createdAt : LocalDateTime?=LocalDateTime.now(),
@@ -37,7 +37,7 @@ class Alarm(
         member=member,
         content = content,
         type=type,
-        isCheck=null,
+        checked=null,
         createdAt = null
     )
 }
