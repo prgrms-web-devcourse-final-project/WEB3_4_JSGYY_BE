@@ -4,6 +4,7 @@ data class PostRequest (
     val title: String = "",
     val content: String = "",
     val price: Long = 0L,
+    val category: String = "",
     val place: String = "",
     val saleStatus: Boolean = true,
     val auctionStatus: Boolean = false,
