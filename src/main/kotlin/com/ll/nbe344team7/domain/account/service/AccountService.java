@@ -101,7 +101,7 @@ public class AccountService {
             account.setBankName(dto.getBankName());
             account.setAccountNumber(dto.getAccountNumber());
         }else {
-            account = new Account(dto);
+            account = new Account(dto, memberId);
         }
 
         accountRepository.save(account);
