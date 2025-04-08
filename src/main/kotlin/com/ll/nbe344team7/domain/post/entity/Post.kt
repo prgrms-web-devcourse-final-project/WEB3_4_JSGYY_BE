@@ -12,7 +12,7 @@ class Post (
     member: Member,
     title: String,
     content: String,
-    categoryId: Long,
+    category: String,
     price: Long,
     place: String,
     auctionStatus: Boolean
@@ -36,7 +36,7 @@ class Post (
         protected set
 
     @Column(nullable = false)
-    var categoryId: Long = categoryId
+    var category: String = category
         protected set
 
     @Column(nullable = false)

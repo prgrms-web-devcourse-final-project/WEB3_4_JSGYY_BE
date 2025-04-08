@@ -25,7 +25,7 @@ data class PostDto(
     val images: List<ImageFileDto>
 ) {
     companion object {
-        fun from(post: Post, memberId: Long, categoryName: String, isLiked: Boolean): PostDto {
+        fun from(post: Post, memberId: Long, isLiked: Boolean): PostDto {
             val isAuthor = post.member.id == memberId
 
             return PostDto(
@@ -33,7 +33,7 @@ data class PostDto(
                 authorId = post.member.id!!,
                 title = post.title,
                 content = post.content,
-                category = categoryName,
+                category = post.category,
                 place = post.place,
                 price = post.price,
                 saleStatus = post.saleStatus,

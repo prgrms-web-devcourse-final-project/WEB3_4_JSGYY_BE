@@ -4,6 +4,7 @@ import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.entity.AuctionSchedule;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
+import com.ll.nbe344team7.domain.category.repository.CategoryRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
@@ -22,8 +23,6 @@ import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.domain.post.repository.ReportRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
-import com.ll.nbe344team7.global.imageFIle.repository.ImageFileRepository;
-import com.ll.nbe344team7.global.imageFIle.service.S3ImageService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,28 +38,25 @@ public class PostService {
     private final AuctionRepository auctionRepository;
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
-    private final S3ImageService s3ImageService;
-    private final ImageFileRepository imageFileRepository;
     private final ReportRepository reportRepository;
     private final AuctionScheduleRepository auctionScheduleRepository;
+    private final CategoryRepository categoryRepository;
 
     public PostService(PostRepository postRepository,
                        AuctionRepository auctionRepository,
                        MemberRepository memberRepository,
                        PostLikeRepository postLikeRepository,
-                       S3ImageService s3ImageService,
-                       ImageFileRepository imageFileRepository,
-                          ReportRepository reportRepository,
-                       AuctionScheduleRepository auctionScheduleRepository
+                       ReportRepository reportRepository,
+                       AuctionScheduleRepository auctionScheduleRepository,
+                       CategoryRepository categoryRepository
     ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
-        this.s3ImageService = s3ImageService;
-        this.imageFileRepository = imageFileRepository;
         this.reportRepository = reportRepository;
         this.auctionScheduleRepository = auctionScheduleRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     /**
@@ -142,6 +138,7 @@ public class PostService {
                 member,
                 request.getTitle(),
                 request.getContent(),
+                request.getCategory(),
                 request.getPrice(),
                 request.getPlace(),
                 request.getAuctionStatus()
@@ -257,12 +254,13 @@ public class PostService {
      */
     public Page<PostListDto> getPostsBySearch(Pageable pageable, PostSearchRequest searchRequest) {
 
-        if (searchRequest.getMinPrice() == null && searchRequest.getMaxPrice() == null
+        if (searchRequest.getCategory() == null && searchRequest.getMinPrice() == null && searchRequest.getMaxPrice() == null
                 && searchRequest.getSaleStatus() == null && searchRequest.getKeyword() == null) {
             return postRepository.findAll(pageable).map(post -> PostListDto.Companion.from(post));
         }
 
         return postRepository.findBySearchCriteria(
+                searchRequest.getCategory(),
                 searchRequest.getMinPrice(),
                 searchRequest.getMaxPrice(),
                 searchRequest.getSaleStatus(),
