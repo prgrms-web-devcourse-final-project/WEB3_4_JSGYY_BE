@@ -4,7 +4,6 @@ import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.entity.AuctionSchedule;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
-import com.ll.nbe344team7.domain.category.repository.CategoryRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
@@ -40,15 +39,13 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final ReportRepository reportRepository;
     private final AuctionScheduleRepository auctionScheduleRepository;
-    private final CategoryRepository categoryRepository;
 
     public PostService(PostRepository postRepository,
                        AuctionRepository auctionRepository,
                        MemberRepository memberRepository,
                        PostLikeRepository postLikeRepository,
                        ReportRepository reportRepository,
-                       AuctionScheduleRepository auctionScheduleRepository,
-                       CategoryRepository categoryRepository
+                       AuctionScheduleRepository auctionScheduleRepository
     ) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
@@ -56,7 +53,6 @@ public class PostService {
         this.postLikeRepository = postLikeRepository;
         this.reportRepository = reportRepository;
         this.auctionScheduleRepository = auctionScheduleRepository;
-        this.categoryRepository = categoryRepository;
     }
 
     /**
@@ -254,8 +250,13 @@ public class PostService {
      */
     public Page<PostListDto> getPostsBySearch(Pageable pageable, PostSearchRequest searchRequest) {
 
-        if (searchRequest.getCategory() == null && searchRequest.getMinPrice() == null && searchRequest.getMaxPrice() == null
-                && searchRequest.getSaleStatus() == null && searchRequest.getKeyword() == null) {
+        if (searchRequest.getCategory() == null
+                && searchRequest.getMinPrice() == null
+                && searchRequest.getMaxPrice() == null
+                && searchRequest.getSaleStatus() == null
+                && searchRequest.getKeyword() == null
+                && searchRequest.getPlace() == null
+        ) {
             return postRepository.findAll(pageable).map(post -> PostListDto.Companion.from(post));
         }
 
