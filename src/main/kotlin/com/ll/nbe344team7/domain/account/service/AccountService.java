@@ -92,22 +92,20 @@ public class AccountService {
      * @author shjung
      * @since 25. 3. 31.
      */
-    public Map<Object, Object> createAccount(AccountDTO dto) {
-        if(!memberRepository.existsById(dto.getMemberId())) {
-            throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
-        }
+    public Map<Object, Object> createAccount(AccountDTO dto, Long memberId) {
+        Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         Account account;
         if(accountRepository.count() > 0) {
-            account = this.accountRepository.findByMemberId(dto.getMemberId());
+            account = this.accountRepository.findByMemberId(memberId);
             account.setBankName(dto.getBankName());
             account.setAccountNumber(dto.getAccountNumber());
         }else {
-            account = new Account(dto);
+            account = new Account(dto, memberId);
         }
 
         accountRepository.save(account);
 
-        return Map.of("message", "계좌번호 및 은행이 저장되었습니다.");
+        return Map.of("message", member.getNickname() + "님의 계좌번호 및 은행이 저장되었습니다.");
     }
 }

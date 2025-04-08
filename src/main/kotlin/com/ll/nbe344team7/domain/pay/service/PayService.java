@@ -71,8 +71,9 @@ public class PayService {
      * @author shjung
      * @since 25. 3. 24.
      */
-    public Map<Object, Object> depositAccount(DepositDTO dto){
+    public Map<Object, Object> depositAccount(DepositDTO dto, Long memberId) {
         try{
+            Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
             // 1. api 결제 확인 요청
             IamportResponse<Payment> iamportResponse = iamportClient.paymentByImpUid(dto.getImpUid());
             // 2. 결제 금액 확인
@@ -88,7 +89,7 @@ public class PayService {
                 throw new PaymentException(PayExceptionCode.PAYMENT_STATUS_ERROR);
             }
             // 6. 거래 내역 저장할 entity 생성
-            Exchange exchange = new Exchange(dto, status);
+            Exchange exchange = new Exchange(dto, status, memberId);
 
             // 7. 만약 거래 내역이 저장된 상태면 exception 발생
             if(paymentRepository.countByImpUidContainsIgnoreCase(dto.getImpUid()) > 0){
@@ -112,10 +113,10 @@ public class PayService {
      * @author shjung
      * @since 25. 3. 24.
      */
-    public Map<Object, Object> withdrawAccount(WithdrawDTO dto){
+    public Map<Object, Object> withdrawAccount(WithdrawDTO dto, Long memberId) {
         // 1. 멤버 오류 및 계좌 오류
-        Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-        Account account = this.accountRepository.findByMemberId(dto.getMemberId());
+        Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Account account = this.accountRepository.findByMemberId(memberId);
 
         if(account == null){
             throw new AccountException(AccountExceptionCode.NOT_FOUND_ACCOUNT);
@@ -130,7 +131,7 @@ public class PayService {
         Withdraw withdraw = new Withdraw(null, member.getName(), dto.getPrice(), account.getBankName(), account.getAccountNumber(), LocalDateTime.now());
 
         // 4. 거래 내역에 출금 저장
-        Exchange exchange = new Exchange(null, dto.getMemberId(), dto.getMemberId(),
+        Exchange exchange = new Exchange(null, memberId, memberId,
                 LocalDateTime.now(), dto.getPrice(), 0, 1, null, null);
         account.setMoney(account.getMoney() - dto.getPrice());
 
@@ -151,12 +152,12 @@ public class PayService {
      * @author shjung
      * @since 25. 4. 2.
      */
-    public Map<Object, Object> payExchange(PaymentDTO dto){
+    public Map<Object, Object> payExchange(PaymentDTO dto, Long memberId) {
         // 1. 멤버 조회 및 게시글, 계좌 조회
-        Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Post post = this.postRepository.findById(dto.getPostId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_POST));
 
-        Account account = this.accountRepository.findByMemberId(dto.getMemberId());
+        Account account = this.accountRepository.findByMemberId(memberId);
         if(account == null){
             throw new AccountException(AccountExceptionCode.NOT_FOUND_ACCOUNT);
         }
@@ -166,7 +167,7 @@ public class PayService {
         }
         // 3. 송금 기록 저장
         //  - 구매 확정이 아니라서 결제 상태를 미 결제로 저장
-        Exchange sendExchange = new Exchange(null, dto.getMemberId(), post.getMember().getId(),
+        Exchange sendExchange = new Exchange(null, memberId, post.getMember().getId(),
                 LocalDateTime.now(), post.getPrice(), 0, 1, null, dto.getPostId());
         post.updateSaleStatus(false);
 
@@ -189,13 +190,13 @@ public class PayService {
      * @author shjung
      * @since 25. 4. 2.
      */
-    public Map<Object, Object> confirmExchange(PaymentDTO dto){
+    public Map<Object, Object> confirmExchange(PaymentDTO dto, Long memberId) {
         // 1. 멤버 조회 및 게시글, 계좌 조회
-        Member member = this.memberRepository.findById(dto.getMemberId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Post post = this.postRepository.findById(dto.getPostId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_POST));
 
         // 2. 구매한 물품 조회
-        Exchange sendExchange = this.paymentRepository.findByMyIdAndPostId(dto.getMemberId(), dto.getPostId());
+        Exchange sendExchange = this.paymentRepository.findByMyIdAndPostId(memberId, dto.getPostId());
         if(sendExchange == null){
             throw new PaymentException(PayExceptionCode.PAYMENT_ERROR);
         }
@@ -206,7 +207,7 @@ public class PayService {
         }
         // 4. 결제 상태 완료로 변경 및 판매자는 입금 내역 추가
         sendExchange.setStatus(1);
-        Exchange receiveExchange = new Exchange(null, post.getMember().getId(), dto.getMemberId(),
+        Exchange receiveExchange = new Exchange(null, post.getMember().getId(), memberId,
                 LocalDateTime.now(), post.getPrice(), 1, 0, null, dto.getPostId());
         // 5. 판매자의 보유금 증가
         Account account = this.accountRepository.findByMemberId(post.getMember().getId());

@@ -4,7 +4,9 @@ import com.ll.nbe344team7.domain.account.dto.AccountDTO;
 import com.ll.nbe344team7.domain.account.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -57,7 +59,8 @@ public class AccountController {
 
     @Operation(summary = "계좌 생성")
     @PostMapping
-    public ResponseEntity<?> createAccount(@RequestBody AccountDTO account) {
-        return ResponseEntity.ok(this.accountService.createAccount(account));
+    public ResponseEntity<?> createAccount(@RequestBody AccountDTO account,
+                                           @AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(this.accountService.createAccount(account, user.getMemberId()));
     }
 }

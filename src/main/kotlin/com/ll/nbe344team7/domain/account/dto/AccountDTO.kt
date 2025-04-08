@@ -7,4 +7,4 @@ package com.ll.nbe344team7.domain.account.dto
  * @author shjung
  * @since 25. 3. 31.
  */
-data class AccountDTO (val memberId: Long, val accountNumber: String, val bankName: String)
+data class AccountDTO (val accountNumber: String, val bankName: String)

@@ -25,10 +25,10 @@ data class Exchange(
     val impUid: String? = null,
     val postId: Long? = null,
 ){
-    constructor(dto: DepositDTO, status: Int) : this(
+    constructor(dto: DepositDTO, status: Int, memberId: Long) : this(
         id = null,
-        myId = dto.memberId,
-        otherId = dto.memberId,
+        myId = memberId,
+        otherId = memberId,
         payDate = LocalDateTime.now(),
         price = dto.price,
         status = status,
