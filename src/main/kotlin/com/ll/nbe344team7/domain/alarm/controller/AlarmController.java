@@ -1,14 +1,11 @@
 package com.ll.nbe344team7.domain.alarm.controller;
 
 import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
-import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.alarm.service.AlarmService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +19,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/alarms")
+@Tag(name = "알람 API")
 public class AlarmController {
 
     private final AlarmService alarmService;
@@ -40,6 +38,7 @@ public class AlarmController {
      * @author 이광석
      * @since 2025-04-03
      */
+    @Operation(summary = "알람 목록조회")
     @GetMapping
     public ResponseEntity<Map<String,Object>> getAlarms(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -62,6 +61,7 @@ public class AlarmController {
      * @author 이광석
      * @since 2025-04-03
      */
+    @Operation(summary = "알람 삭제")
     @DeleteMapping("{id}")
     public ResponseEntity<Map<String,Object>> deleteAlarm(
             @AuthenticationPrincipal CustomUserDetails userDetails,

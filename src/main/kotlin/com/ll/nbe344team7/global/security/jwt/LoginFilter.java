@@ -105,7 +105,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String accessToken = jwtUil.createJwt("access",username,memberId,role,60*10*1000L);
+        String accessToken = jwtUil.createJwt("access",username,memberId,role,60*60*24*1000L);
         String refreshToken = jwtUil.createJwt("refresh",username,memberId,role,60*60*24*1000L);
 
         redisRepository.save(refreshToken,accessToken,60*60*24L);

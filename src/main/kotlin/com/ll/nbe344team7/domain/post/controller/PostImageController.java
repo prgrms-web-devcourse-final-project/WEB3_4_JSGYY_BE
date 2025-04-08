@@ -3,6 +3,8 @@ package com.ll.nbe344team7.domain.post.controller;
 import com.ll.nbe344team7.domain.post.dto.response.UpdateImageResult;
 import com.ll.nbe344team7.domain.post.service.PostImageService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
+@Tag(name = "게시글 이미지 API")
 public class PostImageController {
     private final PostImageService postImageService;
 
@@ -33,6 +36,7 @@ public class PostImageController {
      * @author GAEUN220
      * @since 2025-04-04
      */
+    @Operation(summary = "게시글 사진 업로드 & 삭제")
     @PostMapping("/{postId}/images")
     public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
