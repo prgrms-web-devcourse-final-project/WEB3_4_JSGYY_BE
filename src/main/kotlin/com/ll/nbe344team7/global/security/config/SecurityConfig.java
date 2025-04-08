@@ -98,6 +98,7 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
 
                         configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));   //3000으로 오는 요청 허가
+                        configuration.setAllowedOrigins(Collections.singletonList("https://www.app1.springservice.shop"));   //3000으로 오는 요청 허가
                         configuration.setAllowedMethods(Collections.singletonList("*"));   //모든 HTTP 메서드 허용( GET 등)
                         configuration.setAllowCredentials(true);  //쿠키등 인증정보 전달 허용
                         configuration.setAllowedHeaders(Collections.singletonList("*")); //모든 헤더 허용
