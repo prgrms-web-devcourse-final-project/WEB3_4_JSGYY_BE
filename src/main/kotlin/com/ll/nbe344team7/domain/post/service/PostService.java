@@ -4,6 +4,9 @@ import com.ll.nbe344team7.domain.auction.entity.Auction;
 import com.ll.nbe344team7.domain.auction.entity.AuctionSchedule;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
+import com.ll.nbe344team7.domain.category.exception.CategoryException;
+import com.ll.nbe344team7.domain.category.exception.CategoryExceptionCode;
+import com.ll.nbe344team7.domain.category.repository.CategoryRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
@@ -39,20 +42,22 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final ReportRepository reportRepository;
     private final AuctionScheduleRepository auctionScheduleRepository;
+    private final CategoryRepository categoryRepository;
 
     public PostService(PostRepository postRepository,
                        AuctionRepository auctionRepository,
                        MemberRepository memberRepository,
                        PostLikeRepository postLikeRepository,
                        ReportRepository reportRepository,
-                       AuctionScheduleRepository auctionScheduleRepository
-    ) {
+                       AuctionScheduleRepository auctionScheduleRepository,
+                       CategoryRepository categoryRepository) {
         this.postRepository = postRepository;
         this.auctionRepository = auctionRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
         this.reportRepository = reportRepository;
         this.auctionScheduleRepository = auctionScheduleRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     /**
@@ -125,6 +130,10 @@ public class PostService {
      */
     @Transactional
     public Map<String, String> createPost(PostRequest request, Long memberId) {
+
+        if (!categoryRepository.existsByName(request.getCategory())) {
+            throw new CategoryException(CategoryExceptionCode.CATEGORY_NOT_FOUND);
+        }
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
@@ -205,6 +214,10 @@ public class PostService {
         validatePostRequest(request);
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!categoryRepository.existsByName(request.getCategory())) {
+            throw new CategoryException(CategoryExceptionCode.CATEGORY_NOT_FOUND);
+        }
 
         if (!post.getMember().getId().equals(memberId)) {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
