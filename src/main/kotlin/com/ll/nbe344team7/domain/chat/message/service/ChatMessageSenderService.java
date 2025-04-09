@@ -19,12 +19,33 @@ import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
 
+//class Message{
+//    DateTime created_at;
+//}
+//class User{}
+//class Room{}
+//class RoomAttendant{
+//    Room room;
+//    User user;
+//    DateTime joined_at;
+//}
+//class MessageCheck{
+//    Message message;
+//    RoomAttendant attendant;
+//}
+//자바에서 동시처리능력은 == 스레드 코어의개수
+//저런작업이 길어지면길어질수록 하나의리퀘스트가 오래동안잡혀있으니
+// A 0.1초에메세지를보냄 A의메세지요청 0.4초에들어오고
+// B 0.1초에메세지를보냄 B의메세지요청 0.3초에들어옴
+// RaceCondition 이필요한작업들 아니면 비동기인데 순차적으로실행되어야하는작업들
+// 티케팅, 게임서버같은경우에는 멀티플레이()
 /**
  * 메세지 전송 처리
  *
@@ -61,25 +82,33 @@ public class ChatMessageSenderService {
         ChatMessage chatMessage = new ChatMessage(member, dto.getContent(), chatRoom);
         List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
 
-        try {
-            lock.executeWithLock(roomId, () -> {
-                process(dto, member, chatRoom, chatMessage, chatParticipants);
-            });
-        } catch (LockAcquisitionException e) {
-            log.error("메세지 전송 실패 - 락 획득 실패: {}", roomId);
-        }
+        process(dto, member, chatRoom, chatMessage, chatParticipants);
     }
 
     @Transactional
     public void process(MessageDTO dto, Member member, ChatRoom chatRoom, ChatMessage chatMessage, List<ChatParticipant> chatParticipants) {
+        //fallback처리?
+        //1. 레디스로부터 참가자정보를읽어옴
+        //2. 전파된메세지저장 ->  참가자들에게게메세지전파
+
+        //3. * 알람저장 -> 알람전파 < 비동기처리
+        //4.
         Long roomId = chatRoom.getId();
-
-        redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
+        // save message to db
+        chatMessageRepository.save(chatMessage);
         chatRoomRedisService.saveLastMessage(dto,chatMessage.getMember().getId());
+        //
+        redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
 
-        for (ChatParticipant chatParticipant : chatParticipants) {
+        handleAlarm();
+    }
+
+    @Async
+    public void handleAlarm(){
+
+        // 채팅방에접속하지않은 유저에게 알람보내기 //비동기 추천
+        for (ChatParticipant chatParticipant : chatParticipants) { //이부분 id__in로한번에채팅방들을가져와서 처리
             Long participantId = chatParticipant.getMember().getId();
-
             if (!participantId.equals(member.getId())) {
                 List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
                 redisTemplate.convertAndSend("chatroomList", new ChatRoomListDto(participantId, chatRoomList));
@@ -110,11 +139,11 @@ public class ChatMessageSenderService {
             // 알림 전송 로직
             for (ChatParticipant chatParticipant : offlineUsers) {
                 String content = member.getNickname() + ": " + dto.getContent();
-                alarmService.createAlarm(content, chatParticipant.getMember().getId(), 0);
+                alarmService.createAlarm(content, chatParticipant.getMember().getId(), 2);
             }
-        }
-        chatMessageRepository.save(chatMessage);
     }
+}
+
 
 //    private void redisPublish(MessageDTO dto, Member member, ChatMessage chatMessage, List<ChatParticipant> chatParticipants) {
 //        TransactionSynchronizationManager.registerSynchronization(
