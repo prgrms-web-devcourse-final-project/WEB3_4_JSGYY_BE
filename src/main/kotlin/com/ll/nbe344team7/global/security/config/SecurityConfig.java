@@ -127,11 +127,11 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin())
                 )
 
-                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),LoginFilter.class)  // jwt 유효성 검사
+                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),UsernamePasswordAuthenticationFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
 
-                .addFilterBefore(new LogoutFilter(jwtUtil, redisRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new LogoutFilter(jwtUtil, redisRepository), LoginFilter.class)
 
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));  //세션 stateless 상태 설정
