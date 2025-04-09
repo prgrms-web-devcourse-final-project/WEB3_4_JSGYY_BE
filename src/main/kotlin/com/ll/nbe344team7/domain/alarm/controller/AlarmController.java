@@ -78,6 +78,15 @@ public class AlarmController {
     }
 
 
+    @GetMapping("/create")
+    public ResponseEntity< Map<String,Object>> createAlarm(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        alarmService.createAlarm("웹소켓 입니다.."+userDetails.getMemberId(),2L,2,1L);
+        return ResponseEntity.ok(buildResponse("알람 생성 성공",null));
+    }
+
+
     /**
      * repose 빌드 메소드
      *
@@ -94,4 +103,7 @@ public class AlarmController {
         response.put("data" , data);
         return response;
     }
+
+
+
 }

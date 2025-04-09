@@ -60,7 +60,8 @@ public class JWTFilter extends OncePerRequestFilter {
         noCertifiedUrls.add("/h2-console");
         noCertifiedUrls.add("/api/auth/register");
         noCertifiedUrls.add("/api/login");
-//        noCertifiedUrls.add("/");
+        noCertifiedUrls.add("/");
+        noCertifiedUrls.add("/actuator/health");
 
         for (String noCertifiedUrl : noCertifiedUrls){
             if(request.getServletPath().contains(noCertifiedUrl)){
@@ -69,11 +70,9 @@ public class JWTFilter extends OncePerRequestFilter {
             }
         }
 
-
        String accessToken = request.getHeader("access");
 
        String refreshToken = getRefreshToken(request.getCookies());
-
 
       if(refreshToken==null){
           throw new SecurityException(SecurityExceptionCode.TOKEN_NOT_EFFECTIVE);

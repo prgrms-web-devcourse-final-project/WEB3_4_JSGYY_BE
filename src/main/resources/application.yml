@@ -2,8 +2,8 @@ spring:
   application:
     name: NBE3-4-4-team7
   profiles:
-    active: dev
     include: secret
+    active: dev
   jpa:
     hibernate:
       ddl-auto: update
@@ -30,3 +30,4 @@ logging:
     org.springframework.web.socket: DEBUG
     org.springframework.messaging: DEBUG
     com.example: DEBUG
+

@@ -42,6 +42,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 
 
 	//jwt 토큰 생성 + 관리 의존성
@@ -57,13 +59,14 @@ dependencies {
 	implementation 'org.redisson:redisson:3.45.1'
 
 	// aws s3 관련 의존성
-	implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.2")
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation("software.amazon.awssdk:s3:2.20.128")
-
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+
+	implementation("software.amazon.awssdk:s3:2.20.128")
 }
 
 kotlin {
@@ -80,4 +83,20 @@ allOpen {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+
+sourceSets {
+	main {
+		java {
+			// Kotlin과 Java 파일을 모두 src/main/kotlin에서 읽도록 설정
+			setSrcDirs(['src/main/kotlin'])
+		}
+	}
+
+	test {
+		java {
+			setSrcDirs(['src/test/kotlin'])
+		}
+	}
 }

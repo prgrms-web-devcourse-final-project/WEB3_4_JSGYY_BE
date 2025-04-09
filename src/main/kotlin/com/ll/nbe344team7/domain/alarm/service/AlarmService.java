@@ -8,6 +8,7 @@ import com.ll.nbe344team7.domain.alarm.repository.AlarmRepository;
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.service.MemberService;
+import com.ll.nbe344team7.global.config.redis.publisher.AlarmRedisPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,9 +29,14 @@ public class AlarmService {
     private final AlarmRepository alarmRepository;
     private final MemberService memberService;
 
-    public AlarmService(AlarmRepository alarmRepository, MemberService memberService){
+    private final AlarmRedisPublisher alarmRedisPublisher;
+
+    public AlarmService(AlarmRepository alarmRepository,
+                        MemberService memberService,
+                        AlarmRedisPublisher alarmRedisPublisher){
         this.alarmRepository = alarmRepository;
         this.memberService = memberService;
+        this.alarmRedisPublisher = alarmRedisPublisher;
     }
 
     /**
@@ -51,13 +57,7 @@ public class AlarmService {
 
 
         return alarms.map(alarm -> new AlarmDTO(
-                alarm.getId(),
-                alarm.getMember().getUsername(),
-                alarm.getMember().getNickname(),
-                alarm.getContent(),
-                alarm.getType(),
-                alarm.isCheck(),
-                alarm.getCreatedAt()
+              alarm
         ));
     }
 
@@ -84,11 +84,13 @@ public class AlarmService {
      * @author 이광석
      * @since 2025-04-03
      */
-    public void createAlarm(String content,Long memberId,int type){
+    public void createAlarm(String content,Long memberId,int type,Long destinationId){
 
         Member member = memberService.getMember(memberId);
-        Alarm newAlarm = new Alarm(member,content,type);
+        Alarm newAlarm = new Alarm(member,content,type,destinationId);
         alarmRepository.save(newAlarm);
+
+        alarmRedisPublisher.publishMessage(new AlarmDTO(newAlarm));
     }
 
     /**

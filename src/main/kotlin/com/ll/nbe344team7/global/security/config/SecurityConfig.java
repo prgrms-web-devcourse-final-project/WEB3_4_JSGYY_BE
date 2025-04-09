@@ -19,8 +19,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -75,6 +77,22 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(){
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.app1.springservice.shop"));
+        config.setAllowedMethods(List.of("GET","POST","PATCH","DELETE","OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization"));
+        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**",config);
+        return source;
+    }
+
+
     /**
      * SecurityFilterChain을 bean 으로 등록하는 메서드
      * HTTP 요청시 보안처리 필터 체인
@@ -90,24 +108,7 @@ public class SecurityConfig {
         loginFilter.setFilterProcessesUrl("/api/auth/login");
 
 
-        // CORS 설정 활성화
-        http
-                .cors((corsCustomizer->corsCustomizer.configurationSource(new CorsConfigurationSource() {
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                        CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));   //3000으로 오는 요청 허가
-                        configuration.setAllowedMethods(Collections.singletonList("*"));   //모든 HTTP 메서드 허용( GET 등)
-                        configuration.setAllowCredentials(true);  //쿠키등 인증정보 전달 허용
-                        configuration.setAllowedHeaders(Collections.singletonList("*")); //모든 헤더 허용
-                        configuration.setMaxAge(3600L);
-                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-
-
-                        return configuration;
-                    }
-                })));
 
         http
                 .csrf((auth) -> auth.disable())
@@ -118,7 +119,7 @@ public class SecurityConfig {
 
 
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**").permitAll()  //인증없이 접속가능
+                        .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health").permitAll()  //인증없이 접속가능
                         .anyRequest().authenticated()) // 인증 필요
 
                 .headers(headers -> headers
@@ -126,11 +127,11 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin())
                 )
 
-                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),LoginFilter.class)  // jwt 유효성 검사
+                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),UsernamePasswordAuthenticationFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
 
-                .addFilterBefore(new LogoutFilter(jwtUtil, redisRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new LogoutFilter(jwtUtil, redisRepository), LoginFilter.class)
 
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));  //세션 stateless 상태 설정
