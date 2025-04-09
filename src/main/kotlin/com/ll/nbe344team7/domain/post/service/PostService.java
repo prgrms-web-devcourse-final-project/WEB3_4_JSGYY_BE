@@ -223,6 +223,10 @@ public class PostService {
             throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
+        if (post.getAuctionStatus() && post.getAuctionDetails() != null && !request.getAuctionStatus()) {
+            throw new PostException(PostErrorCode.CANNOT_MODIFY_AUCTION);
+        }
+
         post.update(
                 request.getTitle(),
                 request.getContent(),
