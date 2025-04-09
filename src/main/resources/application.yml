@@ -16,6 +16,9 @@ spring:
   output:
     ansi:
       enabled: always
+springdoc:
+  swagger-ui:
+    persist-authorization: true
 
 logging:
   level:
