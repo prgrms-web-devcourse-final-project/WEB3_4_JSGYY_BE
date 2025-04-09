@@ -13,9 +13,7 @@ import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatRoomRedisService;
 import com.ll.nbe344team7.domain.member.entity.Member;
-import com.ll.nbe344team7.global.config.reddison.lock.DistributedLock;
 import com.ll.nbe344team7.global.config.redis.publisher.RedisPublisher;
-import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -98,28 +96,25 @@ public class ChatMessageSenderService {
         //
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
 
-        handleAlarm();
+        handleAlarm(dto, roomId, member, chatMessage, chatParticipants);
     }
 
     @Async
-    public void handleAlarm(){
-
-        // 채팅방에접속하지않은 유저에게 알람보내기 //비동기 추천
-        for (ChatParticipant chatParticipant : chatParticipants) { //이부분 id__in로한번에채팅방들을가져와서 처리
-            Long participantId = chatParticipant.getMember().getId();
-            if (!participantId.equals(member.getId())) {
-                List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
-                redisTemplate.convertAndSend("chatroomList", new ChatRoomListDto(participantId, chatRoomList));
-            }
-        }
-
+    public void handleAlarm(MessageDTO dto, Long roomId, Member member, ChatMessage chatMessage,List<ChatParticipant> chatParticipants){
         Set<String> chatroomUsers = chatRedisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
 
         // 채팅방에 없을 때 안읽음, 알람 처리
         if (chatroomUsers.size() < 2) {
+
             List<ChatParticipant> offlineUsers = chatParticipants.stream()
                     .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
                     .toList();
+
+            for (ChatParticipant chatParticipant : offlineUsers) {
+                Long participantId = chatParticipant.getMember().getId();
+                List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
+                redisTemplate.convertAndSend("chatroomList", new ChatRoomListDto(participantId, chatRoomList));
+            }
 
             chatMessage.setRead(false);
 
