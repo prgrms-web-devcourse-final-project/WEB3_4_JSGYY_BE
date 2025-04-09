@@ -84,10 +84,10 @@ public class AlarmService {
      * @author 이광석
      * @since 2025-04-03
      */
-    public void createAlarm(String content,Long memberId,int type){
+    public void createAlarm(String content,Long memberId,int type,Long destinationId){
 
         Member member = memberService.getMember(memberId);
-        Alarm newAlarm = new Alarm(member,content,type);
+        Alarm newAlarm = new Alarm(member,content,type,destinationId);
         alarmRepository.save(newAlarm);
 
         alarmRedisPublisher.publishMessage(new AlarmDTO(newAlarm));

@@ -82,7 +82,7 @@ public class AlarmController {
     public ResponseEntity< Map<String,Object>> createAlarm(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        alarmService.createAlarm("히히 웹소켓이라궁~."+userDetails.getMemberId(),2L,2);
+        alarmService.createAlarm("웹소켓 입니다.."+userDetails.getMemberId(),2L,2,1L);
         return ResponseEntity.ok(buildResponse("알람 생성 성공",null));
     }
 

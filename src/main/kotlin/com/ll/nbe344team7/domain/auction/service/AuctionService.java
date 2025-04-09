@@ -149,11 +149,11 @@ public class AuctionService {
 
                 // 7. 알람 생성
                 Long sellerId = auction.getPost().getMember().getId();
-                alarmService.createAlarm("'" + auction.getPost().getTitle() + "'" + WIN_BID_STRING, auction.getWinnerId(), 0);
+                alarmService.createAlarm("'" + auction.getPost().getTitle() + "'" + WIN_BID_STRING, auction.getWinnerId(), 1,1L);
 
                 Member winner = this.memberRepository.findById(auction.getWinnerId()).orElse(null);
                 if(winner == null){continue;}
-                alarmService.createAlarm("'" + winner.getNickname() + "'" + SELLER_BID_STRING, sellerId, 0);
+                alarmService.createAlarm("'" + winner.getNickname() + "'" + SELLER_BID_STRING, sellerId, 1,1L);
             }
         }
     }
