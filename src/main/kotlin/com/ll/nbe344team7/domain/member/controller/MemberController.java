@@ -154,7 +154,7 @@ public class MemberController {
     public ResponseEntity<?> getMyPosts(
             @PathVariable Long memberId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(size = 10,
+            @PageableDefault(size = 15,
                     page = 0,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
@@ -179,7 +179,7 @@ public class MemberController {
     public ResponseEntity<?> getMyLikes(
             @PathVariable Long memberId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(size = 10,
+            @PageableDefault(size = 15,
                     page = 0,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
