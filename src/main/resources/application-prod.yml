@@ -9,4 +9,3 @@ spring:
     username: lldjlocal
     password: ${cloud.custom.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
-

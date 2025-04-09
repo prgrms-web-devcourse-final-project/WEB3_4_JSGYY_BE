@@ -20,9 +20,9 @@ data class Account (
     var money: Long,
     var accountNumber: String,
     var bankName: String) {
-    constructor(accountDTO: AccountDTO) : this(
+    constructor(accountDTO: AccountDTO, memberId: Long) : this(
         id= null,
-        memberId = accountDTO.memberId,
+        memberId = memberId,
         money = 0,
         accountNumber = accountDTO.accountNumber,
         bankName = accountDTO.bankName,

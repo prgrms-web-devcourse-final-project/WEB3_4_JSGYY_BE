@@ -6,6 +6,8 @@ import com.ll.nbe344team7.domain.post.dto.request.ReportRequest;
 import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
+@Tag(name = "게시글 API")
 public class PostController {
 
     private final PostService postService;
@@ -37,6 +40,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
+    @Operation(summary = "게시글 작성")
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody PostRequest request,
@@ -56,6 +60,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
+    @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long postId,
@@ -76,6 +81,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
+    @Operation(summary = "게시글 수정")
     @PutMapping("/{postId}")
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
@@ -100,9 +106,10 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
+    @Operation(summary = "게시글 목록 조회")
     @GetMapping
     public ResponseEntity<?> getPosts(
-            @PageableDefault(size = 10,
+            @PageableDefault(size = 15,
                     page = 0,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
@@ -125,6 +132,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
+    @Operation(summary = "게시글 상세 조회")
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPost(
             @PathVariable Long postId,
@@ -144,6 +152,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-31
      */
+    @Operation(summary = "게시글 좋아요")
     @GetMapping("/{postId}/like")
     public ResponseEntity<?> likePost(@PathVariable Long postId,
                                       @AuthenticationPrincipal CustomUserDetails userDetails)
@@ -162,6 +171,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-31
      */
+    @Operation(summary = "좋아요 취소")
     @GetMapping("/{postId}/unlike")
     public ResponseEntity<?> unlikePost(@PathVariable Long postId,
                                         @AuthenticationPrincipal CustomUserDetails userDetails)
@@ -181,6 +191,7 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-04-03
      */
+    @Operation(summary = "게시글 신고")
     @PostMapping("/{postId}/reports")
     public ResponseEntity<?> reportPost(
             @RequestBody ReportRequest reportRequest,

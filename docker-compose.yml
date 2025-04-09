@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: '3.8'
 services:
   app:
@@ -38,7 +39,43 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+=======
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: team07_prod
+      MYSQL_USER: lldjlocal
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+
+  redis:
+    image: redis:latest
+    container_name: redis_1
+    restart: unless-stopped
+    command: redis-server --requirepass dev_team07_3434
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+>>>>>>> main
 
 
 networks:
   backend-net:
+<<<<<<< HEAD
+=======
+
+volumes:
+  mysql_data:
+  redis_data:
+>>>>>>> main

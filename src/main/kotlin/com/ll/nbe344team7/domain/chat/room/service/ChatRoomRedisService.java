@@ -5,8 +5,8 @@ import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
+import com.ll.nbe344team7.domain.chat.redis.repository.ChatRedisRepository;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
-import com.ll.nbe344team7.domain.chat.room.repository.ChatRoomRedisRepository;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,13 +28,14 @@ import java.util.List;
 @Service
 public class ChatRoomRedisService {
 
-    private final ChatRoomRedisRepository chatRoomRedisRepository;
+    private final ChatRedisRepository chatRedisRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public ChatRoomRedisService(ChatRoomRedisRepository chatRoomRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, RedisTemplate<String, String> redisTemplate) {
-        this.chatRoomRedisRepository = chatRoomRedisRepository;
+
+    public ChatRoomRedisService(ChatRedisRepository chatRedisRepository, ChatParticipantRepository chatParticipantRepository, ChatMessageRepository chatMessageRepository, RedisTemplate<String, String> redisTemplate) {
+        this.chatRedisRepository = chatRedisRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.redisTemplate = redisTemplate;
@@ -52,7 +53,7 @@ public class ChatRoomRedisService {
      * @since 2025-04-02
      */
     public void saveLastMessage(MessageDTO messageDTO, Long memberId) {
-        chatRoomRedisRepository.saveLastMessage(messageDTO,memberId);
+        chatRedisRepository.saveLastMessage(messageDTO,memberId);
     }
 
     /**
@@ -74,7 +75,7 @@ public class ChatRoomRedisService {
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_LIST);
         }
 
-        List<ChatRoomListResponseDto> savedList = chatRoomRedisRepository.getChatRoomList(memberId);
+        List<ChatRoomListResponseDto> savedList = chatRedisRepository.getChatRoomList(memberId);
 
         // 채팅방을 담을 목록 생성
         List<ChatRoomListResponseDto> chatRoomList = new ArrayList<>();
@@ -117,7 +118,7 @@ public class ChatRoomRedisService {
         });
 
         // Redis에 저장
-        chatRoomRedisRepository.saveChatRoomList(memberId,chatRoomList);
+        chatRedisRepository.saveChatRoomList(memberId,chatRoomList);
         return chatRoomList;
     }
 

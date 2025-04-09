@@ -17,4 +17,5 @@ enum class PostErrorCode(val status: HttpStatus, val code: String, val message: 
     IMAGE_REQUIRED(HttpStatus.BAD_REQUEST, "IMAGE_REQUIRED", "게시글에는 최소 1장의 이미지가 있어야 합니다."),
     INVALID_REPORT_TITLE(HttpStatus.BAD_REQUEST, "INVALID_REPORT_TITLE", "신고 제목은 최소 1자, 최대 30자로 입력해주세요."),
     INVALID_REPORT_CONTENT(HttpStatus.BAD_REQUEST, "INVALID_REPORT_CONTENT", "신고 내용은 최소 1자, 최대 100자로 입력해주세요."),
+    CANNOT_MODIFY_AUCTION(HttpStatus.BAD_REQUEST, "CANNOT_MODIFY_AUCTION", "경매글은 일반 게시글로 전환이 불가능합니다."),
 }

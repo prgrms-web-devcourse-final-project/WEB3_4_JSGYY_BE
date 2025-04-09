@@ -1,4 +1,4 @@
-package com.ll.nbe344team7.domain.chat.room.repository;
+package com.ll.nbe344team7.domain.chat.redis.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 채팅룸, 메시지 RedisRepository
@@ -24,14 +25,14 @@ import java.util.List;
  * @since 2025-04-02
  */
 @Repository
-public class ChatRoomRedisRepository {
-    private static final Logger log = LoggerFactory.getLogger(ChatRoomRedisRepository.class);
+public class ChatRedisRepository {
+    private static final Logger log = LoggerFactory.getLogger(ChatRedisRepository.class);
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberRepository memberRepository;
     private final ObjectMapper objectMapper;
 
 
-    public ChatRoomRedisRepository(RedisTemplate<String, String> redisTemplate, MemberRepository memberRepository, ObjectMapper objectMapper) {
+    public ChatRedisRepository(RedisTemplate<String, String> redisTemplate, MemberRepository memberRepository, ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
         this.memberRepository = memberRepository;
         this.objectMapper = objectMapper;
@@ -97,5 +98,29 @@ public class ChatRoomRedisRepository {
         } else {
             System.out.println("⚠️ [디버깅] 삭제할 채팅방 리스트 없음: participantId=" + participantId);
         }
+    }
+
+    public void saveChatroom(String roomKey, String userId){
+        redisTemplate.opsForSet().add(roomKey, userId);
+    }
+
+    public void saveSubscription(String subKey, String userId, String roomId) {
+        redisTemplate.opsForHash().put(subKey, userId, roomId);
+    }
+
+    public String getRoomId(String subKey, String userId) {
+        return redisTemplate.opsForHash().get(subKey, userId).toString();
+    }
+
+    public void deleteChatroom(String roomKey, String userId) {
+        redisTemplate.opsForSet().remove(roomKey, userId);
+    }
+
+    public void deleteSubscription(String subKey, String userId) {
+        redisTemplate.opsForHash().delete(subKey, userId);
+    }
+
+    public Set<String> getChatroomUsers(String key) {
+        return redisTemplate.opsForSet().members(key);
     }
 }

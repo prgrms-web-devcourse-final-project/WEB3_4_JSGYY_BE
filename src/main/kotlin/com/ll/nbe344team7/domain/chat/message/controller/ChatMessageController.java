@@ -3,6 +3,8 @@ package com.ll.nbe344team7.domain.chat.message.controller;
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/chat/rooms/{roomId}")
+@Tag(name = "채팅 메시지 API")
 public class ChatMessageController {
 
     private final ChatMessageService chatMessageService;
@@ -32,6 +35,7 @@ public class ChatMessageController {
      * @author jyson
      * @since 25. 3. 25.
      */
+    @Operation(summary = "메시지 전송")
     @PostMapping
     public ResponseEntity<?> sendMessage(
             @RequestBody MessageDTO messageDTO,
@@ -55,6 +59,7 @@ public class ChatMessageController {
      * @author jyson
      * @since 25. 3. 25.
      */
+    @Operation(summary = "채팅방 입장 시 채팅 조회")
     @GetMapping
     public ResponseEntity<?> enterRoom(
             @PathVariable long roomId,
