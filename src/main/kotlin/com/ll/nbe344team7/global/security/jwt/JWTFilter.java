@@ -51,11 +51,12 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         List<String> noCertifiedUrls = new ArrayList<>();
         noCertifiedUrls.add("/api/auth/login");
         noCertifiedUrls.add("/h2-console");
         noCertifiedUrls.add("/api/auth/register");
-        noCertifiedUrls.add("/");
+//        noCertifiedUrls.add("/");
         noCertifiedUrls.add("/actuator/health");
 
         for (String noCertifiedUrl : noCertifiedUrls){
@@ -65,11 +66,9 @@ public class JWTFilter extends OncePerRequestFilter {
             }
         }
 
-
        String accessToken = request.getHeader("access");
 
        String refreshToken = getRefreshToken(request.getCookies());
-
 
       if(refreshToken==null){
           throw new SecurityException(SecurityExceptionCode.TOKEN_NOT_EFFECTIVE);

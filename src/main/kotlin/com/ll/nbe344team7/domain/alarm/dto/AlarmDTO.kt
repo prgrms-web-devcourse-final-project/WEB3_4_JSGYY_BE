@@ -27,4 +27,12 @@ data class AlarmDTO(
         checked = dto.checked,
         createdAt = dto.createdAt
     )
+    constructor() : this(
+        id = null,
+        receiveMemberId = 0L,
+        content = "",
+        type = 0,
+        checked = false,
+        createdAt = null
+    )
 }

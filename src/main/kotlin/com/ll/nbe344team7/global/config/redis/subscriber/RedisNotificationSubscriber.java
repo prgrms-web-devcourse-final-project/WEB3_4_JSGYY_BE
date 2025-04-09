@@ -43,9 +43,9 @@ public class RedisNotificationSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try{
-            ObjectMapper objectMapper = new ObjectMapper();
+
             AlarmDTO alarmDTO = objectMapper.readValue((byte[]) message.getBody(),AlarmDTO.class);
-            messagingTemplate.convertAndSend("/sub/notifications/"+alarmDTO.getReceiveMemberId());
+            messagingTemplate.convertAndSend("/sub/notifications/"+alarmDTO.getReceiveMemberId(),alarmDTO);
 
         }catch (IOException e ){
             log.error("Redis Subscriber Error:",e);
