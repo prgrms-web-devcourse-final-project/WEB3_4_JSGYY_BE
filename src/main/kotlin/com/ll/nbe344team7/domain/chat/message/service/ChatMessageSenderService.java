@@ -61,17 +61,15 @@ public class ChatMessageSenderService {
     private final ChatMessageRepository chatMessageRepository;
     private final RedisPublisher chatRedisPublisher;
     private final ChatRedisRepository chatRedisRepository;
-    private final DistributedLock lock;
     private final AlarmService alarmService;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ChatRoomRedisService chatRoomRedisService;;
+    private final ChatRoomRedisService chatRoomRedisService;
 
-    public ChatMessageSenderService(ChatParticipantService chatParticipantService, ChatMessageRepository chatMessageRepository, RedisPublisher chatRedisPublisher, ChatRedisRepository chatRedisRepository, DistributedLock lock, AlarmService alarmService, RedisTemplate<String, Object> redisTemplate, ChatRoomRedisService chatRoomRedisService) {
+    public ChatMessageSenderService(ChatParticipantService chatParticipantService, ChatMessageRepository chatMessageRepository, RedisPublisher chatRedisPublisher, ChatRedisRepository chatRedisRepository, AlarmService alarmService, RedisTemplate<String, Object> redisTemplate, ChatRoomRedisService chatRoomRedisService) {
         this.chatParticipantService = chatParticipantService;
         this.chatMessageRepository = chatMessageRepository;
         this.chatRedisPublisher = chatRedisPublisher;
         this.chatRedisRepository = chatRedisRepository;
-        this.lock = lock;
         this.alarmService = alarmService;
         this.redisTemplate = redisTemplate;
         this.chatRoomRedisService = chatRoomRedisService;
