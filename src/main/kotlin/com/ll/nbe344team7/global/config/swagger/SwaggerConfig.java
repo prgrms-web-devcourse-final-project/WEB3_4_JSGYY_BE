@@ -18,17 +18,12 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info().title("4차 프로젝트 7팀 API").version("v1"))
                 .addSecurityItem(new SecurityRequirement()
-                        .addList("access")
-                        .addList("refresh"))
+                        .addList("access-token"))
                 .components(new Components()
-                        .addSecuritySchemes("access", new SecurityScheme()
+                        .addSecuritySchemes("access-token", new SecurityScheme()
                                 .type(SecurityScheme.Type.APIKEY)
                                 .in(SecurityScheme.In.HEADER)
                                 .name("access"))
-                        .addSecuritySchemes("refresh", new SecurityScheme()
-                                .type(SecurityScheme.Type.APIKEY)
-                                .in(SecurityScheme.In.COOKIE)
-                                .name("refresh"))
                 );
     }
 
@@ -123,7 +118,7 @@ public class SwaggerConfig {
     @Bean GroupedOpenApi loginApi() {
         return GroupedOpenApi.builder()
                 .group("LoginApi")
-                .pathsToMatch("/api/auth/login")
+                .pathsToMatch("/api/login")
                 .build();
     }
 }

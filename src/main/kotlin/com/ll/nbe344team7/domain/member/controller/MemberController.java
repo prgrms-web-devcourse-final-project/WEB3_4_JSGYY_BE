@@ -7,6 +7,9 @@ import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -135,4 +138,53 @@ public class MemberController {
         return ResponseEntity.ok(this.memberService.findMemberDTOByNickname(nickname));
     }
 
+    /**
+     *
+     * 내 게시글 조회
+     *
+     * @param memberId
+     * @param customUserDetails
+     * @param pageable
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-09
+     */
+    @GetMapping("/member/{memberId}/myposts")
+    public ResponseEntity<?> getMyPosts(
+            @PathVariable Long memberId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PageableDefault(size = 15,
+                    page = 0,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(memberService.getMyPosts(memberId, customUserDetails.getMemberId(), pageable));
+    }
+
+    /**
+     *
+     * 네가 좋아요한 게시글 조회
+     *
+     * @param memberId
+     * @param customUserDetails
+     * @param pageable
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-09
+     */
+    @GetMapping("/member/{memberId}/mylikes")
+    public ResponseEntity<?> getMyLikes(
+            @PathVariable Long memberId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PageableDefault(size = 15,
+                    page = 0,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(memberService.getMyLikes(memberId, customUserDetails.getMemberId(), pageable));
+    }
 }

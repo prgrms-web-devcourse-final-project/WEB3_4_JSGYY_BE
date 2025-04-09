@@ -109,7 +109,7 @@ public class PostController {
     @Operation(summary = "게시글 목록 조회")
     @GetMapping
     public ResponseEntity<?> getPosts(
-            @PageableDefault(size = 10,
+            @PageableDefault(size = 15,
                     page = 0,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)

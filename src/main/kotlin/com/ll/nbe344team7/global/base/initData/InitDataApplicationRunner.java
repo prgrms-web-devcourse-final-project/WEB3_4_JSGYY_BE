@@ -48,11 +48,11 @@ public class InitDataApplicationRunner implements ApplicationRunner {
             memberRepository.save(member4);
             memberRepository.save(member5);
 
-            Alarm alarm1 = new Alarm(member1,"~님이 메시지를 보냈습니다",1);
-            Alarm alarm2 = new Alarm(member1,"~에서 낙찰되었습니다",2);
-            Alarm alarm3 = new Alarm(member1,"알림입니다",3);
-            Alarm alarm4 = new Alarm(member2,"~님이 메시지를 보냈습니다",1);
-            Alarm alarm5 = new Alarm(member2,"~에서 낙찰되었습니다",2);
+            Alarm alarm1 = new Alarm(member1,"~님이 메시지를 보냈습니다",1,1);
+            Alarm alarm2 = new Alarm(member1,"~에서 낙찰되었습니다",2,1);
+            Alarm alarm3 = new Alarm(member1,"알림입니다",3,1);
+            Alarm alarm4 = new Alarm(member2,"~님이 메시지를 보냈습니다",1,1);
+            Alarm alarm5 = new Alarm(member2,"~에서 낙찰되었습니다",2,1);
 
             alarmRepository.save(alarm1);
             alarmRepository.save(alarm2);
