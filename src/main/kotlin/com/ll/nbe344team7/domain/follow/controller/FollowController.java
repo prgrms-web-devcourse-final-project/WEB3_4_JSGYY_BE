@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -78,7 +79,7 @@ public class FollowController {
     @Operation(summary = "팔로잉 목록 조회")
     @GetMapping
     public ResponseEntity<?> getFollows(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                        Pageable pageable) {
+                                        @PageableDefault(size = 5) Pageable pageable) {
         Page<FollowListResponseDto> response = followService.listFollows(userDetails.getMemberId(),pageable);
         return ResponseEntity.ok(Map.of("following", response));
     }
