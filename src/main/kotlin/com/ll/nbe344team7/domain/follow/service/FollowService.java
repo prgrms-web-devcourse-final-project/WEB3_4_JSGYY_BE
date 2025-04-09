@@ -13,6 +13,7 @@ import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -41,15 +42,16 @@ public class FollowService {
      * @author kjm72
      * @since 2025-04-07
      */
+    @Transactional
     public FollowResponseDto createFollow(Long userId, Long followingId) {
         Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        if (followRepository.existsByUserAndFollowing(user, following)) {
+        if (followRepository.existsByUserIdAndFollowingId(user.getId(), following.getId())) {
             throw new FollowException(FollowExceptionCode.ALREADY_FOLLOW);
         }
 
-        Follow follow = new Follow(user, following);
+        Follow follow = new Follow(user.getId(), following.getId());
         followRepository.save(follow);
         return new FollowResponseDto("팔로우 성공");
     }
@@ -64,14 +66,15 @@ public class FollowService {
      * @author kjm72
      * @since 2025-04-07
      */
+    @Transactional
     public FollowResponseDto unFollow(Long userId, Long followingId) {
         Member user = memberRepository.findById(userId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
         Member following = memberRepository.findById(followingId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        if (!followRepository.existsByUserAndFollowing(user, following)) {
+        if (!followRepository.existsByUserIdAndFollowingId(user.getId(), following.getId())) {
             throw new FollowException(FollowExceptionCode.NOT_EXIST_FOLLOW);
         }
-        Follow follow = followRepository.findByUserAndFollowing(user, following);
+        Follow follow = followRepository.findByUserIdAndFollowingId(user.getId(), following.getId());
         followRepository.delete(follow);
         return new FollowResponseDto("언팔로우 성공");
     }
@@ -86,11 +89,16 @@ public class FollowService {
      * @author kjm72
      * @since 2025-04-07
      */
+    @Transactional(readOnly = true)
     public Page<FollowListResponseDto> listFollows(Long id, Pageable pageable) {
-        Member user = memberRepository.findById(id).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        Page<Follow> followPage = followRepository.findAllByUserId(id, pageable);
+        if (followPage.isEmpty()){
+            throw new FollowException(FollowExceptionCode.NOT_EXIST_LIST);
+        }
+        return followPage.map(follow ->{
+                    Member following = memberRepository.findById(follow.getFollowingId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
-        Page<Follow> followPage = followRepository.findByUserId(user.getId(), pageable);
-
-        return followPage.map(follow -> new FollowListResponseDto(follow.getFollowing()));
+                    return new FollowListResponseDto(following);
+                });
     }
 }

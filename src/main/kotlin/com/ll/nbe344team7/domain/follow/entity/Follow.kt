@@ -1,6 +1,5 @@
 package com.ll.nbe344team7.domain.follow.entity
 
-import com.ll.nbe344team7.domain.member.entity.Member
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
 
@@ -12,13 +11,12 @@ import jakarta.persistence.*
  */
 @Entity
 class Follow(
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    val user : Member,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id", nullable = false)
-    val following : Member
+    @Column(name = "member_id", nullable = false)
+    val userId : Long? = null,
+
+    @Column(name = "following_id", nullable = false)
+    val followingId : Long? = null
 ) : BaseEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
