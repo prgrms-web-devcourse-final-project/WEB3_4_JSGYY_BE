@@ -11,3 +11,4 @@ spring:
     redis:
       host: localhost
       port: 6379
+      password: ${cloud.custom.redis.password}
