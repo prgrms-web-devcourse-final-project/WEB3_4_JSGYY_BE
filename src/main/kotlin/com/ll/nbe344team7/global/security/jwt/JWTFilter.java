@@ -62,7 +62,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         noCertifiedUrls.add("/api/login");
 
- //       noCertifiedUrls.add("/");
+        noCertifiedUrls.add("/");
         noCertifiedUrls.add("/actuator/health");
 
         for (String noCertifiedUrl : noCertifiedUrls){
