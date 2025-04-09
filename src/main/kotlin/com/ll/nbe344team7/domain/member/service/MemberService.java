@@ -4,10 +4,18 @@ package com.ll.nbe344team7.domain.member.service;
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.dto.OneData;
 import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.exception.MemberException;
+import com.ll.nbe344team7.domain.member.exception.MemberExceptionCode;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
+import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
+import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +30,17 @@ import org.springframework.stereotype.Service;
 public class MemberService {
     final private MemberRepository memberRepository;
     final private BCryptPasswordEncoder bCryptPasswordEncoder;
-    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder){
+    final private PostRepository postRepository;
+    final private PostLikeRepository postLikeRepository;
+    public MemberService(MemberRepository memberRepository,
+                         BCryptPasswordEncoder bCryptPasswordEncoder,
+                         PostRepository postRepository,
+                         PostLikeRepository postLikeRepository
+    ) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.postRepository = postRepository;
+        this.postLikeRepository = postLikeRepository;
     }
 
 
@@ -158,5 +174,55 @@ public class MemberService {
             throw new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER);
         }
         return new MemberDTO(member);
+    }
+
+    /**
+     *
+     * 내 게시글 조회
+     *
+     * @param memberId
+     * @param loginMemberId
+     * @param pageable
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-09
+     */
+    public Page<PostListDto> getMyPosts(Long memberId, Long loginMemberId, Pageable pageable) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        if (!memberId.equals(loginMemberId)) {
+            throw new MemberException(MemberExceptionCode.NOT_AUTHORIZED);
+        }
+
+        Page<Post> posts = postRepository.findByMemberId(memberId, pageable);
+
+        return posts.map(post -> PostListDto.Companion.from(post));
+    }
+
+    /**
+     *
+     * 내가 좋아요한 게시글 조회
+     *
+     * @param memberId
+     * @param loginMemberId
+     * @param pageable
+     * @return
+     *
+     * @author GAEUN220
+     * @since 2025-04-09
+     */
+    public Page<PostListDto> getMyLikes(Long memberId, Long loginMemberId, Pageable pageable) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+
+        if (!memberId.equals(loginMemberId)) {
+            throw new MemberException(MemberExceptionCode.NOT_AUTHORIZED);
+        }
+
+        Page<Post> likedPosts = postLikeRepository.findLikedPostsByMemberId(memberId, pageable);
+
+        return likedPosts.map(post -> PostListDto.Companion.from(post));
     }
 }
