@@ -40,4 +40,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByIdWithLock(@Param("postId") Long id);
 
     Optional<Post> findFirstByOrderByIdDesc();
+
+    Page<Post> findByMemberId(Long id, Pageable pageable);
 }

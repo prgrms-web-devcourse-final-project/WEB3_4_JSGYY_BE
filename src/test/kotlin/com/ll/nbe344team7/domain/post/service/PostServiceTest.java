@@ -2,6 +2,8 @@ package com.ll.nbe344team7.domain.post.service;
 
 import com.ll.nbe344team7.domain.alarm.repository.AlarmRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
+import com.ll.nbe344team7.domain.category.entity.Category;
+import com.ll.nbe344team7.domain.category.repository.CategoryRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
 import com.ll.nbe344team7.domain.post.dto.request.AuctionRequest;
@@ -67,6 +69,9 @@ public class PostServiceTest {
     @MockitoBean
     private S3ImageService s3ImageService;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     private Member member;
 
     MultipartFile[] files = {
@@ -76,6 +81,9 @@ public class PostServiceTest {
 
     @BeforeEach
     public void setUp() {
+        Category category = new Category(null, "testCategory");
+        categoryRepository.save(category);
+
         member = new Member(
                 null,
                 "testUsername",
@@ -99,6 +107,7 @@ public class PostServiceTest {
         postRepository.deleteAll();
         auctionRepository.deleteAll();
         memberRepository.deleteAll();
+        categoryRepository.deleteAll();
     }
 
 
@@ -110,6 +119,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -138,6 +148,7 @@ public class PostServiceTest {
                 "",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -158,6 +169,7 @@ public class PostServiceTest {
                 "testTitle",
                 "",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -178,6 +190,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 -1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -198,6 +211,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "",
                 true,
                 false,
@@ -223,6 +237,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 true,
@@ -253,6 +268,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 true,
@@ -273,6 +289,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -286,6 +303,7 @@ public class PostServiceTest {
                 "updateTitle",
                 "updateContent",
                 2000,
+                "testCategory",
                 "updatePlace",
                 false,
                 false,
@@ -317,6 +335,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 true,
@@ -335,6 +354,7 @@ public class PostServiceTest {
                 "updateTitle",
                 "updateContent",
                 2000,
+                "testCategory",
                 "updatePlace",
                 true,
                 true,
@@ -360,6 +380,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -393,6 +414,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -419,6 +441,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -446,6 +469,7 @@ public class PostServiceTest {
                     "제목 " + i,
                     "내용 " + i,
                     i * 1000,
+                    "testCategory",
                     "부산광역시 금정구 장전동",
                     true,
                     false,
@@ -484,6 +508,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -519,6 +544,7 @@ public class PostServiceTest {
                     "제목 " + i,
                     "내용 " + i,
                     i * 1000,
+                    "testCategory",
                     "부산광역시 금정구 장전동",
                     true,
                     false,
@@ -537,7 +563,7 @@ public class PostServiceTest {
 
         // 검색 조건 설정
         PostSearchRequest searchRequest = new PostSearchRequest(
-                1000L, 5000L, true, "제목 1", "부산광역시 금정구 장전동"
+                "testCategory", 1000L, 5000L, true, "제목 1", "부산광역시 금정구 장전동"
         );
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
@@ -561,6 +587,7 @@ public class PostServiceTest {
                     "제목 " + i,
                     "내용 " + i,
                     i * 1000,
+                    "testCategory",
                     "부산광역시 금정구 장전동",
                     true,
                     false,
@@ -579,7 +606,7 @@ public class PostServiceTest {
 
         // 검색 조건 설정
         PostSearchRequest searchRequest = new PostSearchRequest(
-                1000L, 5000L, true, "", ""
+                "testCategory",1000L, 5000L, true, "", ""
         );
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
@@ -601,6 +628,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -625,6 +653,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -664,6 +693,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -689,6 +719,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
@@ -714,6 +745,7 @@ public class PostServiceTest {
                 "testTitle",
                 "testContent",
                 1000,
+                "testCategory",
                 "testPlace",
                 true,
                 false,
