@@ -19,6 +19,6 @@ public class CorsMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry corsRegistry){
         corsRegistry
                 .addMapping("/**")   //모든 경로에 대해 CORS 허용
-                .allowedOrigins("http://localhost:3000");  //3000에서 오는 요청만 허용
+                .allowedOrigins("http://localhost:3000", "https://www.app1.springservice.shop");  //3000에서 오는 요청만 허용
     }
 }

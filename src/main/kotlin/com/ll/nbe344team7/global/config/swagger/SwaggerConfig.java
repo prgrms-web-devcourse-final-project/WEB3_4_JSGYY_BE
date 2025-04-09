@@ -6,9 +6,12 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -17,6 +20,11 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("4차 프로젝트 7팀 API").version("v1"))
+                .servers(List.of(
+                        new Server().url("https://api.app1.springservice.shop").description("PROD"),
+                        new Server().url("http://localhost:8080").description("DEV")
+
+                ))
                 .addSecurityItem(new SecurityRequirement()
                         .addList("access-token"))
                 .components(new Components()
