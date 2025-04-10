@@ -44,3 +44,6 @@ security:
       - /api/login
       - /actuator/health
       - /
+  time:
+    access: 3600000
+    refresh: 86400000

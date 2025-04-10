@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.global.security.jwt;
 
 import com.ll.nbe344team7.global.redis.RedisRepository;
+import com.ll.nbe344team7.global.security.config.CertifiedProperties;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import com.ll.nbe344team7.global.security.exception.SecurityException;
@@ -32,14 +33,13 @@ public class JWTFilter extends OncePerRequestFilter {
 
     final private JWTUtil jwtUtil;
     final private RedisRepository redisRepository;
-    final private List<String> noCertifiedUrl;
 
+    final private CertifiedProperties certifiedProperties;
 
-
-    public JWTFilter(JWTUtil jwtUtil,RedisRepository redisRepository,List<String> noCertifiedUrl) {
+    public JWTFilter(JWTUtil jwtUtil, RedisRepository redisRepository, CertifiedProperties certifiedProperties) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
-        this.noCertifiedUrl = noCertifiedUrl;
+        this.certifiedProperties = certifiedProperties;
     }
 
     /**
@@ -61,8 +61,9 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
+        List<String> noCertifiedUrls = certifiedProperties.getNo();
 
-        for (String noCertifiedUrl : noCertifiedUrl){
+        for (String noCertifiedUrl : noCertifiedUrls){
             if(request.getServletPath().contains(noCertifiedUrl)){
                 filterChain.doFilter(request,response);
                 return;

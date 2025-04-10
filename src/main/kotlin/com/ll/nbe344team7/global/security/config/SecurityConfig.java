@@ -37,20 +37,23 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
+    private final CertifiedProperties certifiedProperties;
+
 
     public SecurityConfig(
             AuthenticationConfiguration authenticationConfiguration,
             JWTUtil jwtUtil,
-            RedisRepository redisRepository) {
+            RedisRepository redisRepository,
+            CertifiedProperties certifiedProperties) {
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
+        this.certifiedProperties = certifiedProperties;
     }
 
 
-    @Value("${security.certified.no}")
-    private List<String> noCertifiedUrl;
+
 
     /**
      * AuthenticationManager 를 bean 으로 등록하는 메서드
@@ -131,7 +134,7 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin())
                 )
 
-                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository,noCertifiedUrl),UsernamePasswordAuthenticationFilter.class)  // jwt 유효성 검사
+                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository,certifiedProperties),UsernamePasswordAuthenticationFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
 
