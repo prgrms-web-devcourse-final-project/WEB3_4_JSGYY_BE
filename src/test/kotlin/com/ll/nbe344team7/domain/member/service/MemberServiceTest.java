@@ -94,7 +94,7 @@ public class MemberServiceTest {
     @DisplayName("")
     void MemberServiceTest2() {
         // given
-
+            MemberDTO testMemberDTO = memberService.myDetails(1L);
         // when
 
         // then
