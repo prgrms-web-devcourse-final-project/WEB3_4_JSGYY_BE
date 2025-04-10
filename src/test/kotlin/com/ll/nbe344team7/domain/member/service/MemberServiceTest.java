@@ -44,37 +44,36 @@ public class MemberServiceTest {
 
         memberDTO = new MemberDTO(
                 null,
-                "testUsernameD",
+                "uniqueUsername",
                 "testNameD",
                 "testPasswordD",
                 "testPasswordD",
-                "testNicknameD",
-                "test@email.comD",
-                "010-test-testD",
+                "uniqueNickname",
+                "unique@email.com",
+                "010-unique-number",
                 "ROLE_ADMIN",
                 "주소D"
         );
 
-        memberRepository.save(member);
     }
 
     @AfterEach
-    public void tearDown(){
+    public void rollBack(){
         memberRepository.deleteAll();
     }
 
     @Test
     @DisplayName("member 생성 테스트")
     void t1() throws Exception{
+        //given
+        //when
         memberService.register(memberDTO);
 
-        Optional<Member> saveMember = memberRepository.findById(1L);
-
-        assertThat(saveMember.isPresent()).isTrue();
-        assertThat(saveMember.get().getUsername()).isEqualTo(memberDTO.getUsername());
-        assertThat(saveMember.get().getEmail()).isEqualTo(memberDTO.getEmail());
-        assertThat(saveMember.get().getNickname()).isEqualTo(memberDTO.getNickname());
-
+        Member member1 = memberRepository.findByNickname(memberDTO.getNickname());
+        MemberDTO memberDTO1 = new MemberDTO(member1);
+        //then
+        assertThat(member1.getNickname()).isEqualTo(memberDTO.getNickname());
+        assertThat(memberDTO1).isEqualTo(memberDTO);
     }
 
     @Test
@@ -91,13 +90,18 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("myDetails 성공 테스트 ")
     void MemberServiceTest2() {
         // given
 
         // when
-
+            MemberDTO memberDTO1 = memberService.myDetails(1L);
         // then
+            assertThat(memberDTO1.getNickname()).isEqualTo(member.getNickname()+"sdf");
+            System.out.println(memberDTO1.getNickname());
+            assertThat(memberDTO1.getEmail()).isEqualTo(member.getEmail());
+            assertThat(memberDTO1.getUsername()).isEqualTo(member.getUsername());
+            assertThat(memberDTO1.getName()).isEqualTo(member.getUsername());
     }
 
 }
