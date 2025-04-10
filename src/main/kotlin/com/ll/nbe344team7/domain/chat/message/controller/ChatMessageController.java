@@ -2,6 +2,7 @@ package com.ll.nbe344team7.domain.chat.message.controller;
 
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
+import com.ll.nbe344team7.domain.chat.message.dto.MessageSearchDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,9 +53,7 @@ public class ChatMessageController {
      * 채팅방 입장 시 채팅 조회
      *
      * @param roomId
-     * @param page
-     * @param size
-     * @param message
+     * @param messageSearchDTO
      * @return
      * @author jyson
      * @since 25. 3. 25.
@@ -63,11 +62,9 @@ public class ChatMessageController {
     @GetMapping
     public ResponseEntity<?> enterRoom(
             @PathVariable long roomId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "") String message
-    ) {
-        Page<ChatMessageDTO> chats = chatMessageService.getChatMessages(roomId, message, page, size);
+            @ModelAttribute MessageSearchDTO messageSearchDTO
+            ) {
+        Page<ChatMessageDTO> chats = chatMessageService.getChatMessages(roomId, messageSearchDTO);
 
         return ResponseEntity.ok(chats);
     }
