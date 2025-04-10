@@ -3,7 +3,9 @@ spring:
     name: NBE3-4-4-team7
   profiles:
     include: secret
-    active: dev
+
+    active: prod
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,9 +18,11 @@ spring:
   output:
     ansi:
       enabled: always
+
 springdoc:
   swagger-ui:
     persist-authorization: true
+
 
 logging:
   level:

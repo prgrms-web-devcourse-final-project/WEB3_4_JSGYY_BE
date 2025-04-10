@@ -1,35 +1,45 @@
-version: "3.8"
 
+version: '3.8'
 services:
+  app:
+    image: janjanhada/project-server:1.5
+    environment:
+      SPRING_PROFILES_ACTIVE: prod,secret
+    depends_on:
+      - mysqlsudo
+      - redis
+    networks:
+      - backend-net
+    ports:
+      - "8080:8080"
+
   mysql:
     image: mysql:8.0
-    container_name: mysql_1
-    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: team07_prod
-      MYSQL_USER: lldjlocal
-      MYSQL_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: 12341234
+      MYSQL_DATABASE: 12341234
     ports:
       - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:latest
-    container_name: redis_1
-    restart: unless-stopped
-    command: redis-server --requirepass dev_team07_3434
+    image: redis:6.2-alpine
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
+    networks:
+      - backend-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 
 networks:
   backend-net:
-
-volumes:
-  mysql_data:
-  redis_data:
