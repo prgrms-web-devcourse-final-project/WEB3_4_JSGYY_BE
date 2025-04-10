@@ -2,6 +2,8 @@ package com.ll.nbe344team7.domain.chat.message.service;
 
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
+import com.ll.nbe344team7.domain.chat.message.dto.MessageSearchDTO;
+import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * @author jyson
@@ -45,7 +49,6 @@ public class ChatMessageService {
      * @author jyson
      * @since 25. 3. 25.
      */
-    @Transactional
     public void send(MessageDTO dto, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
@@ -57,21 +60,19 @@ public class ChatMessageService {
      * 채팅방 메세지 조회
      *
      * @param roomId
-     * @param message
-     * @param page
-     * @param size
+     * @param dto
      * @return
 
      *
      * @author jyson
      * @since 25. 3. 25.
      * */
-    public Page<ChatMessageDTO> getChatMessages(long roomId, String message, int page, int size) {
+    public Page<ChatMessageDTO> getChatMessages(long roomId, MessageSearchDTO dto) {
 
         chatroomService.getChatRoom(roomId);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        if (!message.isEmpty()) return chatMessageRepository.findByChatRoomIdAndContentContaining(pageable, roomId, message).map(ChatMessageDTO::new);
+        if (!dto.getMessage().isEmpty()) return chatMessageRepository.findByChatRoomIdAndContentContaining(pageable, roomId, dto.getMessage()).map(ChatMessageDTO::new);
         return chatMessageRepository.findByChatRoomId(pageable, roomId).map(ChatMessageDTO::new);
     }
 
@@ -88,5 +89,9 @@ public class ChatMessageService {
     @Transactional
     public void updateRead(Long roomId, Long memberId) {
         chatMessageRepository.updateRead(roomId, memberId);
+    }
+
+    public Optional<ChatMessage> findFirstByOrderByIdDesc() {
+        return chatMessageRepository.findFirstByOrderByIdDesc();
     }
 }
