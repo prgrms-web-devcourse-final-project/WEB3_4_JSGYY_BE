@@ -79,8 +79,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.app1.springservice.shop"));
-        config.setAllowedMethods(List.of("GET","POST","PATCH","DELETE","OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization"));
+        config.setAllowedMethods(List.of("*"));
+        config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
