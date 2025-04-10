@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.global.security.jwt;
 
 import com.ll.nbe344team7.global.redis.RedisRepository;
+import com.ll.nbe344team7.global.security.config.CertifiedProperties;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import com.ll.nbe344team7.global.security.exception.SecurityException;
@@ -11,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,9 +34,12 @@ public class JWTFilter extends OncePerRequestFilter {
     final private JWTUtil jwtUtil;
     final private RedisRepository redisRepository;
 
-    public JWTFilter(JWTUtil jwtUtil,RedisRepository redisRepository) {
+    final private CertifiedProperties certifiedProperties;
+
+    public JWTFilter(JWTUtil jwtUtil, RedisRepository redisRepository, CertifiedProperties certifiedProperties) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
+        this.certifiedProperties = certifiedProperties;
     }
 
     /**
@@ -55,15 +60,8 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        List<String> noCertifiedUrls = new ArrayList<>();
-        noCertifiedUrls.add("/api/auth/login");
-        noCertifiedUrls.add("/h2-console");
-        noCertifiedUrls.add("/api/auth/register");
 
-        noCertifiedUrls.add("/api/login");
-
-        noCertifiedUrls.add("/");
-        noCertifiedUrls.add("/actuator/health");
+        List<String> noCertifiedUrls = certifiedProperties.getNo();
 
         for (String noCertifiedUrl : noCertifiedUrls){
             if(request.getServletPath().contains(noCertifiedUrl)){

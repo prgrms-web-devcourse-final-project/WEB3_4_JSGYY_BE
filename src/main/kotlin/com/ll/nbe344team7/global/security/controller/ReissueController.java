@@ -26,7 +26,6 @@ public class ReissueController {
     final private JWTUtil jwtUtil;
     final private RedisRepository redisRepository;
 
-    private static final Long ACCESS_TOKEN_EXPIRY =  60 * 10 * 1000L;
 
     public ReissueController(JWTUtil jwtUtil , RedisRepository redisRepository){
         this.jwtUtil = jwtUtil;
@@ -73,7 +72,7 @@ public class ReissueController {
         Long memberId = jwtUtil.getMemberId(refresh);
         String role = jwtUtil.getRole(refresh);
 
-        String newAccessToken = jwtUtil.createJwt("access",username,memberId,role,60*10*1000L);
+        String newAccessToken = jwtUtil.createJwt("access",username,memberId,role,1);
 
         redisRepository.modify(refresh,newAccessToken);
 

@@ -92,7 +92,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
      * @author 이광석
      */
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authentication) {
         CustomUserDetails customUserDetails= (CustomUserDetails) authentication.getPrincipal();
 
         String username = customUserDetails.getUsername();
@@ -105,10 +108,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String accessToken = jwtUil.createJwt("access",username,memberId,role,60*60*24*1000L);
-        String refreshToken = jwtUil.createJwt("refresh",username,memberId,role,60*60*24*1000L);
+        String accessToken = jwtUil.createJwt("access",username,memberId,role,1);
+        String refreshToken = jwtUil.createJwt("refresh",username,memberId,role,2);
 
-        redisRepository.save(refreshToken,accessToken,60*60*24L);
+        redisRepository.save(refreshToken,accessToken,60*60*24*1000L);
 
        Cookie cookie = new Cookie("refresh",refreshToken);
        cookie.setHttpOnly(true);

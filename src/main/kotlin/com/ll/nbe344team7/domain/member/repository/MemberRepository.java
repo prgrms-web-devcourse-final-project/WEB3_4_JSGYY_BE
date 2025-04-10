@@ -3,7 +3,11 @@ package com.ll.nbe344team7.domain.member.repository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+
 import java.util.List;
+
+import java.util.Optional;
+
 
 
 /**
@@ -17,5 +21,9 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     Member findByNickname(String nickname);
 
+
     List<Member> findAllByIdIn(List<Long> followingIds);
+
+    Optional<Member> findFirstByOrderByIdDesc();
+
 }

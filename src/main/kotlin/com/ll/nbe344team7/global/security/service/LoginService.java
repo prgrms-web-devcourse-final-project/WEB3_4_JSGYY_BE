@@ -5,12 +5,15 @@ import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoginService {
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
+
+
 
     public LoginService(JWTUtil jwtUtil, RedisRepository redisRepository) {
         this.jwtUtil = jwtUtil;
@@ -19,10 +22,10 @@ public class LoginService {
 
     public void generateAndAttachTokens(HttpServletResponse response, CustomUserDetails userDetails) {
         String accessToken = jwtUtil.createJwt("access", userDetails.getUsername(),
-                userDetails.getMemberId(), userDetails.getRole(), 60 * 60 * 1000L);
+                userDetails.getMemberId(), userDetails.getRole(), 1);
 
         String refreshToken = jwtUtil.createJwt("refresh", userDetails.getUsername(),
-                userDetails.getMemberId(), userDetails.getRole(), 60 * 60 * 24 * 1000L);
+                userDetails.getMemberId(), userDetails.getRole(), 2);
 
         redisRepository.save(refreshToken, accessToken, 60 * 60 * 24L);
 
