@@ -44,5 +44,4 @@ public class RedisChatRoomListSubscriber implements MessageListener {
             log.error("ChatRoomListSubscriber Error: ", e);
         }
     }
-
 }

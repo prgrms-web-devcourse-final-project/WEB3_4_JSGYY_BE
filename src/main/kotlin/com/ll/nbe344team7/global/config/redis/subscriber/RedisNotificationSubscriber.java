@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.global.config.redis.subscriber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.Message;
@@ -42,8 +43,7 @@ public class RedisNotificationSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try{
-
-            AlarmDTO alarmDTO = objectMapper.readValue((byte[]) message.getBody(),AlarmDTO.class);
+            AlarmDTO alarmDTO = objectMapper.readValue((byte[]) message.getBody(), AlarmDTO.class);
             log.info("Received message from Redis: {}", alarmDTO);
             messagingTemplate.convertAndSend("/sub/notifications/"+alarmDTO.getReceiveMemberId(),alarmDTO);
         }catch (IOException e ){
