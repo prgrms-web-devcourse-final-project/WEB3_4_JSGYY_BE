@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,10 +32,14 @@ public class JWTFilter extends OncePerRequestFilter {
 
     final private JWTUtil jwtUtil;
     final private RedisRepository redisRepository;
+    final private List<String> noCertifiedUrl;
 
-    public JWTFilter(JWTUtil jwtUtil,RedisRepository redisRepository) {
+
+
+    public JWTFilter(JWTUtil jwtUtil,RedisRepository redisRepository,List<String> noCertifiedUrl) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
+        this.noCertifiedUrl = noCertifiedUrl;
     }
 
     /**
@@ -55,17 +60,9 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        List<String> noCertifiedUrls = new ArrayList<>();
-        noCertifiedUrls.add("/api/auth/login");
-        noCertifiedUrls.add("/h2-console");
-        noCertifiedUrls.add("/api/auth/register");
 
-        noCertifiedUrls.add("/api/login");
 
-        noCertifiedUrls.add("/");
-        noCertifiedUrls.add("/actuator/health");
-
-        for (String noCertifiedUrl : noCertifiedUrls){
+        for (String noCertifiedUrl : noCertifiedUrl){
             if(request.getServletPath().contains(noCertifiedUrl)){
                 filterChain.doFilter(request,response);
                 return;

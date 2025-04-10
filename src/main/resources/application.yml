@@ -4,7 +4,7 @@ spring:
   profiles:
     include: secret
 
-    active: prod
+    active: dev
 
   jpa:
     hibernate:
@@ -35,3 +35,12 @@ logging:
     org.springframework.messaging: DEBUG
     com.example: DEBUG
 
+security:
+  certified:
+    no:
+      - /api/auth/login
+      - /h2-console
+      - /api/auth/register
+      - /api/login
+      - /actuator/health
+      - /
