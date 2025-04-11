@@ -151,6 +151,9 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     private String getRefreshToken(Cookie[] cookies){
 
+
+        if(cookies==null) throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN);
+
         for(Cookie cookie: cookies){
             if(cookie.getName().equals("refresh")){
                 return cookie.getValue();

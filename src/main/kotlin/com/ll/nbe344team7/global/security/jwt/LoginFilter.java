@@ -116,7 +116,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
        Cookie cookie = new Cookie("refresh",refreshToken);
        cookie.setHttpOnly(true);
        cookie.setSecure(true);
-       cookie.setPath("/");
+//       cookie.setPath("/");
 
        response.addCookie(cookie);
        response.addHeader("access",accessToken);

@@ -33,6 +33,7 @@ public class LoginService {
         Cookie cookie = new Cookie("refresh", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
+        cookie.setSecure(true);
         response.addCookie(cookie);
 
         // access 토큰은 헤더로
