@@ -35,3 +35,15 @@ logging:
     org.springframework.messaging: DEBUG
     com.example: DEBUG
 
+security:
+  certified:
+    no:
+      - /api/auth/login
+      - /h2-console
+      - /api/auth/register
+      - /api/login
+      - /actuator/health
+      - /
+  time:
+    access: 3600000
+    refresh: 86400000

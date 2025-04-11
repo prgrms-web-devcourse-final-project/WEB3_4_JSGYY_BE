@@ -76,7 +76,7 @@ public class FollowController {
      * @author kjm72
      * @since 2025-04-07
      */
-    @Operation(summary = "팔로잉 목록 조회")
+    @Operation(summary = "팔로잉 목록 조회",description = "sort의 값을 \"id\"로 변경하고 진행")
     @GetMapping
     public ResponseEntity<?> getFollows(@AuthenticationPrincipal CustomUserDetails userDetails,
                                         @PageableDefault(size = 5) Pageable pageable) {

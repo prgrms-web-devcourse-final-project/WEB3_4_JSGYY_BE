@@ -37,6 +37,7 @@ public class AuctionService {
 
     private static String WIN_BID_STRING = " 경매 물품을 낙찰 받으셨습니다.";
     private static String SELLER_BID_STRING = "님이 낙찰 받으셨습니다.";
+    private static String NO_PAY_BID = " 경매에 입찰한 사람이 없습니다.";
 
     public AuctionService(AuctionRepository auctionRepository, AccountRepository accountRepository,
                           AuctionScheduleRepository auctionScheduleRepository, AlarmService alarmService,
@@ -148,13 +149,20 @@ public class AuctionService {
                 this.auctionScheduleRepository.save(auctionSchedule);
 
                 // 7. 알람 생성
-                Long sellerId = auction.getPost().getMember().getId();
-                alarmService.createAlarm("'" + auction.getPost().getTitle() + "'" + WIN_BID_STRING, auction.getWinnerId(), 1, auction.getPost().getId());
+                // 7-1. 입찰자가 없을 경우
+                if(auction.getWinnerId() == null){
+                    Long sellerId = auction.getPost().getMember().getId();
+                    alarmService.createAlarm("'" + auction.getPost().getTitle() + "'" + NO_PAY_BID, sellerId, 1, auction.getPost().getId());
+                }
+                // 7-2. 입찰자가 있을 경우
+                else {
+                    Long sellerId = auction.getPost().getMember().getId();
+                    alarmService.createAlarm("'" + auction.getPost().getTitle() + "'" + WIN_BID_STRING, auction.getWinnerId(), 1, auction.getPost().getId());
 
-                Member winner = this.memberRepository.findById(auction.getWinnerId()).orElse(null);
-                if(winner == null){continue;}
-                alarmService.createAlarm("'" + winner.getNickname() + "'" + SELLER_BID_STRING, sellerId, 1, auction.getPost().getId());
-
+                    Member winner = this.memberRepository.findById(auction.getWinnerId()).orElse(null);
+                    if(winner == null){continue;}
+                    alarmService.createAlarm("'" + winner.getNickname() + "'" + SELLER_BID_STRING, sellerId, 1, auction.getPost().getId());
+                }
             }
         }
     }

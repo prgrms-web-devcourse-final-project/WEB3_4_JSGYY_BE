@@ -6,6 +6,8 @@ import com.ll.nbe344team7.global.security.jwt.JWTFilter;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import com.ll.nbe344team7.global.security.jwt.LoginFilter;
 import com.ll.nbe344team7.global.security.jwt.LogoutFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,15 +39,21 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
 
+
+
     public SecurityConfig(
             AuthenticationConfiguration authenticationConfiguration,
             JWTUtil jwtUtil,
-            RedisRepository redisRepository) {
+            RedisRepository redisRepository,
+            CertifiedProperties certifiedProperties) {
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
     }
+
+
+
 
     /**
      * AuthenticationManager 를 bean 으로 등록하는 메서드
@@ -119,6 +127,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
 
                         .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health", "/api/posts").permitAll()  //인증없이 접속가능
+
                         .anyRequest().authenticated()) // 인증 필요
 
                 .headers(headers -> headers

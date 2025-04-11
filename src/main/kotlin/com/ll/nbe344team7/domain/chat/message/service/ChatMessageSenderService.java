@@ -1,19 +1,22 @@
 package com.ll.nbe344team7.domain.chat.message.service;
 
+import com.ll.nbe344team7.domain.alarm.service.AlarmService;
+import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.entity.ChatMessage;
 import com.ll.nbe344team7.domain.chat.message.repository.ChatMessageRepository;
 import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.service.ChatParticipantService;
 import com.ll.nbe344team7.domain.chat.redis.repository.ChatRedisRepository;
+import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListDto;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
 import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
+import com.ll.nbe344team7.domain.chat.room.service.ChatRoomRedisService;
 import com.ll.nbe344team7.domain.member.entity.Member;
-import com.ll.nbe344team7.global.config.reddison.lock.DistributedLock;
-import com.ll.nbe344team7.global.config.redis.publisher.ChatRedisPublisher;
-import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,65 +36,82 @@ public class ChatMessageSenderService {
 
     private final ChatParticipantService chatParticipantService;
     private final ChatMessageRepository chatMessageRepository;
-    private final ChatRedisPublisher chatRedisPublisher;
     private final ChatRedisRepository chatRedisRepository;
-    private final DistributedLock lock;
+    private final AlarmService alarmService;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChatRoomRedisService chatRoomRedisService;
 
-
-    public ChatMessageSenderService(ChatParticipantService chatParticipantService, ChatMessageRepository chatMessageRepository, ChatRedisPublisher chatRedisPublisher, ChatRedisRepository chatRedisRepository, DistributedLock lock) {
+    public ChatMessageSenderService(ChatParticipantService chatParticipantService, ChatMessageRepository chatMessageRepository, ChatRedisRepository chatRedisRepository, AlarmService alarmService, RedisTemplate<String, Object> redisTemplate, ChatRoomRedisService chatRoomRedisService) {
         this.chatParticipantService = chatParticipantService;
         this.chatMessageRepository = chatMessageRepository;
-        this.chatRedisPublisher = chatRedisPublisher;
         this.chatRedisRepository = chatRedisRepository;
-        this.lock = lock;
+        this.alarmService = alarmService;
+        this.redisTemplate = redisTemplate;
+        this.chatRoomRedisService = chatRoomRedisService;
+    }
+
+    public void sendMessage(MessageDTO dto, Member member, ChatRoom chatRoom) {
+        Long roomId = chatRoom.getId();
+        ChatMessage chatMessage = new ChatMessage(member, dto.getContent(), chatRoom);
+        List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
+
+        process(dto, member, chatRoom, chatMessage, chatParticipants);
     }
 
     @Transactional
-    public void sendMessage(MessageDTO dto, Member member, ChatRoom chatRoom) {
+    public void process(MessageDTO dto, Member member, ChatRoom chatRoom, ChatMessage chatMessage, List<ChatParticipant> chatParticipants) {
+
+        //1. 레디스로부터 참가자정보를읽어옴
+        //2. 전파된메세지저장 ->  참가자들에게게메세지전파
+        //3. 메세지 읽지 않음 저장 -> 채팅목록 리스트 전파 < 비동기처리
+        //4. 알람저장 -> 알람전파 < 비동기처리
+
+        long start = System.currentTimeMillis();
         Long roomId = chatRoom.getId();
+        // save message to db
+        saveMessage(dto, chatMessage);
+        long end = System.currentTimeMillis();
+        log.info("process time: {}", end - start);
 
-        try {
-            lock.executeWithLock(roomId, () -> {
-                // 채널 chatroom pub
-                ChatMessage chatMessage = new ChatMessage(member, dto.getContent(), chatRoom);
-                chatMessageRepository.save(chatMessage);
-                chatRedisPublisher.publishMessage(dto, chatMessage);
-
-                // 채널 chatroomList pub
-                List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
-                chatRedisPublisher.publishRoomListUpdate(member.getId(), chatParticipants);
-
-                Set<String> chatroomUsers = chatRedisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
-
-                if (chatroomUsers.size() < 2) {
-                    List<ChatParticipant> offlineUsers = chatParticipants.stream()
-                            .filter(p -> !chatroomUsers.contains(String.valueOf(p.getMember().getId())))
-                            .toList();
-
-                    // 메세지 안읽음
-                    chatMessage.setRead(false);
-                    redisUpdateReadCount(offlineUsers, roomId);
-
-                    // 알림 전송 로직
-                }
-            });
-        } catch (LockAcquisitionException e) {
-            log.error("메세지 전송 실패 - 락 획득 실패: {}", roomId);
-        }
+        handleAlarm(dto, roomId, member, chatMessage, chatParticipants);
     }
 
-    /**
-     * 안읽은 메세지 count 처리
-     *
-     * @param offlineUsers
-     * @param roomId
+    private void saveMessage(MessageDTO dto, ChatMessage chatMessage) {
+        chatMessageRepository.save(chatMessage);
+        chatRoomRedisService.saveLastMessage(dto, chatMessage.getMember().getId());
 
-     *
-     * @author jyson
-     * @since 25. 4. 7.
-     */
-    private void redisUpdateReadCount(List<ChatParticipant> offlineUsers, Long roomId) {
-        List<ChatRoomListResponseDto> chatRoomList = chatRedisRepository.getChatRoomList(offlineUsers.getFirst().getId());
+        redisPublish("chatroom", new ChatMessageDTO(chatMessage));
+    }
+
+    @Async
+    public void handleAlarm(MessageDTO dto, Long roomId, Member member, ChatMessage chatMessage, List<ChatParticipant> chatParticipants) {
+        long start = System.currentTimeMillis();
+        Set<String> chatroomUsers = chatRedisRepository.getChatroomUsers("chatroom:" + roomId + ":users");
+
+        List<Long> offlineUsers = chatParticipants.stream()
+                .filter(p -> !chatroomUsers.contains(p.getMember().getId().toString()))
+                .map(p -> p.getMember().getId())
+                .toList();
+
+        if (offlineUsers.isEmpty()) return;
+
+        // 채팅방에 없을 때 안읽음, 알람 처리
+        chatMessage.setRead(false);
+        chatMessageRepository.save(chatMessage);
+
+        for (Long participantId : offlineUsers) {
+            redisUpdateReadCount(roomId, participantId);
+
+            String content = member.getNickname() + ": " + dto.getContent();
+            alarmService.createAlarm(content, participantId, 2, roomId);
+        }
+
+        long end = System.currentTimeMillis();
+        log.info("handleAlarm time: {}", end - start);
+    }
+
+    private void redisUpdateReadCount(Long roomId, Long participantId) {
+        List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
 
         for (int i = 0; i < chatRoomList.size(); i++) {
             ChatRoomListResponseDto chatRoomListResponseDto = chatRoomList.get(i);
@@ -102,6 +122,49 @@ public class ChatMessageSenderService {
             }
         }
 
-        chatRedisRepository.saveChatRoomList(offlineUsers.getFirst().getId(), chatRoomList);
+        chatRedisRepository.saveChatRoomList(participantId, chatRoomList);
+        redisPublish("chatroomList", new ChatRoomListDto(participantId, chatRoomList));
+    }
+
+    /**
+     * 일시적 장애 시 redis 발행 재시도
+     *
+     * @param channel
+     * @param object
+
+     *
+     * @author jyson
+     * @since 25. 4. 10. */
+    private void redisPublish(String channel, Object object) {
+
+        try {
+            int maxRetries = 3;
+            for (int i = 0; i < maxRetries; i++) {
+                try {
+                    redisTemplate.convertAndSend(channel, object);
+                    return;
+                } catch (Exception e) {
+                    log.warn("재시도 {}회 실패: {}", i + 1, e.getMessage());
+                    backoff(i);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Redis 발행 실패: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 재시도 간격 100ms, 200ms, 400ms
+     * @param i
+
+     *
+     * @author jyson
+     * @since 25. 4. 10.     */
+    private void backoff(int i) {
+        try {
+            Thread.sleep(100L * (int) Math.pow(2, i));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

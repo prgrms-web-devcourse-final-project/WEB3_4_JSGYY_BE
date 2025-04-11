@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 /**
  *
  * @author jyson
@@ -24,4 +26,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE ChatMessage cm SET cm.isRead = true WHERE cm.chatRoom.id = :roomId AND cm.isRead = false AND cm.member.id != :memberId")
     void updateRead(@Param("roomId") Long roomId, @Param("memberId") Long memberId);
+
+    Optional<ChatMessage> findFirstByOrderByIdDesc();
 }
