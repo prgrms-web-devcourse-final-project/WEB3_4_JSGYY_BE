@@ -28,7 +28,7 @@ public class LogoutFilter extends OncePerRequestFilter {
 
     /**
      *로그아웃 필터
-     * 절절한 logout 요청인지 확인하고 redis 에서 해당 사용자의 토큰들을 지운 다음 빈 토큰을 쿠키에 담아 전달
+     * 적절한 logout 요청인지 확인하고 redis 에서 해당 사용자의 토큰들을 지운 다음 빈 토큰을 쿠키에 담아 전달
      * @param request
      * @param response
      * @param filterChain
