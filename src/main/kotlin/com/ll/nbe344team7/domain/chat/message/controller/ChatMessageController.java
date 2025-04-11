@@ -1,7 +1,6 @@
 package com.ll.nbe344team7.domain.chat.message.controller;
 
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
-import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageSearchDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,8 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * @author jyson
@@ -25,28 +22,6 @@ public class ChatMessageController {
 
     public ChatMessageController(ChatMessageService chatMessageService) {
         this.chatMessageService = chatMessageService;
-    }
-
-    /**
-     * 메세지 보내기 컨트롤러
-     *
-     * @param messageDTO
-     * @param roomId
-     * @return
-     * @author jyson
-     * @since 25. 3. 25.
-     */
-    @Operation(summary = "메시지 전송")
-    @PostMapping
-    public ResponseEntity<?> sendMessage(
-            @RequestBody MessageDTO messageDTO,
-            @PathVariable long roomId
-    ) {
-        chatMessageService.send(messageDTO, roomId);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "메세지 전송완료"
-        ));
     }
 
     /**
