@@ -46,8 +46,9 @@ public class ConnectHandler implements StompCommandHandler{
         String username = jwtUtil.getUsername(token);
         Long memberId = jwtUtil.getMemberId(token);
         String role = jwtUtil.getRole(token);
+        String nickname = jwtUtil.getNickname(token);
 
-        CustomUserData customUserData = new CustomUserData(memberId, username, role, "tmp");
+        CustomUserData customUserData = new CustomUserData(memberId, username, nickname, role, "tmp");
         CustomUserDetails customUserDetails = new CustomUserDetails(customUserData);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
         accessor.setUser(authToken);
