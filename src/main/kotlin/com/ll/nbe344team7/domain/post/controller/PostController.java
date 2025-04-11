@@ -7,6 +7,10 @@ import com.ll.nbe344team7.domain.post.dto.response.PostListDto;
 import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +44,74 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
-    @Operation(summary = "게시글 작성")
+    @Operation(
+            summary = "게시글 작성",
+            parameters = {
+                    @Parameter(name = "request", description = "게시글 내용", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 작성 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "1번 게시글이 작성되었습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "제목 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "제목을 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "내용 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "내용을 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "가격이 0원 이하일 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "가격을 0원 이상 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "장소 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "장소를 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "카테고리 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "카테고리를 선택해주세요."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody PostRequest request,
@@ -60,7 +131,45 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
-    @Operation(summary = "게시글 삭제")
+    @Operation(
+            summary = "게시글 삭제",
+            parameters = {
+                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 삭제 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "1번 게시글이 삭제되었습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "401", description = "게시글 작성자가 아닐 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "게시글 권한이 없습니다."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+
+    )
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long postId,
@@ -81,7 +190,95 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
-    @Operation(summary = "게시글 수정")
+    @Operation(
+            summary = "게시글 수정",
+            parameters = {
+                    @Parameter(name = "postId", description = "게시글 ID", required = true),
+                    @Parameter(name = "request", description = "게시글 수정 내용", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 수정 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "1번 게시글이 수정되었습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "401", description = "게시글 작성자가 아닐 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "게시글 권한이 없습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "제목 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "제목을 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "내용 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "내용을 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "가격이 0원 이하일 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "가격을 0원 이상 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "장소 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "장소를 입력해주세요."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "카테고리 입력 안 했을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "카테고리를 선택해주세요."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @PutMapping("/{postId}")
     public ResponseEntity<?> modifyPost(
             @PathVariable Long postId,
@@ -106,7 +303,18 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
-    @Operation(summary = "게시글 목록 조회")
+    @Operation(
+            summary = "게시글 목록 조회",
+            parameters = {
+                    @Parameter(name = "pageable", description = "페이지 정보", required = true),
+                    @Parameter(name = "category", description = "카테고리", required = false),
+                    @Parameter(name = "minPrice", description = "최소가격", required = false),
+                    @Parameter(name = "maxPrice", description = "최대가격", required = false),
+                    @Parameter(name = "saleStatus", description = "판매상태", required = false),
+                    @Parameter(name = "keyword", description = "검색어", required = false),
+                    @Parameter(name = "place", description = "위치", required = false)
+            }
+    )
     @GetMapping
     public ResponseEntity<?> getPosts(
             @PageableDefault(size = 15,
@@ -132,7 +340,42 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-24
      */
-    @Operation(summary = "게시글 상세 조회")
+    @Operation(
+            summary = "게시글 상세 조회",
+            parameters = {
+                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 상세 조회 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "title": "제목",
+                                                "content": "내용",
+                                                "price": 10000,
+                                                ”category”: “남성의류”,
+                                                "auctionStatus": true,
+                                                "auctionRequest": {
+                                                    "startedAt": "2025-03-27T10:00:00",
+                                                    "closedAt": "2025-04-10T10:00:00"
+                                                }
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPost(
             @PathVariable Long postId,
@@ -152,7 +395,44 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-31
      */
-    @Operation(summary = "게시글 좋아요")
+    @Operation(
+            summary = "게시글 좋아요",
+            parameters = {
+                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 좋아요 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "1번 게시글 좋아요 성공"
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "이미 좋아요를 눌렀을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "이미 좋아요를 눌렀습니다."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @GetMapping("/{postId}/like")
     public ResponseEntity<?> likePost(@PathVariable Long postId,
                                       @AuthenticationPrincipal CustomUserDetails userDetails)
@@ -171,7 +451,44 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-03-31
      */
-    @Operation(summary = "좋아요 취소")
+    @Operation(
+            summary = "좋아요 취소",
+            parameters = {
+                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 좋아요 취소 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "1번 게시글 좋아요 취소 성공"
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "좋아요를 누르지 않았을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 좋아요입니다."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @GetMapping("/{postId}/unlike")
     public ResponseEntity<?> unlikePost(@PathVariable Long postId,
                                         @AuthenticationPrincipal CustomUserDetails userDetails)
@@ -191,7 +508,55 @@ public class PostController {
      * @author GAEUN220
      * @since 2025-04-03
      */
-    @Operation(summary = "게시글 신고")
+    @Operation(
+            summary = "게시글 신고",
+            parameters = {
+                    @Parameter(name = "reportRequest", description = "신고 내용", required = true),
+                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 신고 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "1번 게시글이 신고되었습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "신고 제목 입력하지 않았을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" :  “신고 제목은 최소 1자, 최대 30자로 입력해주세요.”
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "신고 내용 입력하지 않았을 때", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" :  “신고 내용은 최소 1자, 최대 100자로 입력해주세요.”
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @PostMapping("/{postId}/reports")
     public ResponseEntity<?> reportPost(
             @RequestBody ReportRequest reportRequest,

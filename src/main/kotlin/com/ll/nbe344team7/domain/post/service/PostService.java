@@ -85,6 +85,10 @@ public class PostService {
         if (request.getPlace().isBlank()) {
             throw new PostException(PostErrorCode.INVALID_PLACE);
         }
+
+        if (request.getCategory().isBlank()) {
+            throw new PostException(PostErrorCode.INVALID_CATEGORY);
+        }
     }
 
     /**
