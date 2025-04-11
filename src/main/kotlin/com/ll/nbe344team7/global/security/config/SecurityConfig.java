@@ -90,7 +90,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000", "https://lustrous-pegasus-1dc714.netlify.app"));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
+        config.setExposedHeaders(List.of("access"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
