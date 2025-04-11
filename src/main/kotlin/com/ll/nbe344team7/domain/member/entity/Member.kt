@@ -3,7 +3,6 @@ package com.ll.nbe344team7.domain.member.entity
 import com.ll.nbe344team7.domain.member.dto.MemberDTO
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
-import kotlin.text.Typography.tm
 
 /**
  * 멤버 entity
@@ -84,4 +83,26 @@ class Member(
         blocked=false,
         role="ROLE_ADMIN"
     )
+
+    constructor(memberId: Long, nickname: String) : this(
+        id=memberId,
+        username = "",
+        name="",
+        password = "",
+        nickname=nickname,
+        email="",
+        phoneNum="",
+        blocked=false,
+        role="ROLE_ADMIN"
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Member) return false
+        return id == other.id // id가 같으면 동일 객체로 간주
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode() // id의 해시코드를 반환
+    }
 }

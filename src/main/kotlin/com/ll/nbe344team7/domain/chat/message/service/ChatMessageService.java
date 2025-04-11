@@ -9,8 +9,6 @@ import com.ll.nbe344team7.domain.chat.room.entity.ChatRoom;
 import com.ll.nbe344team7.domain.chat.room.service.ChatroomService;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
-import com.ll.nbe344team7.global.exception.GlobalException;
-import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,15 +41,13 @@ public class ChatMessageService {
      * 채팅 보내기
      *
      * @param dto
-     * @param memberId
+     * @param member
 
      *
      * @author jyson
      * @since 25. 3. 25.
      */
-    public void send(MessageDTO dto, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+    public void send(MessageDTO dto, Member member) {
         ChatRoom chatRoom = chatroomService.getChatRoom(dto.getRoomId());
         chatMessageSenderService.sendMessage(dto, member, chatRoom);
     }
