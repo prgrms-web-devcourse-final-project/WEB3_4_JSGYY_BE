@@ -100,7 +100,7 @@ public class FollowService {
         if (followPage.isEmpty()){
             throw new FollowException(FollowExceptionCode.NOT_EXIST_LIST);
         }
-        List<Long> followingIds = followPage.stream().map(Follow::getId).toList();
+        List<Long> followingIds = followPage.stream().map(Follow::getFollowingId).toList();
 
         List<Member> members = memberRepository.findAllByIdIn(followingIds);
 
