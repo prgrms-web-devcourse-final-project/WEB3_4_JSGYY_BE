@@ -302,7 +302,9 @@ public class PostController {
     @Operation(
             summary = "게시글 목록 조회",
             parameters = {
-                    @Parameter(name = "pageable", description = "페이지 정보", required = true),
+                    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", required = false),
+                    @Parameter(name = "size", description = "페이지 크기 (default = 15)", required = false),
+                    @Parameter(name = "sort", description = "정렬 기준 (예: createdAt,desc)", required = false),
                     @Parameter(name = "category", description = "카테고리", required = false),
                     @Parameter(name = "minPrice", description = "최소가격", required = false),
                     @Parameter(name = "maxPrice", description = "최대가격", required = false),
