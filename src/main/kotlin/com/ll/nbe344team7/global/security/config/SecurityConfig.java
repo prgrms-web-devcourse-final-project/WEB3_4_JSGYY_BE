@@ -6,9 +6,9 @@ import com.ll.nbe344team7.global.security.jwt.JWTFilter;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import com.ll.nbe344team7.global.security.jwt.LoginFilter;
 import com.ll.nbe344team7.global.security.jwt.LogoutFilter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -125,7 +125,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests((auth) -> auth
-
+                        .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                         .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health").permitAll()  //인증없이 접속가능
                         .anyRequest().authenticated()) // 인증 필요
 
