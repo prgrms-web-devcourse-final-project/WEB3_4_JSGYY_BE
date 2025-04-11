@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -42,16 +41,9 @@ public class AuctionController {
      */
     @Operation(
             summary = "입찰 기능",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "입찰 DTD",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = BidDTO.class)
-                    )
-            ),
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true),
+                    @Parameter(name = "price", description = "입찰 금액", required = true)
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "입찰 성공", content = @Content(
@@ -60,7 +52,7 @@ public class AuctionController {
                                     name = "성공 응답 예시",
                                     value = """
                                             {
-                                                "message" : "1번 게시글 물품에 20000원 입찰이 완료되었습니다.
+                                                "message" : "1번 게시글 물품에 20000원 입찰이 완료되었습니다."
                                             }
                                             """
                             )
