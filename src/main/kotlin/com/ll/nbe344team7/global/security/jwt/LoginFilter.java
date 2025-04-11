@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,8 +26,9 @@ import java.util.Map;
  * 입력 받은 데이터를 authenticationManager에게 전달
  * 로그인 성공 : jwt 발급
  * 로그인 실패 : badRequest 전달
- * @since 2025-03-26
+ *
  * @author 이광석
+ * @since 2025-03-26
  */
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -54,8 +55,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
      * @param response
      * @return Authentication
      * @throws AuthenticationException
-     * @since 2025-03-25
      * @author 이광석
+     * @since 2025-03-25
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -71,7 +72,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
             return authenticationManager.authenticate(authToken);
-        }catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException("회원 정보를 다시 확인해주세요");
         }
     }
@@ -82,20 +83,20 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
      * 로그인 성공시 사용자 정보를 이용해서 jwt토큰 생성
      * 해당 토큰을 담아 쿠키 생성
      * 쿠키를 클라이언트에 전달
+     *
      * @param request
      * @param response
      * @param chain
      * @param authentication
-     *
-     * @since 2025-03-26
      * @author 이광석
+     * @since 2025-03-26
      */
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
                                             Authentication authentication) {
-        CustomUserDetails customUserDetails= (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
         String username = customUserDetails.getUsername();
         Long memberId = customUserDetails.getMemberId();
@@ -108,29 +109,33 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String accessToken = jwtUil.createJwt("access",username,memberId,nickname,role,1);
-        String refreshToken = jwtUil.createJwt("refresh",username,memberId,nickname,role,2);
+        String accessToken = jwtUil.createJwt("access", username, memberId, nickname, role, 1);
+        String refreshToken = jwtUil.createJwt("refresh", username, memberId, nickname, role, 2);
 
-        redisRepository.save(refreshToken,accessToken,60*60*24*1000L);
+        redisRepository.save(refreshToken, accessToken, 60 * 60 * 24 * 1000L);
 
-       Cookie cookie = new Cookie("refresh",refreshToken);
-       cookie.setHttpOnly(true);
-       cookie.setSecure(true);
-       cookie.setPath("/");
+        String refreshCookieString = ResponseCookie
+                .from("refresh", refreshToken)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .build()
+                .toString();
 
-       response.addCookie(cookie);
-       response.addHeader("access",accessToken);
-       response.setStatus(HttpStatus.OK.value());
+        response.addHeader("Set-Cookie", refreshCookieString);
+        response.addHeader("access", accessToken);
+        response.setStatus(HttpStatus.OK.value());
     }
 
     /**
      * 로그인 실패 메서드
+     *
      * @param request
      * @param response
      * @param failed
-     *
-     * @since 2025-03-26
      * @author 이광석
+     * @since 2025-03-26
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
