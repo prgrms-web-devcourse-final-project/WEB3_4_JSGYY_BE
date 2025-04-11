@@ -10,15 +10,16 @@ import java.util.Collection;
  * DB에서 가져온 사용자 정보를 담는 객체
  * 로그인시 : AuthenticationManager 가 CustomUserDetails를 이용하여 입력받은 로그인 정보와 대조
  * 로그인 외 다른 요청시 : JWT토큰에서 사용자 정보를 추출하여 저장
- * @since 2025-03-26
+ *
  * @author 이광석
+ * @since 2025-03-26
  */
 public class CustomUserDetails implements UserDetails {
 
     final private CustomUserData customUserData;
 
     public CustomUserDetails(
-            CustomUserData customUserData){
+            CustomUserData customUserData) {
         this.customUserData = customUserData;
     }
     @Override
@@ -33,11 +34,11 @@ public class CustomUserDetails implements UserDetails {
         return collection;
     }
 
-    public Long getMemberId(){
+    public Long getMemberId() {
         return customUserData.getMemberId();
     }
 
-    public String getRole(){
+    public String getRole() {
         return customUserData.getRole();
     }
 
@@ -51,6 +52,9 @@ public class CustomUserDetails implements UserDetails {
         return customUserData.getUsername();
     }
 
+    public String getNickname() {
+        return customUserData.getNickname();
+    }
 
     @Override
     public boolean isAccountNonExpired() {

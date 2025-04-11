@@ -2,6 +2,7 @@ package com.ll.nbe344team7.domain.chat.message.controller;
 
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class ChatController {
             try {
                 if (principal instanceof UsernamePasswordAuthenticationToken auth){
                     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-                    chatMessageService.send(messageDTO, userDetails.getMemberId());
+                    chatMessageService.send(messageDTO, new Member(userDetails.getMemberId(), userDetails.getUsername()));
                 }
             } catch (Exception e) {
                 log.error("Chat Publish Error: ", e);

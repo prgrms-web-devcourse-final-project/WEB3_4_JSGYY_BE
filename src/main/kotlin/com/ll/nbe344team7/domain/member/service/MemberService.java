@@ -180,7 +180,6 @@ public class MemberService {
      *
      * 내 게시글 조회
      *
-     * @param memberId
      * @param loginMemberId
      * @param pageable
      * @return
@@ -188,15 +187,12 @@ public class MemberService {
      * @author GAEUN220
      * @since 2025-04-09
      */
-    public Page<PostListDto> getMyPosts(Long memberId, Long loginMemberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
-        if (!memberId.equals(loginMemberId)) {
+    public Page<PostListDto> getMyPosts( Long loginMemberId, Pageable pageable) {
+        if (!loginMemberId.equals(loginMemberId)) {
             throw new MemberException(MemberExceptionCode.NOT_AUTHORIZED);
         }
 
-        Page<Post> posts = postRepository.findByMemberId(memberId, pageable);
+        Page<Post> posts = postRepository.findByMemberId(loginMemberId, pageable);
 
         return posts.map(post -> PostListDto.Companion.from(post));
     }
@@ -205,7 +201,6 @@ public class MemberService {
      *
      * 내가 좋아요한 게시글 조회
      *
-     * @param memberId
      * @param loginMemberId
      * @param pageable
      * @return
@@ -213,15 +208,12 @@ public class MemberService {
      * @author GAEUN220
      * @since 2025-04-09
      */
-    public Page<PostListDto> getMyLikes(Long memberId, Long loginMemberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
-        if (!memberId.equals(loginMemberId)) {
+    public Page<PostListDto> getMyLikes(Long loginMemberId, Pageable pageable) {
+        if (!loginMemberId.equals(loginMemberId)) {
             throw new MemberException(MemberExceptionCode.NOT_AUTHORIZED);
         }
 
-        Page<Post> likedPosts = postLikeRepository.findLikedPostsByMemberId(memberId, pageable);
+        Page<Post> likedPosts = postLikeRepository.findLikedPostsByMemberId(loginMemberId, pageable);
 
         return likedPosts.map(post -> PostListDto.Companion.from(post));
     }

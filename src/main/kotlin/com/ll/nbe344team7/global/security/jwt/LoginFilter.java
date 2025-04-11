@@ -68,7 +68,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String username = requestMap.get("username");
             String password = requestMap.get("password");
 
-
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
             return authenticationManager.authenticate(authToken);
@@ -100,6 +99,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String username = customUserDetails.getUsername();
         Long memberId = customUserDetails.getMemberId();
+        String nickname = customUserDetails.getNickname();
 
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -108,8 +108,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String accessToken = jwtUil.createJwt("access",username,memberId,role,1);
-        String refreshToken = jwtUil.createJwt("refresh",username,memberId,role,2);
+        String accessToken = jwtUil.createJwt("access",username,memberId,nickname,role,1);
+        String refreshToken = jwtUil.createJwt("refresh",username,memberId,nickname,role,2);
 
         redisRepository.save(refreshToken,accessToken,60*60*24*1000L);
 

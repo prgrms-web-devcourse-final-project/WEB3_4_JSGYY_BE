@@ -71,8 +71,9 @@ public class ReissueController {
         String username = jwtUtil.getUsername(refresh);
         Long memberId = jwtUtil.getMemberId(refresh);
         String role = jwtUtil.getRole(refresh);
+        String nickname = jwtUtil.getNickname(refresh);
 
-        String newAccessToken = jwtUtil.createJwt("access",username,memberId,role,1);
+        String newAccessToken = jwtUtil.createJwt("access",username,memberId,nickname,role,1);
 
         redisRepository.modify(refresh,newAccessToken);
 
