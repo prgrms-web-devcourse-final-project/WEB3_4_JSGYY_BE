@@ -46,9 +46,6 @@ public class PostController {
      */
     @Operation(
             summary = "게시글 작성",
-            parameters = {
-                    @Parameter(name = "request", description = "게시글 내용", required = true)
-            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 작성 성공", content = @Content(
                             mediaType = "application/json",
@@ -193,8 +190,7 @@ public class PostController {
     @Operation(
             summary = "게시글 수정",
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true),
-                    @Parameter(name = "request", description = "게시글 수정 내용", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true)
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 수정 성공", content = @Content(
@@ -511,7 +507,6 @@ public class PostController {
     @Operation(
             summary = "게시글 신고",
             parameters = {
-                    @Parameter(name = "reportRequest", description = "신고 내용", required = true),
                     @Parameter(name = "postId", description = "게시글 ID", required = true)
             },
             responses = {

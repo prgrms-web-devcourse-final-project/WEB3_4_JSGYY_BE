@@ -12,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,7 +60,14 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        List<String> noCertifiedUrls = certifiedProperties.getNo();
+        List<String> noCertifiedUrls = new ArrayList<>();
+
+        noCertifiedUrls.add("/api/auth/login");
+        noCertifiedUrls.add("/h2-console");
+        noCertifiedUrls.add("/api/auth/register");
+        noCertifiedUrls.add("/api/login");
+        noCertifiedUrls.add("/actuator/health");
+        //noCertifiedUrls.add("/");
 
         for (String noCertifiedUrl : noCertifiedUrls){
             if(request.getServletPath().contains(noCertifiedUrl)){
