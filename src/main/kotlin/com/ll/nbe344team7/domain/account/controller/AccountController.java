@@ -89,14 +89,10 @@ public class AccountController {
 
     @Operation(
             summary = "계좌 생성",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "계좌 생성 DTO",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = AccountDTO.class)
-                    )
-            ),
+            parameters = {
+              @Parameter(name = "accountNumber", description = "계좌 번호", required = true),
+              @Parameter(name = "bankName", description = "은행 이름", required = true)
+            },
             responses = {
                     @ApiResponse(
                             responseCode = "200", description = "계좌 생성 또는 수정 성공", content = @Content(
