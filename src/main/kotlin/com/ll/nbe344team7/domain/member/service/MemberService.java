@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -109,25 +110,21 @@ public class MemberService {
      * @author 이광석
      * @since 2025-04-01
      */
+    @Transactional
     public void modifyMyDetails(String category, OneData data, Long memberId) {
-        Member preMember = findMember(memberId);
-        MemberDTO preMemberDTO = new MemberDTO(preMember);
+        Member member = findMember(memberId);
 
         switch(category){
             case "phoneNum":
-                preMemberDTO.setPhoneNum(data.getData());
+                member.setPhoneNum(data.getData());
                 break;
             case "nickname" :
-                preMemberDTO.setNickname(data.getData());
+                member.setNickname(data.getData());
                 break;
             case "address" :
-                preMemberDTO.setAddress(data.getData());
+                member.setAddress(data.getData());
                 break;
         }
-
-        Member newMember = new Member(preMemberDTO);
-        memberRepository.save(newMember);
-
     }
 
     public Member getMember(Long memberId){
@@ -136,21 +133,20 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
-
      * @param data
      * @param memberId
-     * @return boolean
      * @author 이광석
      * @since 2025-04-01
      */
-    public boolean withdrawal(OneData data, Long memberId) {
+    @Transactional
+    public void withdrawal(OneData data, Long memberId) {
         Member member = findMember(memberId);
 
-        if(!member.getPassword().equals(bCryptPasswordEncoder.encode(data.getData()))){
-            return false;
+        if (!bCryptPasswordEncoder.matches(data.getData(), member.getPassword())) {
+            return;
         }
+
         memberRepository.delete(member);
-        return true;
     }
 
 
