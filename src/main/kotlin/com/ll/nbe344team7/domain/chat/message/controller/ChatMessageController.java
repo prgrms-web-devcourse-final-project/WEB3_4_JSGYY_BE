@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.chat.message.controller;
 
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
+import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageSearchDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @author jyson
@@ -29,44 +32,7 @@ public class ChatMessageController {
         this.chatMessageService = chatMessageService;
     }
 
-    /**
-     * 메세지 보내기 컨트롤러
-     *
-     * @param messageDTO
-     * @param roomId
-     * @return
-     * @author jyson
-     * @since 25. 3. 25.
-     */
-    @Operation(
-            summary = "메시지 전송",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "채팅 메시지 Body",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ChatMessageDTO.class)
-                    )
-            ),
-            parameters = {
-                    @Parameter(name = "roomId", description = "채팅방 ID", required = true)
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "메시지 전송 성공", content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "맴버가 조회되지 않습니다.", content = @Content(mediaType = "application/json"))
-            }
-    )
-    @PostMapping
-    public ResponseEntity<?> sendMessage(
-            @RequestBody MessageDTO messageDTO,
-            @PathVariable long roomId
-    ) {
-        chatMessageService.send(messageDTO, roomId);
 
-        return ResponseEntity.ok(Map.of(
-                "message", "메세지 전송완료"
-        ));
-    }
 
     /**
      * 채팅방 입장 시 채팅 조회
