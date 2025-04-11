@@ -87,7 +87,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://lustrous-pegasus-1dc714.netlify.app"));
+
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("access"));
@@ -129,8 +130,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                         .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health").permitAll()  //인증없이 접속가능
-                        .anyRequest().authenticated()) // 인증 필요
-
+                        .anyRequest().authenticated() // 인증 필요
+                )
                 .headers(headers -> headers
                         .defaultsDisabled()
                         .frameOptions(frame -> frame.sameOrigin())
