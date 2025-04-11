@@ -125,7 +125,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests((auth) -> auth
-
                         .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health").permitAll()  //인증없이 접속가능
                         .anyRequest().authenticated()) // 인증 필요
 
