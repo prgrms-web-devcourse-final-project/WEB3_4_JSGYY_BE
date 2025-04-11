@@ -1,6 +1,5 @@
 package com.ll.nbe344team7.domain.chat.service;
 
-import com.ll.nbe344team7.domain.chat.message.controller.ChatMessageController;
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageSearchDTO;
@@ -23,9 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * 채팅 컨트롤러 테스트
@@ -59,7 +55,7 @@ public class ChatMessageServiceTest {
         ChatRoom chatRoom = chatroomService.getChatRoom(dto.getRoomId());
 
         // when
-        chatMessageService.send(dto, member.getId());
+        chatMessageService.send(dto, new Member(member.getId(), member.getNickname()));
         ChatMessage saveChatMessage = chatMessageService.findFirstByOrderByIdDesc().get();
 
         // then
@@ -74,39 +70,32 @@ public class ChatMessageServiceTest {
     void t2() {
         // given
         MessageDTO dto = new MessageDTO("안녕하세요", 2L);
+        Member member = memberService.getMember(1L);
 
         // then
-        assertThatThrownBy(() -> chatroomService.getChatRoom(dto.getRoomId()))
+        assertThatThrownBy(() -> chatMessageService.send(dto, new Member(member.getId(), member.getNickname())))
                 .isInstanceOf(ChatRoomException.class)
                 .hasMessageContaining(ChatRoomExceptionCode.NOT_FOUND_ROOM.getMessage());
     }
 
     @Test
     @DisplayName("채팅방 메세지 조회")
-    void t3() throws Exception {
+    void t3() {
         // given
-        MessageSearchDTO dto = new MessageSearchDTO("안녕하세요", 0, 10);
 
         // when
-        Page<ChatMessageDTO> chatMessages = chatMessageService.getChatMessages(1L, dto);
+        Page<ChatMessageDTO> chatMessages = chatMessageService.getChatMessages(1L, new MessageSearchDTO());
 
         // then
-//        assertThat(saveChatMessage.getMember()).isEqualTo(member);
-//        assertThat(saveChatMessage.getContent()).isEqualTo(dto.getContent());
-//        assertThat(saveChatMessage.getChatRoom()).isEqualTo(chatRoom);
-//        assertThat(saveChatMessage.isRead()).isEqualTo(false);
+        assertThat(chatMessages).isNotNull();
     }
 
     @Test
     @DisplayName("메세지 조회, 없는 채팅방")
-    void t4() throws Exception {
-        mvc.perform(
-                        get("/api/chat/rooms/2")
-                )
-                .andDo(print())
-                .andExpect(handler().handlerType(ChatMessageController.class))
-                .andExpect(handler().methodName("enterRoom"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("채팅방이 조회되지 않습니다."));
+    void t4() {
+        // then
+        assertThatThrownBy(() -> chatMessageService.getChatMessages(2L, new MessageSearchDTO()))
+                .isInstanceOf(ChatRoomException.class)
+                .hasMessageContaining(ChatRoomExceptionCode.NOT_FOUND_ROOM.getMessage());
     }
 }

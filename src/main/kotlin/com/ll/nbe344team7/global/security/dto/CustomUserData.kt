@@ -12,4 +12,5 @@ data class CustomUserData(
     val username : String,
     val role : String,
     val password: String,
+    val nickname : String,
 )
