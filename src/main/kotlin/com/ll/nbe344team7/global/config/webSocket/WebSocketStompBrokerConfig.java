@@ -31,7 +31,8 @@ public class WebSocketStompBrokerConfig implements WebSocketMessageBrokerConfigu
 
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(new CookieHandshakeHandler());
+                .addInterceptors(new CookieHandshakeHandler())
+                .withSockJS();
 
     }
 

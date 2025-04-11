@@ -1,7 +1,6 @@
 package com.ll.nbe344team7.domain.chat.message.controller;
 
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
-import com.ll.nbe344team7.domain.chat.message.dto.MessageDTO;
 import com.ll.nbe344team7.domain.chat.message.dto.MessageSearchDTO;
 import com.ll.nbe344team7.domain.chat.message.service.ChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,8 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * @author jyson

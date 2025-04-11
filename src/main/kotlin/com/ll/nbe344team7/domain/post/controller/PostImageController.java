@@ -36,7 +36,10 @@ public class PostImageController {
      * @author GAEUN220
      * @since 2025-04-04
      */
-    @Operation(summary = "게시글 사진 업로드 & 삭제")
+    @Operation(
+            summary = "게시글 사진 업로드 & 삭제",
+            description = "업로드할 사진은 images에 담아 보내고, 삭제할 사진의 id는 deleteImageIds에 담아 보냅니다."
+    )
     @PostMapping("/{postId}/images")
     public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
