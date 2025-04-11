@@ -89,6 +89,8 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:8080",
+                "http://127.0.0.1:5500",
+                "http://localhost:5500",
                 "https://api.app1.springservice.shop",
                 "https://www.app1.springservice.shop",
                 "https://lustrous-pegasus-1dc714.netlify.app",
