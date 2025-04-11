@@ -29,13 +29,13 @@ class Member(
     val password: String,
 
     @Column(nullable=false, unique = true)
-    val nickname: String,
+    var nickname: String,
 
     @Column(nullable = false)
     val email: String,
 
     @Column(nullable = false, name = "phone_num")
-    val phoneNum: String,
+    var phoneNum: String,
 
     @Column(nullable = false)
     val blocked: Boolean =false,
@@ -44,7 +44,7 @@ class Member(
     val role: String = "ROLE_ADMIN",
 
     @Column(nullable = false)
-    val address: String =""
+    var address: String =""
 ):BaseEntity(){
    constructor(dto: MemberDTO):this(
        id=null,

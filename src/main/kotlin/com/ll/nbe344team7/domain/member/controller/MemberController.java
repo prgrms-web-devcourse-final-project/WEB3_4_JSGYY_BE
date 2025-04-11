@@ -52,24 +52,14 @@ public class MemberController {
      */
     @Operation(
             summary = "회원가입",
-            parameters = {
-                    @Parameter(name = "name", description = "이름", required = true, example = "홍길동"),
-                    @Parameter(name = "username", description = "유저네임", required = true, example = "gildong123"),
-                    @Parameter(name = "password", description = "비밀번호", required = true, example = "1234"),
-                    @Parameter(name = "password2", description = "비밀번호 확인", required = true, example = "1234"),
-                    @Parameter(name = "nickname", description = "닉네임", required = true, example = "길동이"),
-                    @Parameter(name = "email", description = "이메일", required = true, example = "test@test.com"),
-                    @Parameter(name = "phoneNum", description = "전화번호", required = true, example = "010-1234-1234"),
-                    @Parameter(name = "name", description = "권한", required = true, example = "ROLE_ADMIN"),
-                    @Parameter(name = "name", description = "주소", required = true, example = "서울시 강남구")
-            },
+            description = "가입할 회원 정보를 RequestBody에 작성하고 실행하세요",
             responses = {
                     @ApiResponse(responseCode = "200", description = "회원가입 성공", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "400", description = "이미 존재하는 사용자 젇보 입니다.", content = @Content(mediaType = "application/json"))
             }
     )
     @PostMapping("/auth/register")
-    public ResponseEntity<String> register(@Parameter(hidden = true) @RequestBody() MemberDTO memberDTO){
+    public ResponseEntity<String> register(@RequestBody() MemberDTO memberDTO){
 
         try {
             memberService.register(memberDTO);
@@ -91,10 +81,18 @@ public class MemberController {
     @Operation(
             summary = "로그아웃",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content(mediaType = "application/json"))
+                    @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "로그아웃 성공"
+                                            }
+                                            """)
+                    ))
             }
     )
-    @GetMapping("/auth/logout")
+    @PostMapping("/auth/logout")
     public ResponseEntity<Map<String,String>> logout(){
         Map<String,String> mockResponseMap = new HashMap<>();
         mockResponseMap.put("Message","로그아웃 성공");
@@ -139,7 +137,6 @@ public class MemberController {
     @GetMapping("/member/mydetails")
     public ResponseEntity<Map<String, Object>> myDetails(
         @AuthenticationPrincipal    CustomUserDetails customUserDetails
-
     ){
         MemberDTO memberDTOS= memberService.myDetails(customUserDetails.getMemberId());
 
@@ -159,9 +156,12 @@ public class MemberController {
      */
     @Operation(
             summary = "회원 탈퇴",
-            parameters = {
-                    @Parameter(name = "data", description = "회원탈퇴 시 확인 비밀번호", required = true, example = "1234")
-            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(mediaType = "application/json"),
+                    required = true,
+                    description = "탈퇴를 위한 비밀번호를 작성해주세요 ex) \"data\" : \"12345\""
+
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "회원탈퇴 성공", content = @Content(
                             mediaType = "application/json",
@@ -180,7 +180,7 @@ public class MemberController {
     @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Parameter(hidden = true) @RequestBody OneData data
+            @RequestBody OneData data
     ){
         memberService.withdrawal(data,userDetails.getMemberId());
         Map<String,Object> result = new HashMap<>();
@@ -194,10 +194,22 @@ public class MemberController {
 
     @Operation(
             summary = "내 정보 수정",
-            description = "카테고리(nickname, phoneNum, address)에 따라 유저의 정보를 수정합니다.",
+            description = """
+                    카테고리(nickname, phoneNum, address)에 따라 유저의 정보를 수정합니다.
+                    parameter에 수정할 항목을 작성하고 requestbody에 항목의 수정할 내용을 작성해주세요.
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(mediaType = "application/json"),
+                    required = true,
+                    description = """
+                            수정할 항목의 내용을 작성해주세요
+                            nickname => 수정할 닉네임 ex) "data" : "newNickname"
+                            phoneNum => 수정할 전화번호 ex) "data" : "newPhoneNum"
+                            address => 수정할 주소 ex) "data" : "newAddress"
+                            """
+            ),
             parameters = {
-                @Parameter(name = "category", description = "수정할 항목 (nickname, phoneNum, address)", required = true, example = "nickname"),
-                @Parameter(name = "data", description = "수정할 내용(Category에 따라서 설정)", example = "nickname1 OR 010-1234-1234 OR 서울시 광진구"),
+                @Parameter(name = "category", description = "수정할 항목 (nickname, phoneNum, address)", required = true, example = "nickname")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(

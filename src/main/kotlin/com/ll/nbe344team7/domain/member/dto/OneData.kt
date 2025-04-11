@@ -5,4 +5,6 @@ package com.ll.nbe344team7.domain.member.dto
  */
 data class OneData(
     val data : String
-)
+){
+    constructor():this("")
+}
