@@ -112,7 +112,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUil.createJwt("access", username, memberId, nickname, role, 1);
         String refreshToken = jwtUil.createJwt("refresh", username, memberId, nickname, role, 2);
 
-        redisRepository.save(refreshToken, accessToken, 60 * 60 * 24 * 1000L);
+        redisRepository.save(refreshToken, accessToken, JWTUtil.refreshExpiration);
 
         String refreshCookieString = ResponseCookie
                 .from("refresh", refreshToken)

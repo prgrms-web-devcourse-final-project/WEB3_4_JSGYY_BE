@@ -22,10 +22,10 @@ public class JWTUtil {
     private SecretKey secretKey;
 
     @Value("${security.time.access}")
-    private Long accessExpiration;
+    public static  Long accessExpiration;
 
     @Value("${security.time.refresh}")
-    private Long refreshExpiration;
+    public static  Long refreshExpiration;
 
     public JWTUtil(@Value("${spring.jwt.secret}")String secret) {
 
