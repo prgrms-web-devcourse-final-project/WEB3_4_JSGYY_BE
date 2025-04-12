@@ -90,8 +90,8 @@ public class AccountController {
     @Operation(
             summary = "계좌 생성",
             parameters = {
-              @Parameter(name = "accountNumber", description = "계좌 번호", required = true),
-              @Parameter(name = "bankName", description = "은행 이름", required = true)
+              @Parameter(name = "accountNumber", description = "계좌 번호", required = true, schema = @Schema(type = "String")),
+              @Parameter(name = "bankName", description = "은행 이름", required = true, schema = @Schema(type = "String"))
             },
             responses = {
                     @ApiResponse(

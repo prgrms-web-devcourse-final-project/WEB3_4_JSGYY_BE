@@ -270,9 +270,9 @@ public class MemberController {
     @Operation(
             summary = "내 게시글 조회",
             parameters = {
-                    @Parameter(name = "page", description = "페이지 번호", required = true, example = "0"),
-                    @Parameter(name = "size", description = "페이지 크기", required = true, example = "15"),
-                    @Parameter(name = "sort", description = "정렬 기준", required = true ,example = "createdAt")
+                    @Parameter(name = "page", description = "페이지 번호", required = true, schema = @Schema(type = "integer", defaultValue = "0")),
+                    @Parameter(name = "size", description = "페이지 크기", required = true, schema = @Schema(type = "integer", defaultValue = "15")),
+                    @Parameter(name = "sort", description = "정렬 기준", required = true, schema = @Schema(type = "string", defaultValue = "createdAt"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(
@@ -360,9 +360,9 @@ public class MemberController {
     @Operation(
             summary = "내가 좋아요한 게시글 조회",
             parameters = {
-                    @Parameter(name = "page", description = "페이지 번호", required = true, example = "0"),
-                    @Parameter(name = "size", description = "페이지 크기", required = true, example = "15"),
-                    @Parameter(name = "sort", description = "정렬 기준", required = true ,example = "createdAt")
+                    @Parameter(name = "page", description = "페이지 번호", required = true, schema = @Schema(type = "integer", defaultValue = "0")),
+                    @Parameter(name = "size", description = "페이지 크기", required = true, schema = @Schema(type = "integer", defaultValue = "15")),
+                    @Parameter(name = "sort", description = "정렬 기준", required = true, schema = @Schema(type = "string", defaultValue = "createdAt"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(

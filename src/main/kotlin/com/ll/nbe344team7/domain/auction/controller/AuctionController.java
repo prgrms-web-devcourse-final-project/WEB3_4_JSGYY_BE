@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +43,8 @@ public class AuctionController {
     @Operation(
             summary = "입찰 기능",
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true),
-                    @Parameter(name = "price", description = "입찰 금액", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, schema = @Schema(type = "integer")),
+                    @Parameter(name = "price", description = "입찰 금액", required = true, schema = @Schema(type = "integer"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "입찰 성공", content = @Content(
