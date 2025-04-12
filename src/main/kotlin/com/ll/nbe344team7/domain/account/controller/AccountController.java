@@ -47,7 +47,16 @@ public class AccountController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "계좌 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"money\": 10000 }"))),
-                    @ApiResponse(responseCode = "404", description = "계좌를 찾을 수 없습니다.", content = @Content(mediaType = "application/json"))
+                    @ApiResponse(responseCode = "404", description = "계좌를 찾을 수 없습니다.", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "계좌를 찾을 수 없습니다."
+                                            }
+                                            """
+                            )
+                    ))
             }
     )
     @GetMapping("/{id}")
@@ -77,8 +86,26 @@ public class AccountController {
                             content = @Content(
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = ExchangeDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "거래 내역을 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "400", description = "조회 타입이 올바르지 않습니다.", content = @Content(mediaType = "application/json"))
+                    @ApiResponse(responseCode = "404", description = "거래 내역을 찾을 수 없습니다.", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "거래 내역을 찾을 수 없습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "조회 타입이 올바르지 않습니다.", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "조회 타입이 올바르지 않습니다."
+                                            }
+                                            """
+                            )
+                    ))
             }
 
     )
@@ -89,10 +116,14 @@ public class AccountController {
 
     @Operation(
             summary = "계좌 생성",
-            parameters = {
-              @Parameter(name = "accountNumber", description = "계좌 번호", required = true, schema = @Schema(type = "String")),
-              @Parameter(name = "bankName", description = "은행 이름", required = true, schema = @Schema(type = "String"))
-            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "계좌 생성 DTO",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AccountDTO.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(
                             responseCode = "200", description = "계좌 생성 또는 수정 성공", content = @Content(
@@ -106,7 +137,16 @@ public class AccountController {
                                                     """
                                     ))
                     ),
-                    @ApiResponse(responseCode = "404", description = "맴버가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
+                    @ApiResponse(responseCode = "404", description = "맴버가 존재하지 않습니다.", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                                    {
+                                                      "message": "맴버가 존재하지 않습니다."
+                                                    }
+                                                    """
+                            )
+                    ))
             }
     )
     @PostMapping
