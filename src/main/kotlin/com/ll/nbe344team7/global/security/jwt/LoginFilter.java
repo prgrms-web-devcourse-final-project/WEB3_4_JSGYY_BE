@@ -6,6 +6,7 @@ import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +37,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final JWTUtil jwtUil;
 
     private final RedisRepository redisRepository;
+
+
 
     public LoginFilter(
             AuthenticationManager authenticationManager,
@@ -112,7 +115,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUil.createJwt("access", username, memberId, nickname, role, 1);
         String refreshToken = jwtUil.createJwt("refresh", username, memberId, nickname, role, 2);
 
-        redisRepository.save(refreshToken, accessToken, JWTUtil.refreshExpiration);
+        redisRepository.save(refreshToken, accessToken, 86400000L);
 
         String refreshCookieString = ResponseCookie
                 .from("refresh", refreshToken)

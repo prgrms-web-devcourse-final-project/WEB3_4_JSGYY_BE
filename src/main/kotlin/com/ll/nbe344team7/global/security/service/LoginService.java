@@ -5,6 +5,7 @@ import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 public class LoginService {
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
+
+
 
 
 
@@ -25,7 +28,7 @@ public class LoginService {
 
         String refreshToken = jwtUtil.createJwt("refresh", userDetails.getUsername(), userDetails.getMemberId(), userDetails.getNickname(), userDetails.getRole(), 2);
 
-        redisRepository.save(refreshToken, accessToken, JWTUtil.refreshExpiration);
+        redisRepository.save(refreshToken, accessToken, 86400000L);
 
         // refresh 토큰은 쿠키로
         String refreshCookieString = ResponseCookie
