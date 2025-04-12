@@ -8,6 +8,7 @@ import com.ll.nbe344team7.domain.post.service.PostService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,6 +48,32 @@ public class PostController {
      */
     @Operation(
             summary = "게시글 작성",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "게시글 작성 요청 DTO",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PostRequest.class),
+                            examples = @ExampleObject(
+                                    description = "auctionStatus가 false일 경우 acutionRequest의 모든값은 null로 설정",
+                                    value = """
+                                            {
+                                              "title": "바지",
+                                              "content": "청바지입니다",
+                                              "price": 20000,
+                                              "category": "남성의류",
+                                              "place": "서울시 관악구",
+                                              "saleStatus": true,
+                                              "auctionStatus": true,
+                                              "auctionRequest": {
+                                                "startedAt": "2025-03-27T10:00:00",
+                                                "closedAt": "2025-04-10T10:00:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 작성 성공", content = @Content(
                             mediaType = "application/json",
@@ -132,7 +159,7 @@ public class PostController {
     @Operation(
             summary = "게시글 삭제",
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, example = "1")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 삭제 성공", content = @Content(
@@ -190,8 +217,33 @@ public class PostController {
      */
     @Operation(
             summary = "게시글 수정",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "수정할 게시글 내용",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PostRequest.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "title": "바지",
+                                              "content": "면바지",
+                                              "price": 20000,
+                                              "category": "남성의류",
+                                              "place": "서울시 관악구",
+                                              "saleStatus": true,
+                                              "auctionStatus": true,
+                                              "auctionRequest": {
+                                                "startedAt": "2025-04-13T12:00:00",
+                                                "endedAt": "2025-04-13T15:00:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, example = "1")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 수정 성공", content = @Content(
@@ -303,19 +355,101 @@ public class PostController {
     @Operation(
             summary = "게시글 목록 조회",
             parameters = {
-                    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", required = false, schema = @Schema(type = "integer", defaultValue = "0")),
-                    @Parameter(name = "size", description = "페이지 크기 (default = 15)", required = false, schema = @Schema(type = "integer", defaultValue = "15")),
-                    @Parameter(name = "sort", description = "정렬 기준 (예: createdAt,desc)", required = false, schema = @Schema(type = "string")),
-                    @Parameter(name = "category", description = "카테고리", required = false, schema = @Schema(type = "string")),
-                    @Parameter(name = "minPrice", description = "최소가격", required = false, schema = @Schema(type = "integer")),
-                    @Parameter(name = "maxPrice", description = "최대가격", required = false, schema = @Schema(type = "integer")),
-                    @Parameter(name = "saleStatus", description = "판매상태", required = false, schema = @Schema(type = "string")),
-                    @Parameter(name = "keyword", description = "검색어", required = false, schema = @Schema(type = "string")),
-                    @Parameter(name = "place", description = "위치", required = false, schema = @Schema(type = "string"))
+                    @Parameter(name = "page", description = "페이지 번호", required = true, schema = @Schema(type = "integer", defaultValue = "0")),
+                    @Parameter(name = "size", description = "페이지 크기", required = true, schema = @Schema(type = "integer", defaultValue = "15")),
+                    @Parameter(name = "sort", description = "정렬 기준", required = true, schema = @Schema(type = "string", defaultValue = "createdAt"))
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "게시글 목록 조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = PostListDto.class)),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "content": [
+                                                        {
+                                                          "id": 1,
+                                                          "title": "aaa",
+                                                          "place": "가산",
+                                                          "price": 2000,
+                                                          "saleStatus": true,
+                                                          "auctionStatus": false,
+                                                          "thumbnail": "qweqweqwe",
+                                                          "createdAt": "2025-04-11T15:33:44.618817"
+                                                        },
+                                                        {
+                                                          "id": 2,
+                                                          "title": "aa12a",
+                                                          "place": "가산",
+                                                          "price": 2000,
+                                                          "saleStatus": true,
+                                                          "auctionStatus": true,
+                                                          "thumbnail": null,
+                                                          "createdAt": "2025-04-11T15:34:28.531806"
+                                                        },
+                                                        {
+                                                          "id": 3,
+                                                          "title": "바지",
+                                                          "place": "서울시 관악구",
+                                                          "price": 20000,
+                                                          "saleStatus": true,
+                                                          "auctionStatus": false,
+                                                          "thumbnail": null,
+                                                          "createdAt": "2025-04-12T14:40:29.88151"
+                                                        },
+                                                        {
+                                                          "id": 4,
+                                                          "title": "바지",
+                                                          "place": "서울시 관악구",
+                                                          "price": 30000,
+                                                          "saleStatus": true,
+                                                          "auctionStatus": false,
+                                                          "thumbnail": null,
+                                                          "createdAt": "2025-04-12T14:41:11.746954"
+                                                        }
+                                                      ],
+                                                      "pageable": {
+                                                        "pageNumber": 0,
+                                                        "pageSize": 15,
+                                                        "sort": {
+                                                          "empty": false,
+                                                          "unsorted": false,
+                                                          "sorted": true
+                                                        },
+                                                        "offset": 0,
+                                                        "paged": true,
+                                                        "unpaged": false
+                                                      },
+                                                      "last": true,
+                                                      "totalElements": 4,
+                                                      "totalPages": 1,
+                                                      "size": 15,
+                                                      "number": 0,
+                                                      "sort": {
+                                                        "empty": false,
+                                                        "unsorted": false,
+                                                        "sorted": true
+                                                      },
+                                                      "first": true,
+                                                      "numberOfElements": 4,
+                                                      "empty": false
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "잘못된 요청 파라미터"
+                    )
             }
     )
     @GetMapping
     public ResponseEntity<?> getPosts(
+            @Parameter(hidden = true)
             @PageableDefault(size = 15,
                     page = 0,
                     sort = "createdAt",
@@ -342,7 +476,7 @@ public class PostController {
     @Operation(
             summary = "게시글 상세 조회",
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, example = "1")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 상세 조회 성공", content = @Content(
@@ -397,7 +531,7 @@ public class PostController {
     @Operation(
             summary = "게시글 좋아요",
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, example = "1")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 좋아요 성공", content = @Content(
@@ -453,7 +587,7 @@ public class PostController {
     @Operation(
             summary = "좋아요 취소",
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, example = "1")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 좋아요 취소 성공", content = @Content(
@@ -509,8 +643,11 @@ public class PostController {
      */
     @Operation(
             summary = "게시글 신고",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+
+            ),
             parameters = {
-                    @Parameter(name = "postId", description = "게시글 ID", required = true)
+                    @Parameter(name = "postId", description = "게시글 ID", required = true, example = "1")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "게시글 신고 성공", content = @Content(
