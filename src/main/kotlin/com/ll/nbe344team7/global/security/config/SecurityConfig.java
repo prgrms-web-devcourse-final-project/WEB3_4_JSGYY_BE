@@ -94,12 +94,11 @@ public class SecurityConfig {
                 "https://api.app1.springservice.shop",
                 "https://www.app1.springservice.shop",
                 "https://lustrous-pegasus-1dc714.netlify.app",
-                "https://cdpn.io",
-                "null"
+                "https://cdpn.io"
         ));
-        config.setAllowedMethods(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Access"));
+        config.setExposedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "access"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
