@@ -116,9 +116,9 @@ public class FollowController {
             summary = "팔로잉 목록 조회",
             description = "sort의 값을 \"id\"로 변경하고 진행",
             parameters = {
-                    @Parameter(name = "page", description = "페이지 번호", example = "0"),
-                    @Parameter(name = "size", description = "페이지 크기", example = "5"),
-                    @Parameter(name = "sort", description = "정렬 기준", example = "id")
+                    @Parameter(name = "page", description = "페이지 번호", schema = @Schema(type = "integer", defaultValue = "0")),
+                    @Parameter(name = "size", description = "페이지 크기", schema = @Schema(type = "integer", defaultValue = "5")),
+                    @Parameter(name = "sort", description = "정렬 기준", schema = @Schema(type = "string", defaultValue = "id"))
             },
             responses = {
                     @ApiResponse(responseCode = "200",description = "팔로잉 목록 조회 성공",content = @Content(

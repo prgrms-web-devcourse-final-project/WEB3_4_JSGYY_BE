@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
@@ -302,15 +303,15 @@ public class PostController {
     @Operation(
             summary = "게시글 목록 조회",
             parameters = {
-                    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", required = false),
-                    @Parameter(name = "size", description = "페이지 크기 (default = 15)", required = false),
-                    @Parameter(name = "sort", description = "정렬 기준 (예: createdAt,desc)", required = false),
-                    @Parameter(name = "category", description = "카테고리", required = false),
-                    @Parameter(name = "minPrice", description = "최소가격", required = false),
-                    @Parameter(name = "maxPrice", description = "최대가격", required = false),
-                    @Parameter(name = "saleStatus", description = "판매상태", required = false),
-                    @Parameter(name = "keyword", description = "검색어", required = false),
-                    @Parameter(name = "place", description = "위치", required = false)
+                    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", required = false, schema = @Schema(type = "integer", defaultValue = "0")),
+                    @Parameter(name = "size", description = "페이지 크기 (default = 15)", required = false, schema = @Schema(type = "integer", defaultValue = "15")),
+                    @Parameter(name = "sort", description = "정렬 기준 (예: createdAt,desc)", required = false, schema = @Schema(type = "string")),
+                    @Parameter(name = "category", description = "카테고리", required = false, schema = @Schema(type = "string")),
+                    @Parameter(name = "minPrice", description = "최소가격", required = false, schema = @Schema(type = "integer")),
+                    @Parameter(name = "maxPrice", description = "최대가격", required = false, schema = @Schema(type = "integer")),
+                    @Parameter(name = "saleStatus", description = "판매상태", required = false, schema = @Schema(type = "string")),
+                    @Parameter(name = "keyword", description = "검색어", required = false, schema = @Schema(type = "string")),
+                    @Parameter(name = "place", description = "위치", required = false, schema = @Schema(type = "string"))
             }
     )
     @GetMapping
