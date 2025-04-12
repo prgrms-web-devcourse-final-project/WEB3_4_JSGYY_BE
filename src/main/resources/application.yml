@@ -35,6 +35,13 @@ logging:
     org.springframework.messaging: DEBUG
     com.example: DEBUG
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+
 security:
   certified:
     no:
