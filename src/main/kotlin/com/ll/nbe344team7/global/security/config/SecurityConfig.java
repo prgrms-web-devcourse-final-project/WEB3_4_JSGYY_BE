@@ -96,8 +96,9 @@ public class SecurityConfig {
                 "https://lustrous-pegasus-1dc714.netlify.app",
                 "https://cdpn.io"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Access"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
