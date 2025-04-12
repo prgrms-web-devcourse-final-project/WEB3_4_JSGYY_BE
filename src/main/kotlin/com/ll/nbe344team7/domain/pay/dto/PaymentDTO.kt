@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.domain.pay.dto
 
+import io.swagger.v3.oas.annotations.media.Schema
+
 /**
  *
  *
@@ -7,5 +9,10 @@ package com.ll.nbe344team7.domain.pay.dto
  * @author shjung
  * @since 25. 4. 2.
  */
-data class PaymentDTO (val postId: Long){
+@Schema(description = "결제 DTO")
+data class PaymentDTO (
+    @field:Schema(description = "게시글 ID", required = true, example = "1")
+    val postId: Long
+){
+    constructor() : this(0L)
 }

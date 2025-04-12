@@ -4,6 +4,11 @@ import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
 import com.ll.nbe344team7.domain.alarm.service.AlarmService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +43,19 @@ public class AlarmController {
      * @author 이광석
      * @since 2025-04-03
      */
-    @Operation(summary = "알람 목록조회")
+    @Operation(
+            summary = "알람 목록 조회",
+            parameters = {
+                    @Parameter(name = "page", description = "페이지 번호", required = true, schema = @Schema(type = "integer", defaultValue = "1")),
+                    @Parameter(name = "size", description = "페이지 당 알림 수", required = true, schema = @Schema(type = "integer", defaultValue = "10"))
+            },
+            responses = {
+                @ApiResponse(responseCode = "200", description = "목록 조회 성공", content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = AlarmDTO.class)
+                ))
+            }
+    )
     @GetMapping
     public ResponseEntity<Map<String,Object>> getAlarms(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -61,7 +78,34 @@ public class AlarmController {
      * @author 이광석
      * @since 2025-04-03
      */
-    @Operation(summary = "알람 삭제")
+    @Operation(
+            summary = "알람 삭제",
+            parameters = {
+                    @Parameter(name = "id", description = "알람 ID", required = true, example = "1")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message": "알람 삭제 성공"
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "403", description = "권한 오류", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "권한이 없습니다."
+                                            }
+                                            """
+                            )
+                    ))
+            }
+    )
     @DeleteMapping("{id}")
     public ResponseEntity<Map<String,Object>> deleteAlarm(
             @AuthenticationPrincipal CustomUserDetails userDetails,
