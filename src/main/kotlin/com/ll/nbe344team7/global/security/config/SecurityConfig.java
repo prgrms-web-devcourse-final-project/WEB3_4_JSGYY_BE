@@ -94,7 +94,8 @@ public class SecurityConfig {
                 "https://api.app1.springservice.shop",
                 "https://www.app1.springservice.shop",
                 "https://lustrous-pegasus-1dc714.netlify.app",
-                "https://cdpn.io"
+                "https://cdpn.io",
+                "null"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
