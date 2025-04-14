@@ -79,7 +79,7 @@ public class MemberService {
                 memberDTO.getPhoneNum(),
                 false,
                 memberDTO.getRole(),
-                memberDTO.getAddress()
+                memberDTO.getAddress(),
                 new ArrayList<>()         );
 
 
@@ -147,7 +147,6 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
-     * @param oneDataDTO
      * @param memberId
      * @author 이광석
      * @since 2025-04-01
