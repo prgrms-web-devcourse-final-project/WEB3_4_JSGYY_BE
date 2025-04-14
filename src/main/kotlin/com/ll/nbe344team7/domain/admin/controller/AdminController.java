@@ -20,7 +20,7 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 @Tag(name = "어드민 API")
 public class AdminController {
-//1
+
     private final AdminService adminService;
 
     public AdminController(AdminService adminService) {
