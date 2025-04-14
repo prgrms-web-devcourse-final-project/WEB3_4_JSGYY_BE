@@ -62,7 +62,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         List<String> noCertifiedUrls = new ArrayList<>();
 
-
         noCertifiedUrls.add("/api/auth/login");
         noCertifiedUrls.add("/h2-console");
         noCertifiedUrls.add("/api/auth/register");
