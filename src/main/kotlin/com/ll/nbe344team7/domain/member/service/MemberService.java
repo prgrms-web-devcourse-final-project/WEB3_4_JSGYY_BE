@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.domain.member.service;
 
 
+import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
 import com.ll.nbe344team7.domain.member.dto.OneDataDTO;
 import com.ll.nbe344team7.domain.member.entity.Member;
@@ -26,6 +27,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 
 /**
@@ -77,8 +80,7 @@ public class MemberService {
                 false,
                 "ROLE_ADMIN",
                 memberDTO.getAddress(),
-
-        );
+                new ArrayList<>()         );
 
         try {
             memberRepository.save(member);
@@ -155,36 +157,36 @@ public class MemberService {
         Member member = findMember(memberId);
         memberRepository.delete(member);
 
-//        //2.redis 에서 데이터 삭제
-//        Cookie [] cookies = request.getCookies();
-//
-//        if(cookies==null){
-//            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
-//        }
-//
-//        String refreshToken = null;
-//        for(Cookie cookie : cookies){
-//            if(cookie.getName().equals("refresh")){
-//                refreshToken = cookie.getValue();
-//            }
-//        }
-//
-//        if(refreshToken==null){
-//            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
-//        }
-//        redisRepository.delete(refreshToken);
-//
-//        //3. 쿠키 삭제
-//        String refreshCookie = ResponseCookie
-//                .from("refresh",null)
-//                .httpOnly(true)
-//                .path("/")
-//                .secure(true)
-//                .sameSite("None")
-//                .maxAge(0)
-//                .build().toString();
-//
-//        response.addHeader("Set-Cookie",refreshCookie);
+        //2.redis 에서 데이터 삭제
+        Cookie [] cookies = request.getCookies();
+
+        if(cookies==null){
+            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
+        }
+
+        String refreshToken = null;
+        for(Cookie cookie : cookies){
+            if(cookie.getName().equals("refresh")){
+                refreshToken = cookie.getValue();
+            }
+        }
+
+        if(refreshToken==null){
+            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
+        }
+        redisRepository.delete(refreshToken);
+
+        //3. 쿠키 삭제
+        String refreshCookie = ResponseCookie
+                .from("refresh",null)
+                .httpOnly(true)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .maxAge(0)
+                .build().toString();
+
+        response.addHeader("Set-Cookie",refreshCookie);
 
     }
 
