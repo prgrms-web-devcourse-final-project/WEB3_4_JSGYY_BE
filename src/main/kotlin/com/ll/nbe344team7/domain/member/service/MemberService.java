@@ -65,7 +65,7 @@ public class MemberService {
                 memberDTO.getEmail(),
                 memberDTO.getPhoneNum(),
                 false,
-                "ROLE_ADMIN",
+                memberDTO.getRole(),
                 memberDTO.getAddress()
         );
 
