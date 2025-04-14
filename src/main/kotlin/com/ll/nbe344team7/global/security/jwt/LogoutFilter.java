@@ -24,12 +24,10 @@ public class LogoutFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
 
-    private final MemberService memberService;
 
-    public LogoutFilter(JWTUtil jwtUtil, RedisRepository redisRepository, MemberService memberService) {
+    public LogoutFilter(JWTUtil jwtUtil, RedisRepository redisRepository) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
-        this.memberService = memberService;
     }
 
     /**
@@ -55,9 +53,7 @@ public class LogoutFilter extends OncePerRequestFilter {
             return;
         }
 
-        if(request.getRequestURI().equals("/api/auth/logout")){
-            memberService.withdrawal();
-        }
+
 
         // 쿠키에서 refresh 토큰 꺼내기
         String refresh = null;
