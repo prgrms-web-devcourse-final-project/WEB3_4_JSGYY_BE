@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -180,9 +182,12 @@ public class MemberController {
     @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody OneDataDTO oneDataDTO
+
+            HttpServletRequest request,
+            HttpServletResponse response
     ){
-        memberService.withdrawal(oneDataDTO,userDetails.getMemberId());
+        memberService.withdrawal(userDetails.getMemberId(),request,response);
+
         Map<String,Object> result = new HashMap<>();
         result.put("message","회원탈퇴 성공");
 

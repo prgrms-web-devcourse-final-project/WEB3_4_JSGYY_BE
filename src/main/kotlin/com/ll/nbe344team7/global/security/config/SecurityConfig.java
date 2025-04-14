@@ -1,6 +1,7 @@
 package com.ll.nbe344team7.global.security.config;
 
 
+import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.jwt.JWTFilter;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
@@ -43,8 +44,8 @@ public class SecurityConfig {
     public SecurityConfig(
             AuthenticationConfiguration authenticationConfiguration,
             JWTUtil jwtUtil,
-            RedisRepository redisRepository,
-            CertifiedProperties certifiedProperties) {
+            RedisRepository redisRepository
+            ) {
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
