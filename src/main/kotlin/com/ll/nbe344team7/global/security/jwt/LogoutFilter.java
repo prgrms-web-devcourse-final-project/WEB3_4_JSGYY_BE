@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.global.security.jwt;
 
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.exception.SecurityException;
 import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
@@ -21,6 +23,7 @@ public class LogoutFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
+
 
     public LogoutFilter(JWTUtil jwtUtil, RedisRepository redisRepository) {
         this.jwtUtil = jwtUtil;
@@ -44,10 +47,13 @@ public class LogoutFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         // 로그아웃 요청이 아닌 경우 필터 통과
-        if (!request.getRequestURI().equals("/api/auth/logout") || !request.getMethod().equals("POST")) {
+        if (!request.getRequestURI().equals("/api/auth/logout") || !request.getMethod().equals("POST")
+        || !request.getRequestURI().equals("/api/member/withdrawal")) {
             filterChain.doFilter(request, response);
             return;
         }
+
+
 
         // 쿠키에서 refresh 토큰 꺼내기
         String refresh = null;

@@ -13,4 +13,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     public Account findByMemberId(Long memberId);
 
     Long countByMemberId(Long memberId);
+
+    boolean existsAccountsByMemberId(long memberId);
 }
