@@ -55,7 +55,7 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().startsWith("/v3/api-docs") || request.getServletPath().startsWith("/swagger-ui") || request.getServletPath().startsWith("/swagger-resources")
-            || (request.getServletPath().startsWith("/api/posts") && request.getMethod().equals("GET") && !request.getServletPath().equals("/api/posts/**"))) {
+            || (request.getServletPath().startsWith("/api/posts") && request.getMethod().equals("GET") && !request.getServletPath().equals("/api/posts/{id}"))) {
             filterChain.doFilter(request, response);
             return;
         }
