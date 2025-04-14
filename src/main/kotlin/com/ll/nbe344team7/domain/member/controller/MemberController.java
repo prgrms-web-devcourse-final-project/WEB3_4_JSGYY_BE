@@ -2,7 +2,7 @@ package com.ll.nbe344team7.domain.member.controller;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.dto.PasswordDTO;
+import com.ll.nbe344team7.domain.member.dto.OneDataDTO;
 import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -180,9 +182,10 @@ public class MemberController {
     @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody PasswordDTO passwordDTO
+            HttpServletRequest request,
+            HttpServletResponse response
     ){
-        memberService.withdrawal(passwordDTO,userDetails.getMemberId());
+        memberService.withdrawal(userDetails.getMemberId(),request,response);
         Map<String,Object> result = new HashMap<>();
         result.put("message","회원탈퇴 성공");
 
@@ -228,7 +231,7 @@ public class MemberController {
     @PutMapping("/member/modify/{category}")
     public ResponseEntity<Map<String,Object>> modifyMyDetails(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody PasswordDTO data,
+            @RequestBody OneDataDTO data,
             @PathVariable(value = "category") String category
     ){
         Map<String,Object> request = new HashMap<>();

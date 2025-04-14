@@ -2,7 +2,7 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.dto.PasswordDTO;
+import com.ll.nbe344team7.domain.member.dto.OneDataDTO;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.exception.MemberException;
 import com.ll.nbe344team7.domain.member.exception.MemberExceptionCode;
@@ -13,9 +13,16 @@ import com.ll.nbe344team7.domain.post.repository.PostLikeRepository;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
+import com.ll.nbe344team7.global.redis.RedisRepository;
+import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,15 +40,18 @@ public class MemberService {
     final private BCryptPasswordEncoder bCryptPasswordEncoder;
     final private PostRepository postRepository;
     final private PostLikeRepository postLikeRepository;
+    final private RedisRepository redisRepository;
     public MemberService(MemberRepository memberRepository,
                          BCryptPasswordEncoder bCryptPasswordEncoder,
                          PostRepository postRepository,
-                         PostLikeRepository postLikeRepository
+                         PostLikeRepository postLikeRepository,
+                         RedisRepository redisRepository
     ) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.postRepository = postRepository;
         this.postLikeRepository = postLikeRepository;
+        this.redisRepository = redisRepository;
     }
 
 
@@ -104,14 +114,14 @@ public class MemberService {
 
     /**
      * member 데이터 수정 메소드
-     * @param category
+     * @param category - OneData = 수정한 데이터
      * @param data
      * @param memberId
      * @author 이광석
      * @since 2025-04-01
      */
     @Transactional
-    public void modifyMyDetails(String category, PasswordDTO data, Long memberId) {
+    public void modifyMyDetails(String category, OneDataDTO data, Long memberId) {
         Member member = findMember(memberId);
 
         switch(category){
@@ -133,20 +143,48 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
-     * @param passwordDTO
      * @param memberId
      * @author 이광석
      * @since 2025-04-01
      */
     @Transactional
-    public void withdrawal(PasswordDTO passwordDTO, Long memberId) {
-        Member member = findMember(memberId);
+    public void withdrawal(Long memberId, HttpServletRequest request, HttpServletResponse response) {
 
-        if (!bCryptPasswordEncoder.matches(passwordDTO.getData(), member.getPassword())) {
-            return;
+        //1. db에서 데이터 삭제
+        Member member = findMember(memberId);
+        memberRepository.delete(member);
+
+        //2.redis 에서 데이터 삭제
+        Cookie [] cookies = request.getCookies();
+
+        if(cookies==null){
+            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
         }
 
-        memberRepository.delete(member);
+        String refreshToken = null;
+        for(Cookie cookie : cookies){
+            if(cookie.getName().equals("refresh")){
+                refreshToken = cookie.getValue();
+            }
+        }
+
+        if(refreshToken==null){
+            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
+        }
+        redisRepository.delete(refreshToken);
+
+        //3. 쿠키 삭제
+        String refreshCookie = ResponseCookie
+                .from("refresh",null)
+                .httpOnly(true)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .maxAge(0)
+                .build().toString();
+
+        response.addHeader("Set-Cookie",refreshCookie);
+
     }
 
 
