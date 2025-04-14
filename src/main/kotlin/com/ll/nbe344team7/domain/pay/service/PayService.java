@@ -24,6 +24,8 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -39,23 +41,23 @@ import java.util.Objects;
 @Service
 public class PayService {
 
-    private final PaymentRepository paymentRepository;
-    private final IamportClient iamportClient;
-    private final WithdrawRepository withdrawRepository;
-    private final MemberRepository memberRepository;
-    private final AccountRepository accountRepository;
-    private final PostRepository postRepository;
-
+    private static final Logger log = LoggerFactory.getLogger(PayService.class);
     @Value("${iamport.REST_API_KEY}")
     private String REST_API_KEY;
     @Value("${iamport.REST_API_SECRET}")
     private String REST_API_SECRET;
 
+    private final PaymentRepository paymentRepository;
+    private IamportClient iamportClient;
+    private final WithdrawRepository withdrawRepository;
+    private final MemberRepository memberRepository;
+    private final AccountRepository accountRepository;
+    private final PostRepository postRepository;
+
     public PayService(PaymentRepository paymentRepository, WithdrawRepository withdrawRepository,
                       MemberRepository memberRepository, AccountRepository accountRepository,
                       PostRepository postRepository) {
         this.paymentRepository = paymentRepository;
-        this.iamportClient = new IamportClient(REST_API_KEY, REST_API_SECRET);
         this.withdrawRepository = withdrawRepository;
         this.memberRepository = memberRepository;
         this.accountRepository = accountRepository;
@@ -75,8 +77,9 @@ public class PayService {
     public Map<Object, Object> depositAccount(DepositDTO dto, Long memberId) {
         try{
             Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+            this.iamportClient = new IamportClient(REST_API_KEY, REST_API_SECRET);
             // 1. api 결제 확인 요청
-            IamportResponse<Payment> iamportResponse = iamportClient.paymentByImpUid(dto.getImpUid());
+            IamportResponse<Payment> iamportResponse = this.iamportClient.paymentByImpUid(dto.getImpUid());
             // 2. 결제 금액 확인
             Long amount = (iamportResponse.getResponse().getAmount()).longValue();
             // 3. 결제 금액이 들어온 금액과 다를 경우 exception 발생
@@ -97,8 +100,12 @@ public class PayService {
             if(paymentRepository.countByImpUidContainsIgnoreCase(dto.getImpUid()) > 0){
                 throw new PaymentException(PayExceptionCode.PAYMENT_ERROR);
             }
+
+            Account account = this.accountRepository.findByMemberId(memberId);
+            account.setMoney(dto.getPrice());
             // 8. 이상이 없는 경우 저장 후 리턴
             paymentRepository.save(exchange);
+            accountRepository.save(account);
             return Map.of("message", "충전 요청이 확인되었습니다.");
         } catch (IamportResponseException | IOException e) {
             throw new PaymentException(PayExceptionCode.PORTONE_ERROR);

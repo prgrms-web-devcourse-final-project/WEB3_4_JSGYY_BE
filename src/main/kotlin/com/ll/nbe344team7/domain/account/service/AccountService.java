@@ -72,10 +72,6 @@ public class AccountService {
                 list = this.paymentRepository.findByMyId(memberId);
             }
 
-            if(list.isEmpty()) {
-                throw new AccountException(AccountExceptionCode.NOT_FOUND_EXCHANGE);
-            }
-
             return Map.of("exchanges", list);
         } catch (IllegalArgumentException e) {
             throw new AccountException(AccountExceptionCode.NOT_TYPE_EXCHANGE);
