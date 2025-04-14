@@ -25,9 +25,6 @@ springdoc:
   swagger-ui:
     persist-authorization: true
 
-server:
-  forward-headers-strategy: native
-
 logging:
   level:
     org.hibernate.SQL: DEBUG
