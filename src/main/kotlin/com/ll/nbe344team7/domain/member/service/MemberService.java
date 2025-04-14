@@ -76,7 +76,8 @@ public class MemberService {
                 memberDTO.getPhoneNum(),
                 false,
                 "ROLE_ADMIN",
-                memberDTO.getAddress()
+                memberDTO.getAddress(),
+
         );
 
         try {
@@ -154,36 +155,36 @@ public class MemberService {
         Member member = findMember(memberId);
         memberRepository.delete(member);
 
-        //2.redis 에서 데이터 삭제
-        Cookie [] cookies = request.getCookies();
-
-        if(cookies==null){
-            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
-        }
-
-        String refreshToken = null;
-        for(Cookie cookie : cookies){
-            if(cookie.getName().equals("refresh")){
-                refreshToken = cookie.getValue();
-            }
-        }
-
-        if(refreshToken==null){
-            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
-        }
-        redisRepository.delete(refreshToken);
-
-        //3. 쿠키 삭제
-        String refreshCookie = ResponseCookie
-                .from("refresh",null)
-                .httpOnly(true)
-                .path("/")
-                .secure(true)
-                .sameSite("None")
-                .maxAge(0)
-                .build().toString();
-
-        response.addHeader("Set-Cookie",refreshCookie);
+//        //2.redis 에서 데이터 삭제
+//        Cookie [] cookies = request.getCookies();
+//
+//        if(cookies==null){
+//            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
+//        }
+//
+//        String refreshToken = null;
+//        for(Cookie cookie : cookies){
+//            if(cookie.getName().equals("refresh")){
+//                refreshToken = cookie.getValue();
+//            }
+//        }
+//
+//        if(refreshToken==null){
+//            throw new SecurityException(SecurityExceptionCode.NOT_FOUND_REFRESHTOKEN.getMessage());
+//        }
+//        redisRepository.delete(refreshToken);
+//
+//        //3. 쿠키 삭제
+//        String refreshCookie = ResponseCookie
+//                .from("refresh",null)
+//                .httpOnly(true)
+//                .path("/")
+//                .secure(true)
+//                .sameSite("None")
+//                .maxAge(0)
+//                .build().toString();
+//
+//        response.addHeader("Set-Cookie",refreshCookie);
 
     }
 

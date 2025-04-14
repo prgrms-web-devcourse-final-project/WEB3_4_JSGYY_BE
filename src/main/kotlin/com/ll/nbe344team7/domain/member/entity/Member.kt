@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.domain.member.entity
 
+import com.ll.nbe344team7.domain.alarm.entity.Alarm
 import com.ll.nbe344team7.domain.member.dto.MemberDTO
 import com.ll.nbe344team7.global.base.BaseEntity
 import jakarta.persistence.*
@@ -44,7 +45,10 @@ class Member(
     val role: String = "ROLE_ADMIN",
 
     @Column(nullable = false)
-    var address: String =""
+    var address: String ="",
+
+    @OneToMany(mappedBy = "member", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+val alarms: MutableList<Alarm> = mutableListOf()
 ):BaseEntity(){
    constructor(dto: MemberDTO):this(
        id=null,

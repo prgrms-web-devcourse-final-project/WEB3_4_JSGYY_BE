@@ -49,7 +49,7 @@ public class LogoutFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         // 로그아웃 요청이 아닌 경우 필터 통과
         if (!request.getRequestURI().equals("/api/auth/logout") || !request.getMethod().equals("POST")
-        || !request.getRequestURI().equals("/api/member/withdrawal")) {
+       ) {
             filterChain.doFilter(request, response);
             return;
         }
