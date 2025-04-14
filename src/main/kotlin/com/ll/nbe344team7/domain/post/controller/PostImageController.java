@@ -4,7 +4,11 @@ import com.ll.nbe344team7.domain.post.dto.response.UpdateImageResult;
 import com.ll.nbe344team7.domain.post.service.PostImageService;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +40,119 @@ public class PostImageController {
      * @author GAEUN220
      * @since 2025-04-04
      */
-    @Operation(summary = "게시글 사진 업로드 & 삭제")
-    @PostMapping("/{postId}/images")
+    @Operation(
+            summary = "게시글 이미지 업로드 및 삭제",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "성공", content = @Content(
+                            mediaType = "application/json",
+                            examples = {
+                                    @ExampleObject(
+                                            name = "이미지만 업로드",
+                                            value = """
+                                            {
+                                              "message": "1번 게시글 이미지 업로드 및 삭제 완료",
+                                              "uploadedImages": [
+                                                {
+                                                  "id": 1,
+                                                  "url": "image.jpg"
+                                                }
+                                              ],
+                                              "deletedImageIds": []
+                                            }
+                                            """
+                                    ),
+                                    @ExampleObject(
+                                            name = "이미지 삭제만",
+                                            value = """
+                                            {
+                                                "message": "1번 게시글 이미지 업로드 및 삭제 완료",
+                                                "uploadedImages": [],
+                                                "deletedImageIds": [
+                                                    9
+                                                ]
+                                            }
+                                            """
+                                    ),
+                                    @ExampleObject(
+                                            name = "이미지 업로드 + 삭제",
+                                            value = """
+                                            {
+                                              "message": "1번 게시글 이미지 업로드 및 삭제 완료",
+                                              "uploadedImages": [
+                                                {
+                                                  "id": 4,
+                                                  "url": "image.jpg"
+                                                }
+                                              ],
+                                              "deletedImageIds": [1,2]
+                                            }
+                                            """
+                                    )
+                            }
+                    )),
+                    @ApiResponse(responseCode = "404", description = "게시글 조회 실패", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 게시글입니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "맴버 조회 실패", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "멤버가 조회되지 않습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "403", description = "게시글 권한 오류", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "게시글 권한이 없습니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "최소 이미지 오류", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "게시글에는 최소 1장의 이미지가 있어야 합니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "400", description = "최대 이미지 오류", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "이미지는 최대 10개까지 업로드 가능합니다."
+                                            }
+                                            """
+                            )
+                    )),
+                    @ApiResponse(responseCode = "404", description = "이미지 조회 오류", content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "message" : "존재하지 않는 이미지입니다."
+                                            }
+                                            """
+                            )
+                    )),
+            }
+    )
+    @PostMapping(path = "/{postId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
             @RequestPart(value = "images", required = false) MultipartFile[] images,

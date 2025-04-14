@@ -5,7 +5,6 @@ import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,11 +20,9 @@ public class LoginService {
     }
 
     public void generateAndAttachTokens(HttpServletResponse response, CustomUserDetails userDetails) {
-        String accessToken = jwtUtil.createJwt("access", userDetails.getUsername(),
-                userDetails.getMemberId(), userDetails.getRole(), 1);
+        String accessToken = jwtUtil.createJwt("access", userDetails.getUsername(), userDetails.getMemberId(), userDetails.getNickname(), userDetails.getRole(), 1);
 
-        String refreshToken = jwtUtil.createJwt("refresh", userDetails.getUsername(),
-                userDetails.getMemberId(), userDetails.getRole(), 2);
+        String refreshToken = jwtUtil.createJwt("refresh", userDetails.getUsername(), userDetails.getMemberId(), userDetails.getNickname(), userDetails.getRole(), 2);
 
         redisRepository.save(refreshToken, accessToken, 60 * 60 * 24L);
 
@@ -33,6 +30,7 @@ public class LoginService {
         Cookie cookie = new Cookie("refresh", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
+        cookie.setSecure(true);
         response.addCookie(cookie);
 
         // access 토큰은 헤더로

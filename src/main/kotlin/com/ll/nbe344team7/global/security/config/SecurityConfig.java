@@ -6,9 +6,9 @@ import com.ll.nbe344team7.global.security.jwt.JWTFilter;
 import com.ll.nbe344team7.global.security.jwt.JWTUtil;
 import com.ll.nbe344team7.global.security.jwt.LoginFilter;
 import com.ll.nbe344team7.global.security.jwt.LogoutFilter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,7 +37,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
-    private final CertifiedProperties certifiedProperties;
+
 
 
     public SecurityConfig(
@@ -49,7 +49,6 @@ public class SecurityConfig {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
-        this.certifiedProperties = certifiedProperties;
     }
 
 
@@ -86,12 +85,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://lustrous-pegasus-1dc714.netlify.app"));
-        config.setAllowedMethods(List.of("*"));
+
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://127.0.0.1:5500",
+                "http://localhost:5500",
+                "https://api.app1.springservice.shop",
+                "https://www.app1.springservice.shop",
+                "https://lustrous-pegasus-1dc714.netlify.app",
+                "https://cdpn.io"
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",config);
@@ -126,15 +133,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((auth) -> auth
 
+                        .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                         .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health").permitAll()  //인증없이 접속가능
-                        .anyRequest().authenticated()) // 인증 필요
-
+                        .anyRequest().authenticated() // 인증 필요
+                )
                 .headers(headers -> headers
                         .defaultsDisabled()
                         .frameOptions(frame -> frame.sameOrigin())
                 )
 
-                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository,certifiedProperties),UsernamePasswordAuthenticationFilter.class)  // jwt 유효성 검사
+                .addFilterBefore(new JWTFilter(jwtUtil,redisRepository),UsernamePasswordAuthenticationFilter.class)  // jwt 유효성 검사
 
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class) // 로그인 유효성 검사
 

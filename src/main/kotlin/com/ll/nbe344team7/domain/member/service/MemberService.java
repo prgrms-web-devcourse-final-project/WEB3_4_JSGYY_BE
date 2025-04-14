@@ -2,7 +2,7 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.dto.OneData;
+import com.ll.nbe344team7.domain.member.dto.PasswordDTO;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.exception.MemberException;
 import com.ll.nbe344team7.domain.member.exception.MemberExceptionCode;
@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -109,25 +110,21 @@ public class MemberService {
      * @author 이광석
      * @since 2025-04-01
      */
-    public void modifyMyDetails(String category, OneData data, Long memberId) {
-        Member preMember = findMember(memberId);
-        MemberDTO preMemberDTO = new MemberDTO(preMember);
+    @Transactional
+    public void modifyMyDetails(String category, PasswordDTO data, Long memberId) {
+        Member member = findMember(memberId);
 
         switch(category){
             case "phoneNum":
-                preMemberDTO.setPhoneNum(data.getData());
+                member.setPhoneNum(data.getData());
                 break;
             case "nickname" :
-                preMemberDTO.setNickname(data.getData());
+                member.setNickname(data.getData());
                 break;
             case "address" :
-                preMemberDTO.setAddress(data.getData());
+                member.setAddress(data.getData());
                 break;
         }
-
-        Member newMember = new Member(preMemberDTO);
-        memberRepository.save(newMember);
-
     }
 
     public Member getMember(Long memberId){
@@ -136,21 +133,20 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
-
-     * @param data
+     * @param passwordDTO
      * @param memberId
-     * @return boolean
      * @author 이광석
      * @since 2025-04-01
      */
-    public boolean withdrawal(OneData data, Long memberId) {
+    @Transactional
+    public void withdrawal(PasswordDTO passwordDTO, Long memberId) {
         Member member = findMember(memberId);
 
-        if(!member.getPassword().equals(bCryptPasswordEncoder.encode(data.getData()))){
-            return false;
+        if (!bCryptPasswordEncoder.matches(passwordDTO.getData(), member.getPassword())) {
+            return;
         }
+
         memberRepository.delete(member);
-        return true;
     }
 
 
@@ -180,7 +176,6 @@ public class MemberService {
      *
      * 내 게시글 조회
      *
-     * @param memberId
      * @param loginMemberId
      * @param pageable
      * @return
@@ -188,15 +183,12 @@ public class MemberService {
      * @author GAEUN220
      * @since 2025-04-09
      */
-    public Page<PostListDto> getMyPosts(Long memberId, Long loginMemberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
-        if (!memberId.equals(loginMemberId)) {
+    public Page<PostListDto> getMyPosts( Long loginMemberId, Pageable pageable) {
+        if (!loginMemberId.equals(loginMemberId)) {
             throw new MemberException(MemberExceptionCode.NOT_AUTHORIZED);
         }
 
-        Page<Post> posts = postRepository.findByMemberId(memberId, pageable);
+        Page<Post> posts = postRepository.findByMemberId(loginMemberId, pageable);
 
         return posts.map(post -> PostListDto.Companion.from(post));
     }
@@ -205,7 +197,6 @@ public class MemberService {
      *
      * 내가 좋아요한 게시글 조회
      *
-     * @param memberId
      * @param loginMemberId
      * @param pageable
      * @return
@@ -213,15 +204,12 @@ public class MemberService {
      * @author GAEUN220
      * @since 2025-04-09
      */
-    public Page<PostListDto> getMyLikes(Long memberId, Long loginMemberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
-
-        if (!memberId.equals(loginMemberId)) {
+    public Page<PostListDto> getMyLikes(Long loginMemberId, Pageable pageable) {
+        if (!loginMemberId.equals(loginMemberId)) {
             throw new MemberException(MemberExceptionCode.NOT_AUTHORIZED);
         }
 
-        Page<Post> likedPosts = postLikeRepository.findLikedPostsByMemberId(memberId, pageable);
+        Page<Post> likedPosts = postLikeRepository.findLikedPostsByMemberId(loginMemberId, pageable);
 
         return likedPosts.map(post -> PostListDto.Companion.from(post));
     }

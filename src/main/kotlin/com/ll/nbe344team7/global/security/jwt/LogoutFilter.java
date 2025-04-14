@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.global.security.jwt;
 
+import com.ll.nbe344team7.domain.member.entity.Member;
+import com.ll.nbe344team7.domain.member.service.MemberService;
 import com.ll.nbe344team7.global.redis.RedisRepository;
 import com.ll.nbe344team7.global.security.exception.SecurityException;
 import com.ll.nbe344team7.global.security.exception.SecurityExceptionCode;
@@ -9,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -21,31 +24,36 @@ public class LogoutFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
     private final RedisRepository redisRepository;
 
+
     public LogoutFilter(JWTUtil jwtUtil, RedisRepository redisRepository) {
         this.jwtUtil = jwtUtil;
         this.redisRepository = redisRepository;
     }
 
     /**
-     *로그아웃 필터
-     * 절절한 logout 요청인지 확인하고 redis 에서 해당 사용자의 토큰들을 지운 다음 빈 토큰을 쿠키에 담아 전달
+     * 로그아웃 필터
+     * 적절한 logout 요청인지 확인하고 redis 에서 해당 사용자의 토큰들을 지운 다음 빈 토큰을 쿠키에 담아 전달
+     *
      * @param request
      * @param response
      * @param filterChain
      * @throws ServletException
      * @throws IOException
-     *
      * @author 이광석
      * @since 25.03.31
-     */    @Override
+     */
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-         // 로그아웃 요청이 아닌 경우 필터 통과
-        if (!request.getRequestURI().equals("/api/auth/logout") || !request.getMethod().equals("POST")) {
+        // 로그아웃 요청이 아닌 경우 필터 통과
+        if (!request.getRequestURI().equals("/api/auth/logout") || !request.getMethod().equals("POST")
+        || !request.getRequestURI().equals("/api/member/withdrawal")) {
             filterChain.doFilter(request, response);
             return;
         }
+
+
 
         // 쿠키에서 refresh 토큰 꺼내기
         String refresh = null;
@@ -87,11 +95,17 @@ public class LogoutFilter extends OncePerRequestFilter {
 
         redisRepository.delete(refresh);
 
-        // 쿠키 제거 (브라우저에서 제거하도록 maxAge=0 설정)
-        Cookie deleteCookie = new Cookie("refresh", null);
-        deleteCookie.setMaxAge(0);
-        deleteCookie.setPath("/");
-        response.addCookie(deleteCookie);
+        String refreshCookieString = ResponseCookie
+                .from("refresh", null)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(0)
+                .build()
+                .toString();
+
+        response.addHeader("Set-Cookie", refreshCookieString);
 
         response.setStatus(HttpServletResponse.SC_OK);
     }

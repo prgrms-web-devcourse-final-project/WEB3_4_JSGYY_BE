@@ -15,6 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  *
  *
@@ -95,9 +100,13 @@ public class FollowService {
         if (followPage.isEmpty()){
             throw new FollowException(FollowExceptionCode.NOT_EXIST_LIST);
         }
-        return followPage.map(follow ->{
-                    Member following = memberRepository.findById(follow.getFollowingId()).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
+        List<Long> followingIds = followPage.stream().map(Follow::getFollowingId).toList();
 
+        List<Member> members = memberRepository.findAllByIdIn(followingIds);
+
+        Map<Long, Member> memberMap = members.stream().collect(Collectors.toMap(Member::getId, Function.identity()));
+        return followPage.map(follow ->{
+                    Member following = memberMap.get(follow.getFollowingId());
                     return new FollowListResponseDto(following);
                 });
     }

@@ -44,14 +44,6 @@ public class SwaggerConfig {
     }
 
     @Bean
-    public GroupedOpenApi adminApi() {
-        return GroupedOpenApi.builder()
-                .group("AdminApi")
-                .pathsToMatch("/api/admin/**")
-                .build();
-    }
-
-    @Bean
     public GroupedOpenApi alarmApi() {
         return GroupedOpenApi.builder()
                 .group("AlarmApi")

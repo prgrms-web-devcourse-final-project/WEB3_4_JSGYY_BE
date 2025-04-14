@@ -96,7 +96,7 @@ public class AccountService {
         Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(GlobalExceptionCode.NOT_FOUND_MEMBER));
 
         Account account;
-        if(accountRepository.count() > 0) {
+        if(accountRepository.existsAccountsByMemberId(memberId)) {
             account = this.accountRepository.findByMemberId(memberId);
             account.setBankName(dto.getBankName());
             account.setAccountNumber(dto.getAccountNumber());
