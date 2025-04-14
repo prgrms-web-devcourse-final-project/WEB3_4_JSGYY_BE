@@ -153,11 +153,9 @@ public class MemberService {
     @Transactional
     public void withdrawal(Long memberId, HttpServletRequest request, HttpServletResponse response) {
 
-        //1. db에서 데이터 삭제
-        Member member = findMember(memberId);
-        memberRepository.delete(member);
 
-        //2.redis 에서 데이터 삭제
+
+        //1.redis 에서 데이터 삭제
         Cookie [] cookies = request.getCookies();
 
         if(cookies==null){
@@ -176,7 +174,7 @@ public class MemberService {
         }
         redisRepository.delete(refreshToken);
 
-        //3. 쿠키 삭제
+        //2. 쿠키 삭제
         String refreshCookie = ResponseCookie
                 .from("refresh",null)
                 .httpOnly(true)
@@ -187,6 +185,13 @@ public class MemberService {
                 .build().toString();
 
         response.addHeader("Set-Cookie",refreshCookie);
+
+        //3. accessToken 만료
+        response.addHeader("access","expired");
+
+        //4. db에서 데이터 삭제
+        Member member = findMember(memberId);
+        memberRepository.delete(member);
 
     }
 
