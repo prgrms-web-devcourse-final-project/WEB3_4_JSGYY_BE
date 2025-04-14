@@ -68,14 +68,23 @@ public class ChatMessageSenderService {
 
         long start = System.currentTimeMillis();
         Long roomId = chatRoom.getId();
-        // save message to db
+        // 메세지 보내기
         saveMessage(dto, chatMessage);
         long end = System.currentTimeMillis();
         log.info("process time: {}", end - start);
 
+        // 비동기 알람 처리
         handleAlarm(dto, roomId, member, chatMessage, chatParticipants);
     }
 
+    /**
+     * 메세지 발행 처리
+     * @param dto
+     * @param chatMessage
+
+     *
+     * @author jyson
+     * @since 25. 4. 14.     */
     private void saveMessage(MessageDTO dto, ChatMessage chatMessage) {
         chatMessageRepository.save(chatMessage);
         chatRoomRedisService.saveLastMessage(dto, chatMessage.getMember().getId());
@@ -83,6 +92,17 @@ public class ChatMessageSenderService {
         redisPublish("chatroom", new ChatMessageDTO(chatMessage));
     }
 
+    /**
+     * 채팅방 리스트 목록, 알람 발행
+     * @param dto
+     * @param roomId
+     * @param member
+     * @param chatMessage
+     * @param chatParticipants
+
+     *
+     * @author jyson
+     * @since 25. 4. 14.     */
     @Async
     public void handleAlarm(MessageDTO dto, Long roomId, Member member, ChatMessage chatMessage, List<ChatParticipant> chatParticipants) {
         long start = System.currentTimeMillis();
@@ -100,6 +120,7 @@ public class ChatMessageSenderService {
         chatMessageRepository.save(chatMessage);
 
         for (Long participantId : offlineUsers) {
+            // 안읽음 메세지 카운터 처리, 채팅방 목록 보내기
             redisUpdateReadCount(roomId, participantId);
 
             String content = member.getNickname() + ": " + dto.getContent();
@@ -110,9 +131,18 @@ public class ChatMessageSenderService {
         log.info("handleAlarm time: {}", end - start);
     }
 
+    /**
+     * 안읽음 메세지 카운터 처리, 채팅방 목록 보내기
+     * @param roomId
+     * @param participantId
+
+     *
+     * @author jyson
+     * @since 25. 4. 14.     */
     private void redisUpdateReadCount(Long roomId, Long participantId) {
         List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
 
+        // 안읽음 메세지 카운트
         for (int i = 0; i < chatRoomList.size(); i++) {
             ChatRoomListResponseDto chatRoomListResponseDto = chatRoomList.get(i);
             if (chatRoomListResponseDto.getId() == roomId) {

@@ -34,7 +34,6 @@ public class AccountController {
      *
      * 보유금 조회
      *
-     * @param id
      * @return
      *
      * @author shjung
@@ -59,16 +58,15 @@ public class AccountController {
                     ))
             }
     )
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getAccount(@PathVariable Long id) {
-        return ResponseEntity.ok(this.accountService.getAccount(id));
+    @GetMapping
+    public ResponseEntity<?> getAccount(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(this.accountService.getAccount(user.getMemberId()));
     }
 
     /**
      *
      * 거래 내역 조회
      *
-     * @param id
      * @param type
      * @return
      *
@@ -109,9 +107,10 @@ public class AccountController {
             }
 
     )
-    @GetMapping("/{id}/exchange")
-    public ResponseEntity<?> getExchangeAccount(@PathVariable Long id, @RequestParam(name = "type") String type) {
-        return ResponseEntity.ok(this.accountService.getExchangeAccount(id, type));
+    @GetMapping("/exchange")
+    public ResponseEntity<?> getExchangeAccount(@RequestParam(name = "type") String type,
+                                                @AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(this.accountService.getExchangeAccount(user.getMemberId(), type));
     }
 
     @Operation(

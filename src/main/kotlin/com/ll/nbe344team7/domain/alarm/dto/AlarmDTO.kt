@@ -27,14 +27,14 @@ data class AlarmDTO(
     val createdAt: LocalDateTime?,
     val destinationId : Long)
 {
-    constructor(dto: Alarm) :this(
-        id = dto.id,
-        receiveMemberId = dto.member.id!!,
-        content = dto.content,
-        type=dto.type,
-        checked = dto.checked,
-        createdAt = dto.createdAt,
-        destinationId = dto.destinationId
+    constructor(alarm: Alarm) :this(
+        id = alarm.id,
+        receiveMemberId = alarm.member.id!!,
+        content = alarm.content,
+        type=alarm.type,
+        checked = alarm.checked,
+        createdAt = alarm.createdAt,
+        destinationId = alarm.destinationId
     )
     constructor() : this(
         id = null,
