@@ -84,7 +84,6 @@ public class JWTFilter extends OncePerRequestFilter {
             throw new SecurityException(SecurityExceptionCode.TOKEN_NOT_EFFECTIVE);
         }
 
-
         //토큰 존재 확인
         if (accessToken == null) {
             filterChain.doFilter(request, response);
