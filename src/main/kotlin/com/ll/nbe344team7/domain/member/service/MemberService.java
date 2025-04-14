@@ -2,7 +2,7 @@ package com.ll.nbe344team7.domain.member.service;
 
 
 import com.ll.nbe344team7.domain.member.dto.MemberDTO;
-import com.ll.nbe344team7.domain.member.dto.PasswordDTO;
+import com.ll.nbe344team7.domain.member.dto.OneDataDTO;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.exception.MemberException;
 import com.ll.nbe344team7.domain.member.exception.MemberExceptionCode;
@@ -111,7 +111,7 @@ public class MemberService {
      * @since 2025-04-01
      */
     @Transactional
-    public void modifyMyDetails(String category, PasswordDTO data, Long memberId) {
+    public void modifyMyDetails(String category, OneDataDTO data, Long memberId) {
         Member member = findMember(memberId);
 
         switch(category){
@@ -133,16 +133,16 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
-     * @param passwordDTO
+     * @param oneDataDTO
      * @param memberId
      * @author 이광석
      * @since 2025-04-01
      */
     @Transactional
-    public void withdrawal(PasswordDTO passwordDTO, Long memberId) {
+    public void withdrawal(OneDataDTO oneDataDTO, Long memberId) {
         Member member = findMember(memberId);
 
-        if (!bCryptPasswordEncoder.matches(passwordDTO.getData(), member.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(oneDataDTO.getData(), member.getPassword())) {
             return;
         }
 
