@@ -21,6 +21,7 @@ import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,6 +81,7 @@ public class PayService {
             Long amount = (iamportResponse.getResponse().getAmount()).longValue();
             // 3. 결제 금액이 들어온 금액과 다를 경우 exception 발생
             if(!Objects.equals(dto.getPrice(), amount)){
+                iamportClient.cancelPaymentByImpUid(new CancelData(dto.getImpUid(), true));
                 throw new PaymentException(PayExceptionCode.PRICE_ERROR);
             }
             // 4. 결제 상태 확인
