@@ -135,7 +135,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
 
                         .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
-                        .requestMatchers("/api/login","/api/reissue", "/login", "/", "/api/auth/register","/h2-console/**", "/ws/**","/swagger-ui/**","/v3/api-docs/**", "/actuator/health").permitAll()  //인증없이 접속가능
+                        .requestMatchers("/api/login",
+                                "/api/reissue",
+                                "/login",
+                                "/",
+                                "/api/auth/register",
+                                "/h2-console/**",
+                                "/ws/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/actuator/health").permitAll()  //인증없이 접속가능
                         .anyRequest().authenticated() // 인증 필요
                 )
                 .headers(headers -> headers

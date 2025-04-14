@@ -78,9 +78,10 @@ public class MemberService {
                 memberDTO.getEmail(),
                 memberDTO.getPhoneNum(),
                 false,
-                "ROLE_ADMIN",
-                memberDTO.getAddress(),
+                memberDTO.getRole(),
+                memberDTO.getAddress()
                 new ArrayList<>()         );
+
 
         try {
             memberRepository.save(member);
@@ -146,11 +147,13 @@ public class MemberService {
     /**
      * 회원 탈퇴 메소드
      *
+     * @param oneDataDTO
      * @param memberId
      * @author 이광석
      * @since 2025-04-01
      */
     @Transactional
+
     public void withdrawal(Long memberId, HttpServletRequest request, HttpServletResponse response) {
 
 
@@ -167,6 +170,7 @@ public class MemberService {
             if(cookie.getName().equals("refresh")){
                 refreshToken = cookie.getValue();
             }
+
         }
 
         if(refreshToken==null){

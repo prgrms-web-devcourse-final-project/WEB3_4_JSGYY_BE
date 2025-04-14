@@ -182,10 +182,12 @@ public class MemberController {
     @DeleteMapping("/member/withdrawal")
     public ResponseEntity<Map<String,Object>> withdrawal(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+
             HttpServletRequest request,
             HttpServletResponse response
     ){
         memberService.withdrawal(userDetails.getMemberId(),request,response);
+
         Map<String,Object> result = new HashMap<>();
         result.put("message","회원탈퇴 성공");
 
