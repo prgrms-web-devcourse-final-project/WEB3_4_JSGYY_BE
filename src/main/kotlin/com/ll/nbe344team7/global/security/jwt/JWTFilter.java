@@ -1,7 +1,6 @@
 package com.ll.nbe344team7.global.security.jwt;
 
 import com.ll.nbe344team7.global.redis.RedisRepository;
-import com.ll.nbe344team7.global.security.config.CertifiedProperties;
 import com.ll.nbe344team7.global.security.dto.CustomUserData;
 import com.ll.nbe344team7.global.security.dto.CustomUserDetails;
 import com.ll.nbe344team7.global.security.exception.SecurityException;
@@ -12,9 +11,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,7 +54,8 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().startsWith("/v3/api-docs") || request.getServletPath().startsWith("/swagger-ui") || request.getServletPath().startsWith("/swagger-resources")) {
+        if (request.getServletPath().startsWith("/v3/api-docs") || request.getServletPath().startsWith("/swagger-ui") || request.getServletPath().startsWith("/swagger-resources")
+            || (request.getServletPath().startsWith("/api/posts") && request.getMethod().equals("GET"))) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -71,7 +68,6 @@ public class JWTFilter extends OncePerRequestFilter {
         noCertifiedUrls.add("/api/auth/register");
         noCertifiedUrls.add("/api/login");
         noCertifiedUrls.add("/actuator/health");
-        noCertifiedUrls.add("/api/posts");
         //noCertifiedUrls.add("/");
 
         for (String noCertifiedUrl : noCertifiedUrls) {
