@@ -81,8 +81,8 @@ public class RedisConfig {
         return new MessageListenerAdapter(notificationSubscriber, "onMessage");
     }
 
-    @Bean(name = "ChatRoomListListener")
-    public MessageListenerAdapter ChatRoomListListener(RedisChatRoomListSubscriber chatRoomListSubscriber) {
+    @Bean(name = "chatRoomListListener")
+    public MessageListenerAdapter chatRoomListListener(RedisChatRoomListSubscriber chatRoomListSubscriber) {
         return new MessageListenerAdapter(chatRoomListSubscriber, "onMessage");
     }
 
@@ -91,9 +91,9 @@ public class RedisConfig {
             RedisConnectionFactory connectionFactory,
             @Qualifier("chatMessageListener") MessageListenerAdapter chatListener,
             @Qualifier("notificationListener") MessageListenerAdapter notificationListener,
+            @Qualifier("chatRoomListListener") MessageListenerAdapter chatRoomListListener,
             @Qualifier("chatChannel") ChannelTopic chatChannel,
             @Qualifier("notificationChannel") ChannelTopic notificationChannel,
-            @Qualifier("ChatRoomListListener") MessageListenerAdapter ChatRoomListListener,
             @Qualifier("chatRoomListChannel") ChannelTopic ChatRoomListChannel
     ) {
 
@@ -101,7 +101,7 @@ public class RedisConfig {
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(chatListener, chatChannel); // ChannelTopic 'chatroom' 사용
         container.addMessageListener(notificationListener, notificationChannel); // ChannelTopic 'notification' 사용
-        container.addMessageListener(ChatRoomListListener, ChatRoomListChannel);
+        container.addMessageListener(chatRoomListListener, ChatRoomListChannel);
         return container;
     }
 
