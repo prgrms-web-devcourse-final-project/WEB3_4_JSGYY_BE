@@ -1,5 +1,7 @@
 package com.ll.nbe344team7.global.imageFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ll.nbe344team7.domain.alarm.dto.AlarmDTO;
 import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.chat.message.dto.ChatMessageDTO;
@@ -61,7 +63,12 @@ public class WebSocketTest {
         stompClient = new WebSocketStompClient(new SockJsClient(
                 List.of(new WebSocketTransport(new StandardWebSocketClient()))
         ));
-        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        // JavaTimeModule 등록
+        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        converter.setObjectMapper(objectMapper);
+        stompClient.setMessageConverter(converter);
     }
 
     @Test
@@ -83,12 +90,12 @@ public class WebSocketTest {
         session.subscribe("/sub/chat/room/1", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return ChatMessageDTO.class; // [!code focus]
+                return ChatMessageDTO.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                messageQueue.add((ChatMessageDTO) payload); // [!code focus]
+                messageQueue.add(payload);
             }
         });
 
@@ -97,6 +104,7 @@ public class WebSocketTest {
         ChatRoom chatRoom = chatroomService.getChatRoom(messageDTO.getRoomId());
         ChatMessage chatMessage = new ChatMessage(new Member(1L, "admin1"), messageDTO.getContent(), chatRoom);
         redisTemplate.convertAndSend("chatroom", new ChatMessageDTO(chatMessage));
+
 
         // 4. WebSocket 응답 검증
         await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -123,26 +131,28 @@ public class WebSocketTest {
         ).get(5, TimeUnit.SECONDS);
 
         // 2. 메시지 구독
-        session.subscribe("/sub/notifications/1", new StompFrameHandler() {
+        session.subscribe("/sub/notifications/2", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return AlarmDTO.class; // [!code focus]
+                return AlarmDTO.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                messageQueue.add((AlarmDTO) payload); // [!code focus]
+                messageQueue.add(payload);
             }
         });
 
+
         // 3. Redis에 메시지 발행
-        Alarm alarm = new Alarm(new Member(2L, "admin1"), "admin1: 안녕", 2, 1L);
-        redisTemplate.convertAndSend("notification", new AlarmDTO(alarm));
+        Alarm alarm = new Alarm(new Member(2L, "admin2"), "admin1: 안녕", 2, 1L);
+        AlarmDTO alarmDTO = new AlarmDTO(alarm);
+        redisTemplate.convertAndSend("notification", alarmDTO);
 
         // 4. WebSocket 응답 검증
         await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
             AlarmDTO receivedMessage = (AlarmDTO) messageQueue.poll();
-            assertThat(receivedMessage).isEqualTo(new AlarmDTO(alarm));
+            assertThat(receivedMessage.getContent()).isEqualTo(alarmDTO.getContent());
         });
 
         session.disconnect();

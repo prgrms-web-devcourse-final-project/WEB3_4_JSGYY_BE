@@ -43,6 +43,7 @@ public class RedisNotificationSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try{
+
             AlarmDTO alarmDTO = objectMapper.readValue((byte[]) message.getBody(), AlarmDTO.class);
             log.info("Received message from Redis: {}", alarmDTO);
             messagingTemplate.convertAndSend("/sub/notifications/"+alarmDTO.getReceiveMemberId(),alarmDTO);
