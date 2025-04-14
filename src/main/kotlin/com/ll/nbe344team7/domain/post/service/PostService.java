@@ -173,7 +173,7 @@ public class PostService {
         }
 
         // 반환 메시지
-        return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.");
+        return Map.of("message", post.getId() + "번 게시글이 작성되었습니다.", "postId", String.valueOf(post.getId()));
     }
 
     /**

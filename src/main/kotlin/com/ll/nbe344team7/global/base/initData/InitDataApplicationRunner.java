@@ -2,10 +2,8 @@ package com.ll.nbe344team7.global.base.initData;
 
 import com.ll.nbe344team7.domain.alarm.entity.Alarm;
 import com.ll.nbe344team7.domain.alarm.repository.AlarmRepository;
-import com.ll.nbe344team7.domain.alarm.service.AlarmService;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
-import com.ll.nbe344team7.domain.member.service.MemberService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -32,7 +30,7 @@ public class InitDataApplicationRunner implements ApplicationRunner {
         if(args.containsOption("initMode")){
             System.out.println("초기 모드 활성화");
         }
-        String password = bCryptPasswordEncoder.encode("12345");
+        String password = bCryptPasswordEncoder.encode("123456");
         if(memberRepository.count()==0) {
 
             Member member1 = new Member("admin1", "nickname1",password);

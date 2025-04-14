@@ -155,7 +155,7 @@ public class PostImageController {
     @PostMapping(path = "/{postId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
-            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestBody MultipartFile[] images,
             @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
