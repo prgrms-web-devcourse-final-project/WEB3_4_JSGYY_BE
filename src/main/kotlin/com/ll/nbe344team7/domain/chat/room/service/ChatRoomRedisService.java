@@ -7,6 +7,7 @@ import com.ll.nbe344team7.domain.chat.participant.entity.ChatParticipant;
 import com.ll.nbe344team7.domain.chat.participant.repository.ChatParticipantRepository;
 import com.ll.nbe344team7.domain.chat.redis.repository.ChatRedisRepository;
 import com.ll.nbe344team7.domain.chat.room.dto.ChatRoomListResponseDto;
+import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.global.exception.ChatRoomException;
 import com.ll.nbe344team7.global.exception.ChatRoomExceptionCode;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -84,17 +85,28 @@ public class ChatRoomRedisService {
         // 사용자가 참여한 채팅방들을 조회하면서 정보를 가져옴
         for (ChatParticipant participant : participants) {
             Long roomId = participant.getChatroom().getId();
-            String title = participant.getChatroom().getTitle();
+            String title = participant.getChatroom().getParticipants().stream()
+                    .map(ChatParticipant::getMember)
+                    .filter(member -> !member.getId().equals(memberId))
+                    .map(Member::getNickname)
+                    .findFirst() // 1:1이라 상대는 무조건 1명
+                    .orElse("알 수 없음");
             String nickname = getLastMessageSenderNicknameFromRedis(roomId);
+            if (nickname.isBlank()){
+                ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
+                if (chatRoomLastMessage != null){
+                    nickname = chatRoomLastMessage.member.getNickname();
+                }
+            }
             String lastMessage = getLastMessageFromRedis(roomId);
             // lastMessage가 Redis에 없을 경우 DB에서 가져와 Redis에 저장
             if (lastMessage.isBlank()){
                 ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
                 if (chatRoomLastMessage != null) {
                     lastMessage = chatRoomLastMessage.getContent();
-                    updateLastMessageInRedis(roomId, lastMessage, chatRoomLastMessage.getCreatedAt());
                 } else {
                     lastMessage = ""; // 기본값 설정
+                    updateLastMessageInRedis(roomId, nickname, lastMessage, LocalDateTime.now());
                 }
             }
             Long unReadCount = 0L;
@@ -137,7 +149,7 @@ public class ChatRoomRedisService {
         if (lastMessage == null) {
             ChatMessage chatRoomLastMessage = chatMessageRepository.findLastMessageByRoomId(roomId);
             if (chatRoomLastMessage != null) {
-                updateLastMessageInRedis(roomId, chatRoomLastMessage.getContent(), chatRoomLastMessage.getCreatedAt());
+                updateLastMessageInRedis(roomId, chatRoomLastMessage.member.getNickname(), chatRoomLastMessage.getContent(), chatRoomLastMessage.getCreatedAt());
                 return chatRoomLastMessage.getContent();
             }
             return "";
@@ -182,9 +194,10 @@ public class ChatRoomRedisService {
      * @author kjm72
      * @since 2025-04-04
      */
-    private void updateLastMessageInRedis(Long roomId, String content, LocalDateTime createdAt) {
+    private void updateLastMessageInRedis(Long roomId, String nickname, String content, LocalDateTime createdAt) {
         String key = "chatroom:" + roomId + ":lastMessage";
         Long timestamp = createdAt.toEpochSecond(ZoneOffset.UTC);
+        redisTemplate.opsForHash().put(key, "nickname", nickname);
         redisTemplate.opsForHash().put(key, "content", content);
         redisTemplate.opsForHash().put(key, "timestamp", timestamp.toString());
     }

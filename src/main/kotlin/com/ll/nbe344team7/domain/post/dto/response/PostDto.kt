@@ -7,6 +7,8 @@ import java.time.LocalDateTime
 data class PostDto(
     val id: Long,
     val authorId: Long,
+    val authorUsername: String,
+    val authorNickname: String,
     val title: String,
     val content: String,
     val category: String,
@@ -31,6 +33,8 @@ data class PostDto(
             return PostDto(
                 id = post.id!!,
                 authorId = post.member.id!!,
+                authorUsername = post.member.username,
+                authorNickname = post.member.nickname,
                 title = post.title,
                 content = post.content,
                 category = post.category,
