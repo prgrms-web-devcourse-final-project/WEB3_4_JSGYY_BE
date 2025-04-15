@@ -56,7 +56,7 @@ public class PostImageService {
      * @since 2025-04-04
      */
     @Transactional
-    public UpdateImageResult updateImages(Long postId, MultipartFile[] images, List<Long> deleteImageIds, Long memberId) {
+    public UpdateImageResult updateImages(Long postId, MultipartFile[] images, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
@@ -68,7 +68,7 @@ public class PostImageService {
         }
 
         List<ImageFile> uploadedImages = uploadImages(post, images);
-        List<Long> successfullyDeleted = deleteImages(deleteImageIds);
+//        List<Long> successfullyDeleted = deleteImages(deleteImageIds);
 
         List<ImageFile> finalImages = imageFileRepository.findByPostId(postId);
 
@@ -84,7 +84,7 @@ public class PostImageService {
                 .map(ImageFileDto.Companion::from)
                 .collect(Collectors.toList());
 
-        return new UpdateImageResult(uploadedDtos, successfullyDeleted);
+        return new UpdateImageResult(uploadedDtos);
     }
 
     /**

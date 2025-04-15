@@ -4,7 +4,7 @@ import com.ll.nbe344team7.global.imageFIle.ImageFileDto
 
 data class UpdateImageResult(
     val uploadedImages: List<ImageFileDto>,
-    val deletedImageIds: List<Long>
+//    val deletedImageIds: List<Long>
 ){
-    constructor() : this(listOf(), listOf())
+    constructor() : this(listOf())
 }

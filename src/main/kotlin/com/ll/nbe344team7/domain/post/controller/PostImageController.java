@@ -156,18 +156,35 @@ public class PostImageController {
     public ResponseEntity<?> updateImages(
             @PathVariable Long postId,
             @RequestBody MultipartFile[] images,
-            @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
+//            @RequestPart(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
         if (images == null) images = new MultipartFile[0];
-        if (deleteImageIds == null) deleteImageIds = List.of();
+//        if (deleteImageIds == null) deleteImageIds = List.of();
 
-        UpdateImageResult result = postImageService.updateImages(postId, images, deleteImageIds, userDetails.getMemberId());
+        UpdateImageResult result = postImageService.updateImages(postId, images, userDetails.getMemberId());
 
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
         response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
         response.put("uploadedImages", result.getUploadedImages());
-        response.put("deletedImageIds", result.getDeletedImageIds());
+//        response.put("deletedImageIds", result.getDeletedImageIds());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(path="/{postId}/images/delete")
+    public ResponseEntity<?> deleteImages(
+            @PathVariable Long postId,
+            @RequestBody List<Long> deletedImageIds,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        if (deletedImageIds == null) deletedImageIds = List.of();
+
+        List<Long> deleteIds = postImageService.deleteImages(deletedImageIds);
+
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
+        response.put("deletedImageIds", deleteIds);
 
         return ResponseEntity.ok(response);
     }
