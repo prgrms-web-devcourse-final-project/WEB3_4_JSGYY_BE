@@ -165,7 +165,7 @@ public class PostImageController {
         UpdateImageResult result = postImageService.updateImages(postId, images, userDetails.getMemberId());
 
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-        response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
+        response.put("message", postId + "번 게시글 이미지 업로드 완료");
         response.put("uploadedImages", result.getUploadedImages());
 //        response.put("deletedImageIds", result.getDeletedImageIds());
 
@@ -183,7 +183,7 @@ public class PostImageController {
         List<Long> deleteIds = postImageService.deleteImages(deletedImageIds);
 
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-        response.put("message", postId + "번 게시글 이미지 업로드 및 삭제 완료");
+        response.put("message", postId + "번 게시글 이미지 삭제 완료");
         response.put("deletedImageIds", deleteIds);
 
         return ResponseEntity.ok(response);
