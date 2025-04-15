@@ -52,10 +52,17 @@ public class ChatMessageSenderService {
 
     public void sendMessage(MessageDTO dto, Member member, ChatRoom chatRoom) {
         Long roomId = chatRoom.getId();
-        ChatMessage chatMessage = new ChatMessage(member, dto.getMessage(), chatRoom);
+        ChatMessage chatMessage = new ChatMessage(member, dto.getContent(), chatRoom);
         List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
 
         process(dto, member, chatRoom, chatMessage, chatParticipants);
+        for (ChatParticipant chatParticipant : chatParticipants) {
+            Long participantId = chatParticipant.getMember().getId();
+            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
+
+            ChatRoomListDto chatRoomListDto = new ChatRoomListDto(member.getId(), chatRoomList);
+            redisPublish("chatroomList", chatRoomListDto);
+        }
     }
 
     @Transactional
@@ -123,7 +130,7 @@ public class ChatMessageSenderService {
             // 안읽음 메세지 카운터 처리, 채팅방 목록 보내기
             redisUpdateReadCount(roomId, participantId);
 
-            String content = member.getNickname() + ": " + dto.getMessage();
+            String content = member.getNickname() + ": " + dto.getContent();
             alarmService.createAlarm(content, participantId, 2, roomId);
         }
 

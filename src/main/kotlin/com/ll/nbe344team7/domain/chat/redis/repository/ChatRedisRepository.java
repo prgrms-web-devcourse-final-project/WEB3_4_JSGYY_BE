@@ -53,7 +53,7 @@ public class ChatRedisRepository {
         // Hash에 개별 필드 저장
         redisTemplate.opsForHash().put(key, "roomId", messageDTO.getRoomId().toString());
         redisTemplate.opsForHash().put(key, "nickname", member.getNickname());
-        redisTemplate.opsForHash().put(key, "content", messageDTO.getMessage());
+        redisTemplate.opsForHash().put(key, "content", messageDTO.getContent());
         redisTemplate.opsForHash().put(key, "timestamp", String.valueOf(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)));
     }
 
