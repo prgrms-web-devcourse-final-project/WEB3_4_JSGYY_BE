@@ -52,7 +52,7 @@ public class ChatMessageSenderService {
 
     public void sendMessage(MessageDTO dto, Member member, ChatRoom chatRoom) {
         Long roomId = chatRoom.getId();
-        ChatMessage chatMessage = new ChatMessage(member, dto.getContent(), chatRoom);
+        ChatMessage chatMessage = new ChatMessage(member, dto.getMessage(), chatRoom);
         List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
 
         process(dto, member, chatRoom, chatMessage, chatParticipants);
@@ -79,12 +79,12 @@ public class ChatMessageSenderService {
 
     /**
      * 메세지 발행 처리
+     *
      * @param dto
      * @param chatMessage
-
-     *
      * @author jyson
-     * @since 25. 4. 14.     */
+     * @since 25. 4. 14.
+     */
     private void saveMessage(MessageDTO dto, ChatMessage chatMessage) {
         chatMessageRepository.save(chatMessage);
         chatRoomRedisService.saveLastMessage(dto, chatMessage.getMember().getId());
@@ -94,15 +94,15 @@ public class ChatMessageSenderService {
 
     /**
      * 채팅방 리스트 목록, 알람 발행
+     *
      * @param dto
      * @param roomId
      * @param member
      * @param chatMessage
      * @param chatParticipants
-
-     *
      * @author jyson
-     * @since 25. 4. 14.     */
+     * @since 25. 4. 14.
+     */
     @Async
     public void handleAlarm(MessageDTO dto, Long roomId, Member member, ChatMessage chatMessage, List<ChatParticipant> chatParticipants) {
         long start = System.currentTimeMillis();
@@ -123,7 +123,7 @@ public class ChatMessageSenderService {
             // 안읽음 메세지 카운터 처리, 채팅방 목록 보내기
             redisUpdateReadCount(roomId, participantId);
 
-            String content = member.getNickname() + ": " + dto.getContent();
+            String content = member.getNickname() + ": " + dto.getMessage();
             alarmService.createAlarm(content, participantId, 2, roomId);
         }
 
@@ -133,12 +133,12 @@ public class ChatMessageSenderService {
 
     /**
      * 안읽음 메세지 카운터 처리, 채팅방 목록 보내기
+     *
      * @param roomId
      * @param participantId
-
-     *
      * @author jyson
-     * @since 25. 4. 14.     */
+     * @since 25. 4. 14.
+     */
     private void redisUpdateReadCount(Long roomId, Long participantId) {
         List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
 
@@ -161,10 +161,9 @@ public class ChatMessageSenderService {
      *
      * @param channel
      * @param object
-
-     *
      * @author jyson
-     * @since 25. 4. 10. */
+     * @since 25. 4. 10.
+     */
     private void redisPublish(String channel, Object object) {
 
         try {
@@ -185,11 +184,11 @@ public class ChatMessageSenderService {
 
     /**
      * 재시도 간격 100ms, 200ms, 400ms
-     * @param i
-
      *
+     * @param i
      * @author jyson
-     * @since 25. 4. 10.     */
+     * @since 25. 4. 10.
+     */
     private void backoff(int i) {
         try {
             Thread.sleep(100L * (int) Math.pow(2, i));
