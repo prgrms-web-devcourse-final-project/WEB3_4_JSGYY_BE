@@ -52,17 +52,10 @@ public class ChatMessageSenderService {
 
     public void sendMessage(MessageDTO dto, Member member, ChatRoom chatRoom) {
         Long roomId = chatRoom.getId();
-        ChatMessage chatMessage = new ChatMessage(member, dto.getContent(), chatRoom);
+        ChatMessage chatMessage = new ChatMessage(member, dto.getMessage(), chatRoom);
         List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
 
         process(dto, member, chatRoom, chatMessage, chatParticipants);
-        for (ChatParticipant chatParticipant : chatParticipants) {
-            Long participantId = chatParticipant.getMember().getId();
-            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
-
-            ChatRoomListDto chatRoomListDto = new ChatRoomListDto(member.getId(), chatRoomList);
-            redisPublish("chatroomList", chatRoomListDto);
-        }
     }
 
     @Transactional
@@ -126,11 +119,16 @@ public class ChatMessageSenderService {
         chatMessage.setRead(false);
         chatMessageRepository.save(chatMessage);
 
+        for (ChatParticipant participant : chatParticipants) {
+            Long participantId = participant.getMember().getId();
+            sendUpdatedChatRoomListToUser(participantId);
+        }
+
         for (Long participantId : offlineUsers) {
             // 안읽음 메세지 카운터 처리, 채팅방 목록 보내기
             redisUpdateReadCount(roomId, participantId);
 
-            String content = member.getNickname() + ": " + dto.getContent();
+            String content = member.getNickname() + ": " + dto.getMessage();
             alarmService.createAlarm(content, participantId, 2, roomId);
         }
 
@@ -161,6 +159,13 @@ public class ChatMessageSenderService {
 
         chatRedisRepository.saveChatRoomList(participantId, chatRoomList);
         redisPublish("chatroomList", new ChatRoomListDto(participantId, chatRoomList));
+    }
+
+    private void sendUpdatedChatRoomListToUser(Long participantId) {
+        // 채팅방 목록 갱신
+        List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
+        ChatRoomListDto chatRoomListDto = new ChatRoomListDto(participantId, chatRoomList);
+        redisPublish("chatroomList", chatRoomListDto); // 사용자에게 갱신된 채팅방 목록을 전송
     }
 
     /**
