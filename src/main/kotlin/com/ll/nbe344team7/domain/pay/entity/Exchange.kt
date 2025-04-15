@@ -24,8 +24,9 @@ data class Exchange(
     val exchangeType: Int,
     val impUid: String? = null,
     val postId: Long? = null,
+    val totalPrice: Long,
 ){
-    constructor(dto: DepositDTO, status: Int, memberId: Long) : this(
+    constructor(dto: DepositDTO, status: Int, memberId: Long, totalPrice: Long) : this(
         id = null,
         myId = memberId,
         otherId = memberId,
@@ -33,6 +34,7 @@ data class Exchange(
         price = dto.price,
         status = status,
         exchangeType = 0,
-        impUid = dto.impUid
+        impUid = dto.impUid,
+        totalPrice = totalPrice,
     )
 }

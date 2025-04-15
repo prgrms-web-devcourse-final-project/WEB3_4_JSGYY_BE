@@ -20,5 +20,7 @@ data class ExchangeDTO (
     @field:Schema(description = "계좌", example = "123-456-7890")
     val account: Long,
     @field:Schema(description = "상대 유저 닉네임", example = "nickname2")
-    val otherName: String
+    val otherName: String,
+    @field:Schema(description = "거래 후 잔액", example = "20000")
+    val totalPrice: Long,
 )

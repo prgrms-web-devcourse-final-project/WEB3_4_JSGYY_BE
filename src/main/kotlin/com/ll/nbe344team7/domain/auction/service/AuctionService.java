@@ -12,9 +12,13 @@ import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.domain.post.entity.Post;
+import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
 import com.ll.nbe344team7.global.exception.GlobalExceptionCode;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +33,13 @@ import java.util.Map;
 @Service
 public class AuctionService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuctionService.class);
     private final AuctionRepository auctionRepository;
     private final AccountRepository accountRepository;
     private final AuctionScheduleRepository auctionScheduleRepository;
     private final AlarmService alarmService;
     private final MemberRepository memberRepository;
+    private final PostRepository postRepository;
 
     private static String WIN_BID_STRING = " 경매 물품을 낙찰 받으셨습니다.";
     private static String SELLER_BID_STRING = "님이 낙찰 받으셨습니다.";
@@ -41,12 +47,13 @@ public class AuctionService {
 
     public AuctionService(AuctionRepository auctionRepository, AccountRepository accountRepository,
                           AuctionScheduleRepository auctionScheduleRepository, AlarmService alarmService,
-                          MemberRepository memberRepository) {
+                          MemberRepository memberRepository, PostRepository postRepository) {
         this.auctionRepository = auctionRepository;
         this.accountRepository = accountRepository;
         this.auctionScheduleRepository = auctionScheduleRepository;
         this.alarmService = alarmService;
         this.memberRepository = memberRepository;
+        this.postRepository = postRepository;
     }
 
     /**
@@ -143,11 +150,12 @@ public class AuctionService {
                 // 5. 만약 null 일 경우 넘어가기
                 if(auction == null) continue;
                 auction.setStatus(1);
-
+                Post post = auction.getPost();
+                post.updateSaleStatus(false);
                 // 6. 변경된 정보를 DB에 저장
                 this.auctionRepository.save(auction);
                 this.auctionScheduleRepository.save(auctionSchedule);
-
+                this.postRepository.save(post);
                 // 7. 알람 생성
                 // 7-1. 입찰자가 없을 경우
                 if(auction.getWinnerId() == null){

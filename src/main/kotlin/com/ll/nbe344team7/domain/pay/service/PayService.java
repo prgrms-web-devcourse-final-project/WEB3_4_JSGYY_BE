@@ -93,16 +93,16 @@ public class PayService {
             if(status == 0){
                 throw new PaymentException(PayExceptionCode.PAYMENT_STATUS_ERROR);
             }
-            // 6. 거래 내역 저장할 entity 생성
-            Exchange exchange = new Exchange(dto, status, memberId);
-
-            // 7. 만약 거래 내역이 저장된 상태면 exception 발생
+            // 6. 만약 거래 내역이 저장된 상태면 exception 발생
             if(paymentRepository.countByImpUidContainsIgnoreCase(dto.getImpUid()) > 0){
                 throw new PaymentException(PayExceptionCode.PAYMENT_ERROR);
             }
 
             Account account = this.accountRepository.findByMemberId(memberId);
-            account.setMoney(dto.getPrice());
+            // 7. 거래 내역 저장할 entity 생성
+
+            account.setMoney(account.getMoney() + dto.getPrice());
+            Exchange exchange = new Exchange(dto, status, memberId, account.getMoney());
             // 8. 이상이 없는 경우 저장 후 리턴
             paymentRepository.save(exchange);
             accountRepository.save(account);
@@ -141,7 +141,7 @@ public class PayService {
 
         // 4. 거래 내역에 출금 저장
         Exchange exchange = new Exchange(null, memberId, memberId,
-                LocalDateTime.now(), dto.getPrice(), 0, 1, null, null);
+                LocalDateTime.now(), dto.getPrice(), 0, 1, null, null, account.getMoney() - dto.getPrice());
         account.setMoney(account.getMoney() - dto.getPrice());
 
         this.withdrawRepository.save(withdraw);
@@ -177,7 +177,7 @@ public class PayService {
         // 3. 송금 기록 저장
         //  - 구매 확정이 아니라서 결제 상태를 미 결제로 저장
         Exchange sendExchange = new Exchange(null, memberId, post.getMember().getId(),
-                LocalDateTime.now(), post.getPrice(), 0, 1, null, dto.getPostId());
+                LocalDateTime.now(), post.getPrice(), 0, 1, null, dto.getPostId(), account.getMoney() - post.getPrice());
         post.updateSaleStatus(false);
 
         // 4. 보유금를 결제 금액을 제외하고 저장하고 송금 기록 및 보유금 수정
@@ -216,10 +216,10 @@ public class PayService {
         }
         // 4. 결제 상태 완료로 변경 및 판매자는 입금 내역 추가
         sendExchange.setStatus(1);
-        Exchange receiveExchange = new Exchange(null, post.getMember().getId(), memberId,
-                LocalDateTime.now(), post.getPrice(), 1, 0, null, dto.getPostId());
         // 5. 판매자의 보유금 증가
         Account account = this.accountRepository.findByMemberId(post.getMember().getId());
+        Exchange receiveExchange = new Exchange(null, post.getMember().getId(), memberId,
+                LocalDateTime.now(), post.getPrice(), 1, 0, null, dto.getPostId(), account.getMoney() + post.getPrice());
         account.setMoney(account.getMoney() + post.getPrice());
 
         // 6. 변경된 거래 사항 및 보유금 저장
