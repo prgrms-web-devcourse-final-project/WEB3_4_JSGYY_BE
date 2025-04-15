@@ -73,7 +73,6 @@ public class S3ImageService {
                 .bucket(bucketName)
                 .key(s3FileName)
                 .contentType("image/" + extension)
-                .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 
         try {
