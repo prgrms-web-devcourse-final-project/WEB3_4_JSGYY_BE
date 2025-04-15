@@ -106,7 +106,11 @@ public class ChatRoomRedisService {
                     lastMessage = chatRoomLastMessage.getContent();
                 } else {
                     lastMessage = ""; // 기본값 설정
+<<<<<<< HEAD
                     updateLastMessageInRedis(roomId, nickname, lastMessage, chatRoomLastMessage.getCreatedAt());
+=======
+                    updateLastMessageInRedis(roomId, nickname, lastMessage, LocalDateTime.now());
+>>>>>>> main
                 }
             }
             Long unReadCount = 0L;

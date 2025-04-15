@@ -56,6 +56,13 @@ public class ChatMessageSenderService {
         List<ChatParticipant> chatParticipants = chatParticipantService.getChatParticipants(roomId);
 
         process(dto, member, chatRoom, chatMessage, chatParticipants);
+        for (ChatParticipant chatParticipant : chatParticipants) {
+            Long participantId = chatParticipant.getMember().getId();
+            List<ChatRoomListResponseDto> chatRoomList = chatRoomRedisService.getChatRooms(participantId);
+
+            ChatRoomListDto chatRoomListDto = new ChatRoomListDto(member.getId(), chatRoomList);
+            redisPublish("chatroomList", chatRoomListDto);
+        }
     }
 
     @Transactional
