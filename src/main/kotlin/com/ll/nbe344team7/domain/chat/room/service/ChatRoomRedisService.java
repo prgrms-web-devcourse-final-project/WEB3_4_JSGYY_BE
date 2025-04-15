@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import retrofit2.http.HEAD;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -106,11 +107,8 @@ public class ChatRoomRedisService {
                     lastMessage = chatRoomLastMessage.getContent();
                 } else {
                     lastMessage = ""; // 기본값 설정
-<<<<<<< HEAD
-                    updateLastMessageInRedis(roomId, nickname, lastMessage, chatRoomLastMessage.getCreatedAt());
-=======
                     updateLastMessageInRedis(roomId, nickname, lastMessage, LocalDateTime.now());
->>>>>>> main
+
                 }
             }
             Long unReadCount = 0L;
