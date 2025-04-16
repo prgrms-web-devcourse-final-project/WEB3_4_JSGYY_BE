@@ -12,6 +12,8 @@ import com.ll.nbe344team7.domain.auction.repository.AuctionRepository;
 import com.ll.nbe344team7.domain.auction.repository.AuctionScheduleRepository;
 import com.ll.nbe344team7.domain.member.entity.Member;
 import com.ll.nbe344team7.domain.member.repository.MemberRepository;
+import com.ll.nbe344team7.domain.pay.entity.Exchange;
+import com.ll.nbe344team7.domain.pay.repository.PaymentRepository;
 import com.ll.nbe344team7.domain.post.entity.Post;
 import com.ll.nbe344team7.domain.post.repository.PostRepository;
 import com.ll.nbe344team7.global.exception.GlobalException;
@@ -40,6 +42,7 @@ public class AuctionService {
     private final AlarmService alarmService;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final PaymentRepository paymentRepository;
 
     private static String WIN_BID_STRING = " 경매 물품을 낙찰 받으셨습니다.";
     private static String SELLER_BID_STRING = "님이 낙찰 받으셨습니다.";
@@ -47,13 +50,15 @@ public class AuctionService {
 
     public AuctionService(AuctionRepository auctionRepository, AccountRepository accountRepository,
                           AuctionScheduleRepository auctionScheduleRepository, AlarmService alarmService,
-                          MemberRepository memberRepository, PostRepository postRepository) {
+                          MemberRepository memberRepository, PostRepository postRepository,
+                          PaymentRepository paymentRepository) {
         this.auctionRepository = auctionRepository;
         this.accountRepository = accountRepository;
         this.auctionScheduleRepository = auctionScheduleRepository;
         this.alarmService = alarmService;
         this.memberRepository = memberRepository;
         this.postRepository = postRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     /**
@@ -152,6 +157,7 @@ public class AuctionService {
                 auction.setStatus(1);
                 Post post = auction.getPost();
                 post.updateSaleStatus(false);
+
                 // 6. 변경된 정보를 DB에 저장
                 this.auctionRepository.save(auction);
                 this.auctionScheduleRepository.save(auctionSchedule);
@@ -170,6 +176,21 @@ public class AuctionService {
                     Member winner = this.memberRepository.findById(auction.getWinnerId()).orElse(null);
                     if(winner == null){continue;}
                     alarmService.createAlarm("'" + winner.getNickname() + "'" + SELLER_BID_STRING, sellerId, 1, auction.getPost().getId());
+
+                    Account sellerAccount = this.accountRepository.findById(sellerId).orElse(null);
+                    if(sellerAccount == null){continue;}
+                    Exchange exchange1 = new Exchange(auction, sellerId, winner.getId(), 0, sellerAccount.getMoney() + auction.getMaxPrice());
+
+                    Account winnerAccount = this.accountRepository.findById(winner.getId()).orElse(null);
+                    Exchange exchange2 = new Exchange(auction, winner.getId(), sellerId, 1, winnerAccount.getMoney());
+
+                    this.paymentRepository.save(exchange1);
+                    this.paymentRepository.save(exchange2);
+
+                    sellerAccount.setMoney(sellerAccount.getMoney() + auction.getMaxPrice());
+                    winnerAccount.setMoney(winnerAccount.getMoney());
+                    this.accountRepository.save(winnerAccount);
+                    this.accountRepository.save(sellerAccount);
                 }
             }
         }

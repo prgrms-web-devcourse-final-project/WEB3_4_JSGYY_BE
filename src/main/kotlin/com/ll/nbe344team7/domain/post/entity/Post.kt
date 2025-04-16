@@ -88,6 +88,7 @@ class Post (
             startedAt = startedAt,
             closedAt = closedAt,
             startPrice = this.price,  // Post의 price를 Auction의 startPrice로 사용
+            maxPrice = this.price,
             status = 0,  // 경매 진행 상태 (0 = 진행 중)
         ).apply {
             this.post = this@Post  // Post와 Auction 관계 설정

@@ -25,11 +25,13 @@ data class PostListDto(
 ) {
     companion object {
         fun from(post: Post): PostListDto {
+            var maxPrice = post.price
+            if(post.auctionStatus) maxPrice = post.auctionDetails?.maxPrice!!
             return PostListDto(
                 id = post.id,
                 title = post.title,
                 place = post.place,
-                price = post.price,
+                price = maxPrice,
                 saleStatus = post.saleStatus,
                 auctionStatus = post.auctionStatus,
                 thumbnail = post.images.firstOrNull()?.url,

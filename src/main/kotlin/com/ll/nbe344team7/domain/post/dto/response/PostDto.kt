@@ -29,7 +29,8 @@ data class PostDto(
     companion object {
         fun from(post: Post, memberId: Long, isLiked: Boolean): PostDto {
             val isAuthor = post.member.id == memberId
-
+            var maxPrice = post.price
+            if(post.auctionStatus) maxPrice = post.auctionDetails?.maxPrice!!
             return PostDto(
                 id = post.id!!,
                 authorId = post.member.id!!,
@@ -39,7 +40,7 @@ data class PostDto(
                 content = post.content,
                 category = post.category,
                 place = post.place,
-                price = post.price,
+                price = maxPrice,
                 saleStatus = post.saleStatus,
                 auctionStatus = post.auctionStatus,
                 auctionStartedAt = post.auctionDetails?.startedAt,

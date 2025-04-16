@@ -1,5 +1,6 @@
 package com.ll.nbe344team7.domain.pay.entity
 
+import com.ll.nbe344team7.domain.auction.entity.Auction
 import com.ll.nbe344team7.domain.pay.dto.DepositDTO
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -35,6 +36,18 @@ data class Exchange(
         status = status,
         exchangeType = 0,
         impUid = dto.impUid,
+        totalPrice = totalPrice,
+    )
+
+    constructor(auction: Auction, myId: Long?, otherId: Long?, exchangeType: Int, totalPrice: Long) : this(
+        id = null,
+        myId = myId,
+        otherId = otherId,
+        payDate = LocalDateTime.now(),
+        price = auction.maxPrice,
+        status = 1,
+        exchangeType = exchangeType,
+        impUid = null,
         totalPrice = totalPrice,
     )
 }
