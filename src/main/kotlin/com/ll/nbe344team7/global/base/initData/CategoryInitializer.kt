@@ -28,6 +28,7 @@ class CategoryInitializer(
                 Category(name = "식물"),
                 Category(name = "기타")
             )
+
             categoryRepository.saveAll(categories)
         }
     }
